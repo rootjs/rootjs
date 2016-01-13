@@ -8,7 +8,8 @@
     "build": "node-gyp configure build"
   },
   "devDependencies": {
-    "mocha": "latest"
+    "mocha": "latest",
+    "should": "^8.1.1"
   },
   "repository": {
     "type": "git",

@@ -5,7 +5,7 @@ node_js:
   - "5.4"
   - "4.2"
   - "iojs"
-before_install:
+build:
   - ./build-root.sh
 cache:
   directories:
