@@ -12,7 +12,7 @@ git pull
 cd $HOME
 if [ -d rootbuild ]; then
   cd rootbuild
-  cmake ../root
+  cmake .
 else
   mkdir rootbuild
   cd rootbuild
