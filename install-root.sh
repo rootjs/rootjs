@@ -1,10 +1,5 @@
 #!/bin/sh
 
-
-#Install ROOT devDependencies
-sudo apt-get update -qq
-sudo apt-get install -qq git dpkg-dev make g++ gcc binutils libx11-dev libxpm-dev libxft-dev libxext-dev
-
 #Clone ROOT
 cd $HOME
 if [ ! -d root ]; then
