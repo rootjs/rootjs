@@ -5,8 +5,10 @@ node_js:
   - "5.4"
   - "4.2"
   - "iojs"
-build:
+install:
+  - ./install-root.sh
   - ./build-root.sh
+
 cache:
   directories:
   - $HOME/root
