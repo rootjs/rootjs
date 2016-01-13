@@ -4,8 +4,7 @@
   "description": "Node bindings to the ROOT scientific framework",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
-    "devtest": "jenkins-mocha test/*",
+    "test": "jenkins-mocha test/*",
     "build": "node-gyp configure build"
   },
   "devDependencies": {
