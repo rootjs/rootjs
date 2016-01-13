@@ -3,7 +3,7 @@
 #Build ROOT
 cd $HOME/rootbuild
 
-make -j12 install
+make -j8 install
 
 mkdir $WORKSPACE/rootinstall
 cmake -DCMAKE_INSTALL_PREFIX=$WORKSPACE/rootinstall -P cmake_install.cmake
