@@ -1,0 +1,27 @@
+{
+  "name": "rootjs",
+  "version": "0.0.1",
+  "description": "Node bindings to the ROOT scientific framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rootjs/rootjs.git"
+  },
+  "keywords": [
+    "binding",
+    "root",
+    "cplusplus"
+  ],
+  "author": "PSE",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/rootjs/rootjs/issues"
+  },
+  "homepage": "https://github.com/rootjs/rootjs#readme"
+}
