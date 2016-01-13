@@ -1,8 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 #Build ROOT
 cd $HOME/rootbuild
 
 make -j12 install
-cmake --build . --target install
-source /usr/local/bin/thisroot.sh
+
+mkdir $WORKSPACE/rootinstall
+cmake -DCMAKE_INSTALL_PREFIX=$WORKSPACE/rootinstall -P cmake_install.cmake
+cd $WORKSPACE/rootinstall
+pwd
+source ./bin/thisroot.sh
+cd $WORKSPACE
