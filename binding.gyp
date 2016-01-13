@@ -9,8 +9,8 @@
 
   'targets': [
     {
-      'target_name' :   'rootJS',
-      'sources'     : [ 'rootJS.cc' ],
+      'target_name' :   'rootjs',
+      'sources'     : [ 'src/NodeHandler.cc' ],
 
       'cflags_cc!'  : [ '-fno-rtti' ],					    # exclude rtti flag
       'cflags_cc'   : [ '<@(root_cflags)' ],
