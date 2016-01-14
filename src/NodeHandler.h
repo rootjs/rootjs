@@ -9,13 +9,22 @@ namespace RootJS {
 
   class NodeHandler {
   private:
-    bool initialized;
+    /**
+     * Has the NodeHandler been initialized yet?
+     */
+    static bool initialized;
     v8::Persistent<v8::Object> rootJS;
-    NodeHandler instance;
+    /**
+     * Singleton holder for NodeHandler
+     */
+    static NodeHandler *instance;
+    /**
+     * THe exports object to be sent back to node
+     */
     v8::Local<v8::Object> exports;
 
     /* Private constructor - Singleton */
-    NodeHandler(void);
+    NodeHandler(v8::Local<v8::Object>);
 
     void exposeROOT();
     void exposeGlobalFunctions();
