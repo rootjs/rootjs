@@ -2,6 +2,7 @@
 rootinstall
 artifacts
 build
+docs
 
 ### CPLUSPLUS ###
 
