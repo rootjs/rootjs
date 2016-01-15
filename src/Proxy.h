@@ -11,7 +11,10 @@ namespace RootJS {
  */
 class Proxy {
 private:
+
 protected:
+	Proxy(void* address, TObject const& type, TClassRef const& scope);
+	virtual ~Proxy();
 
 	void* address; /**<adress of encapsulated object in memory*/
 	TObject& type; /**<type meta information of encapsulated object */
