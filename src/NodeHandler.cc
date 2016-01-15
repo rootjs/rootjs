@@ -28,6 +28,7 @@ namespace RootJS {
 
   void NodeHandler::exposeGlobals() {
     TCollection *globals = gROOT->GetListOfGlobals();
+
     TIter next(globals);
     while(TObject *global = next()) {
       /*
@@ -35,6 +36,7 @@ namespace RootJS {
        * the ObjectProxyFactory
        * TODO: Implement something for scalar globals (often constants)
        */
+       return;
       ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(global);
       this->exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()), proxy->get());
     }

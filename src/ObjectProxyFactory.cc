@@ -30,7 +30,7 @@ namespace RootJS {
 
   ObjectProxy* ObjectProxyFactory::createObjectProxy(const TDataMember & type, TClassRef scope, ObjectProxy & holder) {
     TObject *object = (TObject*)(holder.getAddress() + type.GetOffsetCint());
-    object->GetName(); /* Hide unused warning */
+  //  object->GetName(); /* Hide unused warning */
     return nullptr;
   }
 }
