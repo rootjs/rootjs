@@ -32,7 +32,7 @@ public:
 	 * get the address of the encapsulated object
 	 * @return the encapsulated object's address
 	 */
-	void* getAddress();
+	void* getAddress() const;
 
 	/**
 	 * get meta information about the encapsulated objcet's scope

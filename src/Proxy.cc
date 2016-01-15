@@ -12,7 +12,7 @@ void RootJS::Proxy::setAdress(void* address) {
 	this->address = address;
 }
 
-void* RootJS::Proxy::getAddress() {
+void* RootJS::Proxy::getAddress() const {
 	return address;
 }
 

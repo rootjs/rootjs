@@ -10,7 +10,7 @@
   'targets': [
     {
       'target_name' :   'rootjs',
-      'sources'     : [ 'src/NodeHandler.cc', 'src/Proxy.cc'],
+      'sources'     : [ 'src/NodeHandler.cc', 'src/Proxy.cc', 'src/ObjectProxy.cc'],
 
       'cflags_cc!'  : [ '-fno-rtti' ],					    # exclude rtti flag
       'cflags_cc'   : [ '<@(root_cflags)' ],
