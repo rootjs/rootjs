@@ -1,8 +1,12 @@
 #include "NodeHandler.h"
+#include "ObjectProxy.h"
+#include "ObjectProxyFactory.h"
+
+#include <TROOT.h>
 
 namespace RootJS {
 
-  NodeHandler *NodeHandler::instance;  
+  NodeHandler *NodeHandler::instance;
   bool NodeHandler::initialized;
 
   void NodeHandler::initialize(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
@@ -23,6 +27,16 @@ namespace RootJS {
   }
 
   void NodeHandler::exposeGlobals() {
-
+    TCollection *globals = gROOT->GetListOfGlobals();
+    TIter next(globals);
+    while(TObject *global = next()) {
+      /*
+       * As we iterate through TObjects all these items can be pumped through
+       * the ObjectProxyFactory
+       * TODO: Implement something for scalar globals (often constants)
+       */
+      ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(global);
+      this->exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()), proxy->get());
+    }
   }
 }

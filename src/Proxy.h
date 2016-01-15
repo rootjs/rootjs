@@ -13,10 +13,10 @@ class Proxy {
 private:
 
 protected:
-	Proxy(void* address, TObject & type, TClassRef & scope);
+	Proxy(TObject* address, TObject & type, TClassRef & scope);
 	virtual ~Proxy();
 
-	void* address; /**<adress of encapsulated object in memory*/
+	TObject* address; /**<adress of encapsulated object in memory*/
 	TObject& type; /**<type meta information of encapsulated object */
 	TClassRef& scope; /**<scope meta information of encapsulated object*/
 
@@ -26,13 +26,13 @@ public:
 	 * set the address this proxy points to
 	 * @param address the new address
 	 */
-	virtual void setAdress(void* address) = 0;
+	virtual void setAddress(TObject* address);
 
 	/**
 	 * get the address of the encapsulated object
 	 * @return the encapsulated object's address
 	 */
-	void* getAddress();
+	TObject* getAddress();
 
 	/**
 	 * get meta information about the encapsulated objcet's scope
