@@ -1,2 +1,25 @@
+#include "Proxy.h"
 
+RootJS::Proxy::Proxy(void* address, const TObject& type, const TClassRef& scope) :
+		address(address), type(type), scope(scope) {
 
+}
+
+RootJS::Proxy::~Proxy() {
+}
+
+void RootJS::Proxy::setAdress(void* address) {
+	this->address = address;
+}
+
+void* RootJS::Proxy::getAddress() {
+	return address;
+}
+
+TClassRef& RootJS::Proxy::getScope() {
+	return scope;
+}
+
+TObject& RootJS::Proxy::getType() {
+	return type;
+}

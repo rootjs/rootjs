@@ -18,7 +18,7 @@ protected:
 
 	void* address; /**<adress of encapsulated object in memory*/
 	TObject& type; /**<type meta information of encapsulated object */
-	TClassRef& Scope; /**<scope meta information of encapsulated object*/
+	TClassRef& scope; /**<scope meta information of encapsulated object*/
 
 public:
 
@@ -26,7 +26,7 @@ public:
 	 * set the address this proxy points to
 	 * @param address the new address
 	 */
-	void setAdress(void* address);
+	virtual void setAdress(void* address) = 0;
 
 	/**
 	 * get the address of the encapsulated object
@@ -44,7 +44,7 @@ public:
 	 * get meta information about the encapsulated objcet's type
 	 * @return meta information about the type
 	 */
-	TObject& getType();
+	virtual TObject& getType();
 
 	/**
 	 * check if the encapsulated object is a template
