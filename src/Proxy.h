@@ -13,7 +13,7 @@ class Proxy {
 private:
 
 protected:
-	Proxy(void* address, TObject const& type, TClassRef const& scope);
+	Proxy(void* address, TObject & type, TClassRef & scope);
 	virtual ~Proxy();
 
 	void* address; /**<adress of encapsulated object in memory*/
