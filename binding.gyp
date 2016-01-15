@@ -13,7 +13,8 @@
       'sources'     : [
             'src/NodeHandler.cc',
             'src/Proxy.cc',
-            'src/ObjectProxyFactory.cc'
+            'src/ObjectProxyFactory.cc',
+            'src/ObjectProxy.cc'
         ],
 
       'cflags_cc!'  : [ '-fno-rtti' ],					    # exclude rtti flag

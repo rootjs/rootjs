@@ -10,16 +10,17 @@
 
 namespace RootJS {
   ObjectProxy* ObjectProxyFactory::createObjectProxy(TObject * object) {
-    ObjectProxy *proxy = new ObjectProxy(object);
     TClass *klass = gClassTable->GetDict(object->GetName())();
     TList *propertieList = klass->GetListOfAllPublicDataMembers();
     TListIter nextProperty(propertieList);
 
     TClassRef *classRef = new TClassRef(klass);
+    ObjectProxy *proxy = new ObjectProxy(object);
 
     while(TDataMember *member = (TDataMember*)nextProperty()) {
+      v8::Local<v8::Object> nodeObject = proxy->getObject();
       ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(*member, *classRef, *proxy);
-      proxy->get()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName()), memberProxy->get());
+      nodeObject->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName()), memberProxy->get());
     }
 
     delete classRef;
