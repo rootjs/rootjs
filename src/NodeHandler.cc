@@ -3,6 +3,7 @@
 #include "ObjectProxyFactory.h"
 
 #include <TROOT.h>
+#include <iostream>
 
 namespace RootJS {
 
@@ -11,6 +12,7 @@ namespace RootJS {
 
   void NodeHandler::initialize(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
     if(!initialized) {
+      ObjectProxyFactory::initializeProxyMap();
       instance = new NodeHandler(exports);
       instance->exposeROOT();
     } else {
@@ -36,9 +38,10 @@ namespace RootJS {
        * the ObjectProxyFactory
        * TODO: Implement something for scalar globals (often constants)
        */
-       return;
-      ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(global);
-      this->exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()), proxy->get());
+      ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(*((TGlobal*)global));
+      if(proxy != nullptr) {
+        this->exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()), proxy->get());
+      }
     }
   }
 }

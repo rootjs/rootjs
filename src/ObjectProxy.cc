@@ -1,6 +1,13 @@
 #include "ObjectProxy.h"
 
-RootJS::ObjectProxy::ObjectProxy(TDataMember& type, TClassRef scope): Proxy(nullptr, type, scope){
+#include <TObject.h>
+#include <TGlobal.h>
+
+RootJS::ObjectProxy::ObjectProxy(const TDataMember& type, TClassRef scope): Proxy(nullptr, type, scope){
+
+}
+
+RootJS::ObjectProxy::ObjectProxy(void *object, const TGlobal & type, TClassRef scope) : Proxy(object, type, scope) {
 
 }
 
@@ -8,8 +15,8 @@ RootJS::ObjectProxy::~ObjectProxy() {
 
 }
 
-TDataMember& RootJS::ObjectProxy::getType() {
-	return dynamic_cast<TDataMember&>(type);
+const TDataMember& RootJS::ObjectProxy::getType() {
+	return dynamic_cast<const TDataMember&>(type);
 }
 
 void RootJS::ObjectProxy::set(ObjectProxy & value) {

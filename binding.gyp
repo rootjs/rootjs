@@ -14,7 +14,9 @@
             'src/NodeHandler.cc',
             'src/Proxy.cc',
             'src/ObjectProxyFactory.cc',
-            'src/ObjectProxy.cc'
+            'src/ObjectProxy.cc',
+            'src/PrimitiveProxy.cc',
+            'src/NumberProxy.cc'
         ],
 
       'cflags_cc!'  : [ '-fno-rtti' ],					    # exclude rtti flag

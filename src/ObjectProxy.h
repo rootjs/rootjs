@@ -2,12 +2,15 @@
 #ifndef SRC_OBJECTPROXY_H_
 #define SRC_OBJECTPROXY_H_
 
-#include "v8.h"
-
-#include "TDataMember.h"
-#include "TClassRef.h"
-
 #include "Proxy.h"
+
+#include <v8.h>
+
+#include <TDataMember.h>
+#include <TClassRef.h>
+#include <TGlobal.h>
+
+
 
 namespace RootJS {
 
@@ -28,7 +31,7 @@ public:
 	 * @param scope
 	 *			the scope of the encapsulated object
 	 */
-	ObjectProxy(TDataMember& type, TClassRef scope);
+	ObjectProxy(const TDataMember& type, TClassRef scope);
 
   /**
    * Creates a new ObjectProxy.
@@ -39,7 +42,7 @@ public:
    *      A pointer to the object that should be prxied.
    *      We need a pointer to get the correct address.
    */
-  ObjectProxy(TObject * object);
+  ObjectProxy(void *object, const TGlobal & type, TClassRef scope);
 
 	virtual ~ObjectProxy();
 
@@ -48,7 +51,7 @@ public:
 	 *
 	 * @return the meta information about the type of the encapsulated object.
 	 */
-	TDataMember& getType();
+	const TDataMember& getType();
 
 	/**
 	 * Assign the specified value to this ObjectProxy.
