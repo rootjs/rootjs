@@ -27,7 +27,7 @@ namespace RootJS {
     TDataMember *member;
 
     while ((member = (TDataMember*)nextProperty())) {
-      v8::Local<v8::Object> nodeObject = proxy.getObject();
+      v8::Local<v8::Object> nodeObject = proxy.getProxy();
       ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(*member, classRef, proxy);
       nodeObject->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName()), memberProxy->get());
     }
