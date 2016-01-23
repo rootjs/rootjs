@@ -79,3 +79,4 @@ node_modules
 
 #codeblocks settings
 *.cbp
+*.layout
