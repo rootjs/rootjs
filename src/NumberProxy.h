@@ -107,6 +107,13 @@ namespace RootJS {
 		 * @return the encapsulating javascript value
 		 */
 		virtual v8::Local<v8::Value> get();
+
+		/**
+		 * Setter for v8 values, writes new data to memory
+		 * @param value
+		 * 			the value set via node, to be stored at the memory address
+		 */
+		virtual void setValue(v8::Local<v8::Value> value);
 	};
 }
 

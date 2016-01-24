@@ -63,6 +63,13 @@ namespace RootJS {
 		virtual void set(ObjectProxy& value);
 
 		/**
+		 * Setter for v8 values, writes new data to memory
+		 * @param value
+		 * 			the value set via node, to be stored at the memory address
+		 */
+		virtual void setValue(v8::Local<v8::Value> value);
+
+		/**
 		 * Return the encapsulating javascript value.
 		 *
 		 * @return the encapsulating javascript value

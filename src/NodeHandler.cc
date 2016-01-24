@@ -1,9 +1,10 @@
 #include "NodeHandler.h"
 #include "ObjectProxy.h"
 #include "ObjectProxyFactory.h"
+#include "CallbackHandler.h"
 
 #include <TROOT.h>
-#include <iostream>
+#include <string>
 
 namespace RootJS {
 
@@ -40,7 +41,16 @@ namespace RootJS {
 			 */
 			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(*((TGlobal*)global));
 			if(proxy != nullptr) {
-				this->exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()), proxy->get());
+				v8::Local<v8::String> name = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName());
+
+				CallbackHandler::setGlobalProxy(std::string(global->GetName()), proxy);
+
+				this->exports->Set(name, proxy->get());
+				this->exports->SetAccessor(
+					name,
+					&CallbackHandler::globalGetterCallback,
+					&CallbackHandler::globalSetterCallback
+				);
 			}
 		}
 	}

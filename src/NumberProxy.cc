@@ -14,7 +14,7 @@ namespace RootJS {
 
 	v8::Local<v8::Value> NumberProxy::get() {
 		if(getAddress()) {
-			return v8::NumberObject::New(v8::Isolate::GetCurrent(), castToDouble(getAddress()));
+			return v8::Number::New(v8::Isolate::GetCurrent(), castToDouble(getAddress()));
 		}
 		return getProxy();
 	}
@@ -50,5 +50,35 @@ namespace RootJS {
 		NumberProxy* proxy = new NumberProxy(address, type, scope);
 		proxy->numberType = NumberType::DOUBLE_T;
 		return proxy;
+	}
+
+	void NumberProxy::setValue(v8::Local<v8::Value> value) {
+		if(isConst()) {
+			v8::Isolate::GetCurrent()->ThrowException(
+				v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
+				"This value cannot be overwritten, it's constant."
+			));
+		}
+		double numberValue;
+		if(value->IsNumberObject()) {
+			numberValue = v8::Local<v8::NumberObject>::Cast(value)->NumberValue();
+		} else if(value->IsNumber()) {
+			numberValue = v8::Local<v8::Number>::Cast(value)->Value();
+		} else {
+			v8::Isolate::GetCurrent()->ThrowException(
+				v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
+				"This element can only store numbers."
+			));
+			return;
+		}
+
+		switch(numberType) {
+			case NumberType::INT_T:
+				*((int*)getAddress()) = (int)numberValue;
+				break;
+			case NumberType::DOUBLE_T:
+				*((double*)getAddress()) = numberValue;
+				break;
+		}
 	}
 }
