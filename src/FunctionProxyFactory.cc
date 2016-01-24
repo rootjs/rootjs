@@ -8,14 +8,14 @@
 
 namespace RootJS {
 
-		FunctionProxyFactory::FunctionProxyFactory() {
-			//TODO
-		}
-		FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction function, TClassRef scope) {
-			return nullptr; //TODO
-		}
-		FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo<v8::Value> args) {
-			return nullptr; //TODO
-		}
+	FunctionProxyFactory::FunctionProxyFactory() {
+		//TODO
+	}
+	FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction function, TClassRef scope) {
+		return nullptr; //TODO
+	}
+	FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo<v8::Value> args) {
+		return nullptr; //TODO
+	}
 
 }

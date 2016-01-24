@@ -21,8 +21,10 @@ namespace RootJS {
 
 	Double_t NumberProxy::castToDouble(void *ptr) {
 		switch(numberType) {
-			case NumberType::INT_T: return *((Int_t*)getAddress());
-			case NumberType::DOUBLE_T: return *((Double_t*)getAddress());
+		case NumberType::INT_T:
+			return *((Int_t*)getAddress());
+		case NumberType::DOUBLE_T:
+			return *((Double_t*)getAddress());
 		}
 	}
 
