@@ -3,11 +3,14 @@
 #include <TObject.h>
 #include <TGlobal.h>
 
-RootJS::ObjectProxy::ObjectProxy(const TDataMember& type, TClassRef scope): Proxy(nullptr, type, scope){
+RootJS::ObjectProxy::ObjectProxy(const TDataMember& type, TClassRef scope) :
+		Proxy(nullptr, type, scope) {
 
 }
 
-RootJS::ObjectProxy::ObjectProxy(void *object, const TGlobal & type, TClassRef scope) : Proxy(object, type, scope) {
+RootJS::ObjectProxy::ObjectProxy(void *object, const TGlobal & type,
+		TClassRef scope) :
+		Proxy(object, type, scope) {
 
 }
 
@@ -19,17 +22,12 @@ const TDataMember& RootJS::ObjectProxy::getType() {
 	return dynamic_cast<const TDataMember&>(type);
 }
 
-void RootJS::ObjectProxy::set(ObjectProxy & value) {
+void RootJS::ObjectProxy::set(ObjectProxy& value) {
 	// TODO: validate type equality
 	address = value.getAddress();
 }
 
 v8::Local<v8::Value> RootJS::ObjectProxy::get() {
-	// objects just return their holder - i.e the proxy member
-	return getProxy();
-}
-
-v8::Local<v8::Object> RootJS::ObjectProxy::getObject() {
 	// objects just return their holder - i.e the proxy member
 	return getProxy();
 }

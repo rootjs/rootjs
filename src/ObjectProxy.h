@@ -1,4 +1,3 @@
-
 #ifndef SRC_OBJECTPROXY_H_
 #define SRC_OBJECTPROXY_H_
 
@@ -9,8 +8,6 @@
 #include <TDataMember.h>
 #include <TClassRef.h>
 #include <TGlobal.h>
-
-
 
 namespace RootJS {
 
@@ -33,16 +30,19 @@ public:
 	 */
 	ObjectProxy(const TDataMember& type, TClassRef scope);
 
-  /**
-   * Creates a new ObjectProxy.
-   * Use this constructor when you do not have a TDataMember
-   * (This happens when you want to proxy an object which is globally available)
-   *
-   * @param object
-   *      A pointer to the object that should be prxied.
-   *      We need a pointer to get the correct address.
-   */
-  ObjectProxy(void *object, const TGlobal & type, TClassRef scope);
+	/**
+	 * Creates a new ObjectProxy.
+	 *
+	 * @param object
+	 *			the memory address of the encapsulated object
+	 *
+	 * @param type
+	 * 			the type of the encapsulated object
+	 *
+	 * @param scope
+	 *			the scope of the encapsulated object
+	 */
+	ObjectProxy(void *object, const TGlobal& type, TClassRef scope);
 
 	virtual ~ObjectProxy();
 
@@ -59,7 +59,7 @@ public:
 	 * @param value
 	 * 			the value to assign to this ObjectProxy
 	 */
-	virtual void set(ObjectProxy & value);
+	virtual void set(ObjectProxy& value);
 
 	/**
 	 * Return the encapsulating javascript value.
@@ -67,13 +67,6 @@ public:
 	 * @return the encapsulating javascript value
 	 */
 	virtual v8::Local<v8::Value> get();
-
-  /**
-   * Return the encapsulating javascript object.
-   *
-   * @return the encapsulating javascript object.
-   */
-  virtual v8::Local<v8::Object> getObject();
 
 	/**
 	 * Set the encapsulating javascript object.
@@ -98,10 +91,10 @@ public:
 	 */
 	virtual bool isPrimitive();
 
-  virtual bool isTemplate();
-  virtual bool isGlobal();
-  virtual bool isConst();
-  virtual bool isStatic();
+	virtual bool isTemplate();
+	virtual bool isGlobal();
+	virtual bool isConst();
+	virtual bool isStatic();
 
 protected:
 	v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */

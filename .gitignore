@@ -76,3 +76,7 @@ node_modules
 /.project
 /.settings/
 /.cproject
+
+#codeblocks settings
+*.cbp
+*.layout
