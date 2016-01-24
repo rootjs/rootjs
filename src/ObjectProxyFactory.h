@@ -11,24 +11,24 @@
 #include <TMap.h>
 
 namespace RootJS {
-  typedef ObjectProxy* (*MemberProxyInitializator)(const TDataMember&, TClassRef);
-  typedef ObjectProxy* (*GlobalProxyInitializator)(void*, const TGlobal&, TClassRef);
+	typedef ObjectProxy* (*MemberProxyInitializator)(const TDataMember&, TClassRef);
+	typedef ObjectProxy* (*GlobalProxyInitializator)(void*, const TGlobal&, TClassRef);
 
-  class ObjectProxyFactory {
-  private:
-    ObjectProxyFactory(void);
-    static const char* getClassNameFromType(const char*);
-    static void traverseClass(TClassRef&, ObjectProxy&);
-    static std::map<std::string, MemberProxyInitializator> memberProxyMap;
-    static std::map<std::string, GlobalProxyInitializator> globalProxyMap;
-  public:
-    static ObjectProxy* createObjectProxy(TGlobal & object);
-    static ObjectProxy* createObjectProxy(const TDataMember&, TClassRef, ObjectProxy&);
-    static ObjectProxy* determineProxy(const TDataMember&, TClassRef);
-    static ObjectProxy* determineProxy(void*, const TGlobal&, TClassRef);
+	class ObjectProxyFactory {
+	private:
+		ObjectProxyFactory(void);
+		static const char* getClassNameFromType(const char*);
+		static void traverseClass(TClassRef&, ObjectProxy&);
+		static std::map<std::string, MemberProxyInitializator> memberProxyMap;
+		static std::map<std::string, GlobalProxyInitializator> globalProxyMap;
+	public:
+		static ObjectProxy* createObjectProxy(TGlobal & object);
+		static ObjectProxy* createObjectProxy(const TDataMember&, TClassRef, ObjectProxy&);
+		static ObjectProxy* determineProxy(const TDataMember&, TClassRef);
+		static ObjectProxy* determineProxy(void*, const TGlobal&, TClassRef);
 
-    static void initializeProxyMap(void);
-  };
+		static void initializeProxyMap(void);
+	};
 }
 
 #endif /*OBJECT_PROXY_FACTORY_H*/

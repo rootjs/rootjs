@@ -4,13 +4,13 @@
 #include <TGlobal.h>
 
 RootJS::ObjectProxy::ObjectProxy(const TDataMember& type, TClassRef scope) :
-		Proxy(nullptr, type, scope) {
+	Proxy(nullptr, type, scope) {
 
 }
 
 RootJS::ObjectProxy::ObjectProxy(void *object, const TGlobal & type,
-		TClassRef scope) :
-		Proxy(object, type, scope) {
+                                 TClassRef scope) :
+	Proxy(object, type, scope) {
 
 }
 
