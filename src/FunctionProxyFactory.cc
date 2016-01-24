@@ -1,20 +1,21 @@
 #include "FunctionProxyFactory.h"
 
 #include "FunctionProxy.h"
+#include <v8.h>
 #include <TGlobal.h>
 #include <TClass.h>
 #include <TClassRef.h>
 
-namepsace RootJS {
-	FunctionProxyFactory { 
+namespace RootJS {
+
 		FunctionProxyFactory::FunctionProxyFactory() {
 			//TODO
 		}
-		static FunctionProxy& createFunctionProxy(TFunction function, TClassRef scope) {
-			return NULL //TODO
+		FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction function, TClassRef scope) {
+			return nullptr; //TODO
 		}
-		static FunctionProxy& fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo args) {
-			return NULL //TODO
+		FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo<v8::Value> args) {
+			return nullptr; //TODO
 		}
-	}
+
 }
