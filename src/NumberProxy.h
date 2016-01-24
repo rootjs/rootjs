@@ -7,8 +7,19 @@
 #include <TDataMember.h>
 #include <TClassRef.h>
 
+#include <v8.h>
+
 namespace RootJS {
+	enum class NumberType {
+	    INT_T, DOUBLE_T
+	};
+
+
 	class NumberProxy: public PrimitiveProxy {
+	private:
+		NumberType numberType;
+
+		Double_t castToDouble(void*);
 	public:
 		/**
 		 * Create a new NumberProxy.
@@ -43,7 +54,36 @@ namespace RootJS {
 		 * @param scope
 		 *			the scope of the encapsulated object
 		 */
-		static ObjectProxy* construct(const TDataMember& type, TClassRef scope);
+		static ObjectProxy* intConstruct(const TDataMember& type, TClassRef scope);
+
+		/**
+		* This calls the constructor.
+		* We cannot create pointers to constructors,
+		* but need to map the constructors in out Factory.
+
+		* @param address
+		* 		  the address of the global
+		*
+		* @param type
+		* 			the type of the encapsulated object
+		*
+		* @param scope
+		*			the scope of the encapsulated object
+		*/
+		static ObjectProxy* intConstruct(void *address, const TGlobal& type, TClassRef scope);
+
+		/**
+		* This calls the constructor.
+		* We cannot create pointers to constructors,
+		* but need to map the constructors in out Factory.
+
+		* @param type
+		* 			the type of the encapsulated object
+		*
+		* @param scope
+		*			the scope of the encapsulated object
+		*/
+		static ObjectProxy* doubleConstruct(const TDataMember& type, TClassRef scope);
 
 		/**
 		 * This calls the constructor.
@@ -59,7 +99,7 @@ namespace RootJS {
 		 * @param scope
 		 *			the scope of the encapsulated object
 		 */
-		static ObjectProxy* construct(void *address, const TGlobal& type, TClassRef scope);
+		static ObjectProxy* doubleConstruct(void *address, const TGlobal& type, TClassRef scope);
 
 		/**
 		 * Return the encapsulating javascript value.

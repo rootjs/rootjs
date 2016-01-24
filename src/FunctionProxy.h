@@ -61,7 +61,7 @@ namespace RootJS {
 		 * @param args contains the arguments which shall be validated
 		 * @return an array of proxies for the validated arguments
 		 */
-		//ObjectProxy* validateArgs(v8::FunctionCallbackInfo args);
+		std::vector<ObjectProxy*> validateArgs(v8::FunctionCallbackInfo<v8::Value> args);
 
 		/**
 		 * Invokes the proxied function.

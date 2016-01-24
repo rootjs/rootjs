@@ -8,9 +8,10 @@
     "build": "node-gyp configure build"
   },
   "devDependencies": {
+    "jenkins-mocha": "latest",
+    "jslint": "^0.9.6",
     "mocha": "latest",
     "node-gyp": "latest",
-    "jenkins-mocha": "latest",
     "should": "^8.1.1"
   },
   "repository": {

@@ -17,7 +17,7 @@
 				'src/ObjectProxyFactory.cc',
 				'src/ObjectProxy.cc',
 				'src/PrimitiveProxy.cc',
-				'src/NumberProxy.cc'
+				'src/NumberProxy.cc',
 				'src/FunctionProxyFactory.cc'
 			],
 

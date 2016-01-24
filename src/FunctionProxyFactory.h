@@ -6,14 +6,14 @@
 #include <TClass.h>
 #include <TClassRef.h>
 
-namepsace RootJS {
-	class FunctionProxyFactory { 
+namespace RootJS {
+	class FunctionProxyFactory {
 	private:
 		FunctionProxyFactory(void);
 	public:
-		static FunctionProxy& createFunctionProxy(TFunction function, TClassRef scope);
-		static FunctionProxy& fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo args);
-	}
+		static FunctionProxy* createFunctionProxy(TFunction function, TClassRef scope);
+		static FunctionProxy* fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo<v8::Value> args);
+	};
 }
 
 #endif //FUNCTION_PROXY_FACTORY_H

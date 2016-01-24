@@ -1,4 +1,6 @@
 #include "NumberProxy.h"
+#include <iostream>
+#include <v8.h>
 
 namespace RootJS {
 
@@ -12,16 +14,41 @@ namespace RootJS {
 
 	v8::Local<v8::Value> NumberProxy::get() {
 		if(getAddress()) {
-			return v8::NumberObject::New(v8::Isolate::GetCurrent(), *((Int_t*)getAddress()));
+			return v8::NumberObject::New(v8::Isolate::GetCurrent(), castToDouble(getAddress()));
 		}
 		return getProxy();
 	}
 
-	ObjectProxy* NumberProxy::construct(const TDataMember& type, TClassRef scope) {
-		return new NumberProxy(type, scope);
+	Double_t NumberProxy::castToDouble(void *ptr) {
+		switch(numberType) {
+		case NumberType::INT_T:
+			return *((Int_t*)getAddress());
+		case NumberType::DOUBLE_T:
+			return *((Double_t*)getAddress());
+		}
 	}
 
-	ObjectProxy* NumberProxy::construct(void *address, const TGlobal& type, TClassRef scope) {
-		return new NumberProxy(address, type, scope);
+	ObjectProxy* NumberProxy::intConstruct(const TDataMember& type, TClassRef scope) {
+		NumberProxy* proxy = new NumberProxy(type, scope);
+		proxy->numberType = NumberType::INT_T;
+		return proxy;
+	}
+
+	ObjectProxy* NumberProxy::intConstruct(void *address, const TGlobal& type, TClassRef scope) {
+		NumberProxy* proxy = new NumberProxy(address, type, scope);
+		proxy->numberType = NumberType::INT_T;
+		return proxy;
+	}
+
+	ObjectProxy* NumberProxy::doubleConstruct(const TDataMember& type, TClassRef scope) {
+		NumberProxy* proxy = new NumberProxy(type, scope);
+		proxy->numberType = NumberType::DOUBLE_T;
+		return proxy;
+	}
+
+	ObjectProxy* NumberProxy::doubleConstruct(void *address, const TGlobal& type, TClassRef scope) {
+		NumberProxy* proxy = new NumberProxy(address, type, scope);
+		proxy->numberType = NumberType::DOUBLE_T;
+		return proxy;
 	}
 }
