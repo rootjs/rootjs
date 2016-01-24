@@ -51,15 +51,14 @@ namespace RootJS {
     }
     TClass *klass = dictFunc();
 
-    TClassRef *classRef = new TClassRef(klass);
+    TClassRef classRef = TClassRef(klass);
 
-    ObjectProxy *proxy = new ObjectProxy((TObject*)object.GetAddress(), object, *classRef);
+    ObjectProxy *proxy = new ObjectProxy((TObject*)object.GetAddress(), object, classRef);
     //Set an empty proxy and fill iit in the following loops
     proxy->setProxy(v8::Object::New(v8::Isolate::GetCurrent()));
 
-    traverseClass(*classRef, *proxy);
+    traverseClass(classRef, *proxy);
 
-    delete classRef;
     return proxy;
   }
 
