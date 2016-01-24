@@ -47,9 +47,9 @@ namespace RootJS {
 
 				this->exports->Set(name, proxy->get());
 				this->exports->SetAccessor(
-					name,
-					&CallbackHandler::globalGetterCallback,
-					&CallbackHandler::globalSetterCallback
+				    name,
+				    &CallbackHandler::globalGetterCallback,
+				    &CallbackHandler::globalSetterCallback
 				);
 			}
 		}

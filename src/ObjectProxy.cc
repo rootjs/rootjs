@@ -60,6 +60,6 @@ bool RootJS::ObjectProxy::isStatic() {
 	return false; //TODO
 }
 
-void RootJS::ObjectProxy::setValue(v8::Local<v8::Value> value){
+void RootJS::ObjectProxy::setValue(v8::Local<v8::Value> value) {
 	return;
 }
