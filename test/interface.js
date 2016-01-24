@@ -17,6 +17,6 @@ describe('Interface', function() {
           it('should have kMaxChar which equals 128', function(){
               root.kMaxChar.should.equal(128);
           });
-      })
+      });
   });
 });
