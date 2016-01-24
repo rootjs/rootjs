@@ -18,6 +18,7 @@
 				'src/ObjectProxy.cc',
 				'src/PrimitiveProxy.cc',
 				'src/NumberProxy.cc'
+				'src/FuncrionProxyFactory.cc'
 			],
 
 			'cflags_cc!'  : [ '-fno-rtti' ],       			# exclude rtti flag
