@@ -1,7 +1,7 @@
 #include "Proxy.h"
 
 RootJS::Proxy::Proxy(void* address, const TObject & type, TClassRef & scope) :
-		address(address), type(type), scope(scope) {
+	address(address), type(type), scope(scope) {
 
 }
 
