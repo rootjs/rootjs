@@ -47,8 +47,12 @@ public:
    *
    * @return the meta information about the type of the encapsulated object.
    */
-  const TDataMember &getType();
-
+  const ProxyMode &getType();
+/**
+ * Return the name of the type
+ * @return the name of the type
+ */
+  char* const getTypeName();
   /**
    * Assign the specified value to this ObjectProxy.
    *
@@ -94,6 +98,8 @@ public:
 
 protected:
   v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
+private:
+  ProxyMode currentmode;
 };
 }
 

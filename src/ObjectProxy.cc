@@ -3,16 +3,25 @@
 #include <TObject.h>
 #include <TGlobal.h>
 
+namespace RootJS {
+
 RootJS::ObjectProxy::ObjectProxy(TDataMember &type, TClassRef scope)
-    : Proxy(nullptr, type, scope) {}
+    : Proxy(nullptr, type, scope) {
+  this->currentmode = MemberMode(type);
+}
+
 RootJS::ObjectProxy::ObjectProxy(TGlobal &type, TClassRef scope)
-    : Proxy(nullptr, type, scope) {}
+    : Proxy(nullptr, type, scope) {
+  this->currentmode = GlobalMode(type);
+}
 
 RootJS::ObjectProxy::~ObjectProxy() {}
 
-const TDataMember &RootJS::ObjectProxy::getType() {
+const const TDataMember &RootJS::ObjectProxy::getType() {
   return dynamic_cast<const TDataMember &>(type);
 }
+
+char *const RootJS::ObjectProxy::getTypeName() { return nullptr; }
 
 void RootJS::ObjectProxy::set(ObjectProxy &value) {
   // TODO: validate type equality
@@ -38,9 +47,7 @@ bool RootJS::ObjectProxy::isTemplate() {
   return false; // TODO
 }
 
-bool RootJS::ObjectProxy::isGlobal() {
-  return false; // TODO
-}
+bool RootJS::ObjectProxy::isGlobal() { return currentmode.isGlobal(); }
 
 bool RootJS::ObjectProxy::isConst() {
   return false; // TODO
@@ -48,4 +55,5 @@ bool RootJS::ObjectProxy::isConst() {
 
 bool RootJS::ObjectProxy::isStatic() {
   return false; // TODO
+}
 }
