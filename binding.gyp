@@ -18,16 +18,24 @@
 				'src/ObjectProxy.cc',
 				'src/PrimitiveProxy.cc',
 				'src/NumberProxy.cc'
-				'src/FuncrionProxyFactory.cc'
+				'src/FunctionProxyFactory.cc'
 			],
 
 			'cflags_cc!'  : [ '-fno-rtti' ],       			# exclude rtti flag
 			'cflags_cc'   : [ '<@(root_cflags)' ],
 			'ldflags_cc'  : [ '<@(root_ldflags)' ],
 			'include_dirs': [ '<@(root_incdir)' ], 			# using variable instead of '/usr/include/root'
-			'libraries'   : [ '<@(root_glibs)' ]   			# using variable instead of '/usr/lib/root/libXXX.so'
+			'libraries'   : [ '<@(root_glibs)' ],   			# using variable instead of '/usr/lib/root/libXXX.so'
 
-			# TODO: Use 'conditions' to adress OS specifics that are not covered by root-config
-		}
-	]
+			"conditions": [
+			  [ 'OS=="mac"', {
+					"xcode_settings": {
+					  "OTHER_CPLUSPLUSFLAGS" : [ "-std=c++11", "-stdlib=libc++" ],
+					  "OTHER_LDFLAGS": [ "-stdlib=libc++" ],
+					  "MACOSX_DEPLOYMENT_TARGET": "10.7"
+					},
+			  }],
+			],
+    }
+    ]
 }
