@@ -101,8 +101,13 @@ namespace RootJS {
 	}
 
 	void ObjectProxyFactory::initializeProxyMap() {
-		memberProxyMap["Int_t"] = &NumberProxy::construct;
-		globalProxyMap["Int_t"] = &NumberProxy::construct;
+		//Int_t
+		memberProxyMap["Int_t"] = &NumberProxy::intConstruct;
+		globalProxyMap["Int_t"] = &NumberProxy::intConstruct;
+
+		//Double_t
+		memberProxyMap["Double_t"] = &NumberProxy::doubleConstruct;
+		globalProxyMap["Double_t"] = &NumberProxy::doubleConstruct;
 	}
 
 }
