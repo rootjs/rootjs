@@ -3,5 +3,5 @@
 namespace RootJS {
 
 bool ProxyMode::isGlobal() { return true; }
-Long_t ProxyMode::GetAddress() { return 0; }
+Long_t getOffset() { return 0; }
 }

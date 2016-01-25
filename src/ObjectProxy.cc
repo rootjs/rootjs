@@ -5,28 +5,26 @@
 
 namespace RootJS {
 
-ObjectProxy::ObjectProxy(TDataMember &type, TClassRef scope)
+ObjectProxy::ObjectProxy(const TDataMember &type, TClassRef scope)
     : Proxy(nullptr, type, scope) {
   currentmode = MemberMode(type);
 }
 
-ObjectProxy::ObjectProxy(TGlobal &type, TClassRef scope)
+ObjectProxy::ObjectProxy(const TGlobal &type, TClassRef scope)
     : Proxy(nullptr, type, scope) {
-  this->currentmode = GlobalMode(type);
+  currentmode = GlobalMode(type);
 }
 
 ObjectProxy::~ObjectProxy() {}
-
-const ProxyObject &ObjectProxy::getType() {
-  return dynamic_cast<const TDataMember &>(type);
-}
 
 char *const ObjectProxy::getTypeName() {
   // TODO implement (if this is even necessary)
   return nullptr;
 }
 
-Long_t ObjectProxy::getOffset() { return currentmode.getOffset(); }
+ProxyMode &ObjectProxy::getTypeInfo() { return currentmode; }
+
+Long_t ObjectProxy::getOffset() { return currentmode.GetOffset(); }
 
 void ObjectProxy::set(ObjectProxy &value) {
   // TODO: validate type equality
@@ -61,8 +59,6 @@ bool ObjectProxy::isConst() {
 bool ObjectProxy::isStatic() {
   return false; // TODO
 }
-}
 
-void RootJS::ObjectProxy::setValue(v8::Local<v8::Value> value) {
-	return;
+void ObjectProxy::setValue(v8::Local<v8::Value> value) { return; }
 }

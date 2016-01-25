@@ -3,6 +3,8 @@
 
 #include "Proxy.h"
 #include "ProxyMode.h"
+#include "MemberMode.h"
+#include "GlobalMode.h"
 #include <v8.h>
 
 #include <TDataMember.h>
@@ -19,7 +21,7 @@ namespace RootJS {
 class ObjectProxy : public Proxy {
 
 public:
-enum InternalField { Pointer };
+  enum InternalField { Pointer };
   /**
    * Create a new ObjectProxy of a TObject.
    *
@@ -29,7 +31,7 @@ enum InternalField { Pointer };
    * @param scope
    *			the scope of the encapsulated object
    */
-  ObjectProxy(TDataMember &type, TClassRef scope);
+  ObjectProxy(const TDataMember &type, TClassRef scope);
 
   /**
    * Create a new ObjectProxy of a TGlobal.
@@ -40,21 +42,20 @@ enum InternalField { Pointer };
    * @param scope
    *			the scope of the encapsulated object
    */
-  ObjectProxy(TGlobal &type, TClassRef scope);
+  ObjectProxy(const TGlobal &type, TClassRef scope);
 
   virtual ~ObjectProxy();
 
-  /**
-   * Return the meta information about the type of the encapsulated object.
-   *
-   * @return the meta information about the type of the encapsulated object.
-   */
-  const TDataMember &getType();
   /**
    * Return the name of the type
    * @return the name of the type
    */
   char *const getTypeName();
+
+  /*
+  *Returns an object encapsulating meta
+  */
+  ProxyMode &getTypeInfo();
 
   /*
   *get the offset
@@ -92,6 +93,8 @@ enum InternalField { Pointer };
    * @return the encapsulating javascript object
    */
   virtual v8::Local<v8::Object> getProxy();
+
+  virtual void setValue(v8::Local<v8::Value> value);
 
   /**
    * Check if this proxy encapsulates a primitive type.

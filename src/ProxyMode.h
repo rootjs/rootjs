@@ -15,10 +15,9 @@ public:
   virtual bool isGlobal() = 0;
   virtual Long_t GetOffset() = 0;
   TObject getCurrentObject() { return currentObject; };
-
-protected:
   TObject &currentObject;
 
+protected:
 private:
 };
 }

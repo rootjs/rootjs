@@ -1,7 +1,5 @@
-#ifndef SRC_OBJECTPROXY_H_
-#define SRC_OBJECTPROXY_H_
-
-
+#ifndef SRC_MEMBERMODE_H_
+#define SRC_MEMBERMODE_H_
 
 #include <v8.h>
 
@@ -11,9 +9,15 @@
 
 namespace RootJS {
 
-class MemberMode: public ProxyMode{
+class MemberMode : public ProxyMode {
+public:
+  MemberMode(TDataMember &type);
+  ~MemberMode();
+
+  virtual bool isGlobal();
+  virtual Long_t GetOffset();
+
 protected:
-	MemberMode(TDataMember& type);
-
-
-};}
+};
+}
+#endif
