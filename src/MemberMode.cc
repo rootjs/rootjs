@@ -1,5 +1,11 @@
 #include "MemberMode.h"
 
-RootJS::MemberMode::MemberMode(TDataMember &type) { currentObject = type; }
+namespace RootJS {
 
-bool RootJS::ProxyMode::isGlobal() { return false; }
+MemberMode::MemberMode(TDataMember &type) { currentObject = type; }
+
+bool ProxyMode::isGlobal() { return false; }
+Long_t ProxyMode::GetAddress() {
+  return static_cast<TDataMember>(currentObject).GetOffset();
+}
+}

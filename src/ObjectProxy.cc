@@ -5,55 +5,60 @@
 
 namespace RootJS {
 
-RootJS::ObjectProxy::ObjectProxy(TDataMember &type, TClassRef scope)
+ObjectProxy::ObjectProxy(TDataMember &type, TClassRef scope)
     : Proxy(nullptr, type, scope) {
-  this->currentmode = MemberMode(type);
+  currentmode = MemberMode(type);
 }
 
-RootJS::ObjectProxy::ObjectProxy(TGlobal &type, TClassRef scope)
+ObjectProxy::ObjectProxy(TGlobal &type, TClassRef scope)
     : Proxy(nullptr, type, scope) {
   this->currentmode = GlobalMode(type);
 }
 
-RootJS::ObjectProxy::~ObjectProxy() {}
+ObjectProxy::~ObjectProxy() {}
 
-const const TDataMember &RootJS::ObjectProxy::getType() {
+const ProxyObject &ObjectProxy::getType() {
   return dynamic_cast<const TDataMember &>(type);
 }
 
-char *const RootJS::ObjectProxy::getTypeName() { return nullptr; }
+char *const ObjectProxy::getTypeName() {
+  // TODO implement (if this is even necessary)
+  return nullptr;
+}
 
-void RootJS::ObjectProxy::set(ObjectProxy &value) {
+Long_t ObjectProxy::getOffset() { return currentmode.getOffset(); }
+
+void ObjectProxy::set(ObjectProxy &value) {
   // TODO: validate type equality
   address = value.getAddress();
 }
 
-v8::Local<v8::Value> RootJS::ObjectProxy::get() {
+v8::Local<v8::Value> ObjectProxy::get() {
   // objects just return their holder - i.e the proxy member
   return getProxy();
 }
 
-void RootJS::ObjectProxy::setProxy(v8::Local<v8::Object> proxy) {
+void ObjectProxy::setProxy(v8::Local<v8::Object> proxy) {
   this->proxy.Reset(v8::Isolate::GetCurrent(), proxy);
 }
 
-v8::Local<v8::Object> RootJS::ObjectProxy::getProxy() {
+v8::Local<v8::Object> ObjectProxy::getProxy() {
   return v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(), proxy);
 }
 
-bool RootJS::ObjectProxy::isPrimitive() { return false; }
+bool ObjectProxy::isPrimitive() { return false; }
 
-bool RootJS::ObjectProxy::isTemplate() {
+bool ObjectProxy::isTemplate() {
   return false; // TODO
 }
 
-bool RootJS::ObjectProxy::isGlobal() { return currentmode.isGlobal(); }
+bool ObjectProxy::isGlobal() { return currentmode.isGlobal(); }
 
-bool RootJS::ObjectProxy::isConst() {
+bool ObjectProxy::isConst() {
   return false; // TODO
 }
 
-bool RootJS::ObjectProxy::isStatic() {
+bool ObjectProxy::isStatic() {
   return false; // TODO
 }
 }

@@ -2,12 +2,13 @@
 #define SRC_OBJECTPROXY_H_
 
 #include "Proxy.h"
-
+#include "ProxyMode.h"
 #include <v8.h>
 
 #include <TDataMember.h>
 #include <TClassRef.h>
 #include <TGlobal.h>
+#include <RConfig.h>
 
 namespace RootJS {
 
@@ -48,11 +49,18 @@ public:
    * @return the meta information about the type of the encapsulated object.
    */
   const TDataMember &getType();
-/**
- * Return the name of the type
- * @return the name of the type
- */
-  char* const getTypeName();
+  /**
+   * Return the name of the type
+   * @return the name of the type
+   */
+  char *const getTypeName();
+
+  /*
+  *get the offset
+  @return the offset
+  */
+  Long_t getOffset();
+
   /**
    * Assign the specified value to this ObjectProxy.
    *
@@ -99,7 +107,7 @@ public:
 protected:
   v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
 private:
-  ProxyMode currentmode;
+  ProxyMode &currentmode;
 };
 }
 
