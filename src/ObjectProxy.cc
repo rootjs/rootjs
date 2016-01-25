@@ -1,6 +1,5 @@
 #include "ObjectProxy.h"
 
-#include <TROOT.h>
 #include <TObject.h>
 #include <TGlobal.h>
 
@@ -42,7 +41,7 @@ v8::Local<v8::Object> RootJS::ObjectProxy::getProxy() {
 }
 
 bool RootJS::ObjectProxy::isPrimitive() {
-	return dynamic_cast<const TDataMember&>(type).IsBasic();
+	return false;
 }
 
 bool RootJS::ObjectProxy::isTemplate() {
@@ -54,11 +53,11 @@ bool RootJS::ObjectProxy::isGlobal() {
 }
 
 bool RootJS::ObjectProxy::isConst() {
-    return dynamic_cast<const TDataMember&>(type).Property() & kIsConstant;
+	return false; //TODO
 }
 
 bool RootJS::ObjectProxy::isStatic() {
-    return dynamic_cast<const TDataMember&>(type).Property() & kIsStatic;
+	return false; //TODO
 }
 
 void RootJS::ObjectProxy::setValue(v8::Local<v8::Value> value) {
