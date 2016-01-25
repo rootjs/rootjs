@@ -13,8 +13,10 @@
 			'sources': [
 #				'src/FunctionProxy.cc',
 				'src/NodeHandler.cc',
-				'src/Proxy.cc',
-				'src/ObjectProxyFactory.cc',
+				'src/Proxy.cc',		
+'src/GlobalMode.cc',				
+'src/MemberMode.cc',				
+'src/ObjectProxyFactory.cc',
 				'src/ObjectProxy.cc',
 				'src/PrimitiveProxy.cc',
 				'src/NumberProxy.cc',

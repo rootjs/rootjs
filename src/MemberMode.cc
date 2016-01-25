@@ -10,7 +10,6 @@ bool MemberMode::isGlobal() {
 }
 Long_t MemberMode::GetOffset() {
 
-
 		return currentObject->GetOffset();
 }
 }
