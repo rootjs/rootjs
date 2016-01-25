@@ -1,6 +1,10 @@
 #ifndef SRC_PROXYMODE_H_
 #define SRC_PROXYMODE_H_
 #include <RConfig.h>
+#include <TDataMember.h>
+#include <TClassRef.h>
+#include <TGlobal.h>
+#include <RConfig.h>
 namespace RootJS {
 
 /**
@@ -8,14 +12,13 @@ namespace RootJS {
  * TGlobal
  * */
 class ProxyMode {
-  ProxyMode(TObject &current);
-  virtual ~ProxyMode();
 
 public:
-  virtual bool isGlobal() = 0;
-  virtual Long_t GetOffset() = 0;
-  TObject getCurrentObject() { return currentObject; };
-  TObject &currentObject;
+  ProxyMode(const TObject &foo);
+  virtual ~ProxyMode();
+
+  virtual bool isGlobal();
+  virtual Long_t GetOffset();
 
 protected:
 private:

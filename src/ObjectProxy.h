@@ -33,6 +33,10 @@ public:
    */
   ObjectProxy(const TDataMember &type, TClassRef scope);
 
+
+   //TODO remove
+  ObjectProxy(void* adress,const TGlobal g, TClassRef r);
+
   /**
    * Create a new ObjectProxy of a TGlobal.
    *
@@ -111,7 +115,7 @@ public:
 protected:
   v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
 private:
-  ProxyMode &currentmode;
+  ProxyMode currentmode;
 };
 }
 

@@ -1,15 +1,16 @@
 #ifndef SRC_GLOBALMODE_H_
 #define SRC_GLOBALMODE_H_
+#include "ProxyMode.h"
 
 namespace RootJS {
 
-class GlobalMode : public ProxyMode {
+class GlobalMode: public ProxyMode {
 public:
-  GlobalMode(TGlobal &type);
+  GlobalMode(const TGlobal & type);
   ~GlobalMode();
   virtual bool isGlobal();
   virtual Long_t GetOffset();
-
+  const TGlobal &currentObject;
 protected:
 };
 }
