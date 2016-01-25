@@ -11,7 +11,7 @@
 
 namespace RootJS {
 	enum class NumberType {
-	    INT_T, DOUBLE_T
+		INT_T, DOUBLE_T
 	};
 
 
