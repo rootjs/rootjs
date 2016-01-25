@@ -25,6 +25,12 @@ namespace RootJS {
 			return *((Int_t*)getAddress());
 		case NumberType::DOUBLE_T:
 			return *((Double_t*)getAddress());
+		default:
+			v8::Isolate::GetCurrent()->ThrowException(
+			    v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
+			                            "Unknown number format in NumberProxy (castToDouble)."
+			                           ));
+			return -1;
 		}
 	}
 
