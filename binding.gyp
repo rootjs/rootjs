@@ -20,7 +20,8 @@
 				'src/BooleanProxy.cc',
 				'src/NumberProxy.cc',
 				'src/FunctionProxyFactory.cc',
-				'src/CallbackHandler.cc'
+				'src/CallbackHandler.cc',
+				'src/NodeApplication.cc'
 			],
 
 			'cflags_cc!'  : [ '-fno-rtti' ],       			# exclude rtti flag

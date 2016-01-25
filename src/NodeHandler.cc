@@ -2,6 +2,7 @@
 #include "ObjectProxy.h"
 #include "ObjectProxyFactory.h"
 #include "CallbackHandler.h"
+#include "NodeApplication.h"
 
 #include <TROOT.h>
 #include <string>
@@ -13,6 +14,7 @@ namespace RootJS {
 
 	void NodeHandler::initialize(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
 		if(!initialized) {
+			NodeApplication::CreateNodeApplication();
 			ObjectProxyFactory::initializeProxyMap();
 			instance = new NodeHandler(exports);
 			instance->exposeROOT();
