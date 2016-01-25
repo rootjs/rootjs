@@ -69,7 +69,13 @@ namespace RootJS {
 	}
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(const TDataMember & type, TClassRef scope, ObjectProxy & holder) {
-		void *object = (void*)(holder.getAddress() + type.GetOffsetCint());
+		/*
+		 * It is not possible to do pointer arithmetic on void pointers.
+		 * To add the offset to the object we cast the pointer to char* before.
+		 */
+		void *object = static_cast<void*>(
+		                   (static_cast<char*>(holder.getAddress()) + type.GetOffsetCint())
+		               );
 
 		ObjectProxy *memberProxy = determineProxy(type, scope);
 		if(memberProxy) {
@@ -101,8 +107,13 @@ namespace RootJS {
 	}
 
 	void ObjectProxyFactory::initializeProxyMap() {
-		memberProxyMap["Int_t"] = &NumberProxy::construct;
-		globalProxyMap["Int_t"] = &NumberProxy::construct;
+		//Int_t
+		memberProxyMap["Int_t"] = &NumberProxy::intConstruct;
+		globalProxyMap["Int_t"] = &NumberProxy::intConstruct;
+
+		//Double_t
+		memberProxyMap["Double_t"] = &NumberProxy::doubleConstruct;
+		globalProxyMap["Double_t"] = &NumberProxy::doubleConstruct;
 	}
 
 }

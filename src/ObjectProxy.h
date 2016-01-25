@@ -19,6 +19,7 @@ namespace RootJS {
 class ObjectProxy : public Proxy {
 
 public:
+enum InternalField { Pointer };
   /**
    * Create a new ObjectProxy of a TObject.
    *
