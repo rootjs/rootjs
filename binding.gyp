@@ -17,6 +17,7 @@
 				'src/ObjectProxyFactory.cc',
 				'src/ObjectProxy.cc',
 				'src/PrimitiveProxy.cc',
+				'src/BooleanProxy.cc',
 				'src/NumberProxy.cc',
 				'src/FunctionProxyFactory.cc',
 				'src/CallbackHandler.cc'
