@@ -47,7 +47,7 @@ public:
    *
    * @return the meta information about the type of the encapsulated object.
    */
-  const ProxyMode &getType();
+  const TDataMember &getType();
 /**
  * Return the name of the type
  * @return the name of the type

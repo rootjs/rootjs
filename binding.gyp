@@ -11,7 +11,7 @@
 		{
 			'target_name': 'rootjs',
 			'sources': [
-				'src/FunctionProxy.cc',
+#				'src/FunctionProxy.cc',
 				'src/NodeHandler.cc',
 				'src/Proxy.cc',
 				'src/ObjectProxyFactory.cc',
