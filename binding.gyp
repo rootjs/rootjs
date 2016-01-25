@@ -21,7 +21,8 @@
 				'src/NumberProxy.cc',
 				'src/FunctionProxyFactory.cc',
 				'src/CallbackHandler.cc',
-				'src/NodeApplication.cc'
+				'src/NodeApplication.cc',
+				'src/AsyncRunner.cc'
 			],
 
 			'cflags_cc!'  : [ '-fno-rtti' ],       			# exclude rtti flag
