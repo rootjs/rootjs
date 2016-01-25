@@ -35,7 +35,7 @@ describe('Interface', function() {
 
 		  it('should overflow silently', function() {
 			  var gDebug = root.gDebug;
-			  root.gDebug = 1e+15
+			  root.gDebug = 1e+15;
 			  root.gDebug.should.not.equal(1e+15);
 			  root.gDebug = gDebug;
 		  });
@@ -78,7 +78,7 @@ describe('Interface', function() {
 			  (function(){
 				  root.kInitTreatAsZero = 0;
 			  }).should.throw();
-		  })
+		  });
       });
   });
 });
