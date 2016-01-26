@@ -25,7 +25,7 @@ namespace RootJS
 			return v8::Local<v8::FunctionTemplate>::New(isolate, templates[name]);
 		}
 
-		v8::Local<v8::FunctionTemplate> prototype = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback); // v8::External::New(isolate, classRef)
+		v8::Local<v8::FunctionTemplate> prototype = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, v8::String::NewFromUtf8(isolate, name.c_str()));
 		prototype->SetClassName(v8::String::NewFromUtf8(isolate, name.c_str()));
 
 		v8::Local<v8::ObjectTemplate> instance = prototype->InstanceTemplate();
