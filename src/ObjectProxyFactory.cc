@@ -89,6 +89,10 @@ namespace RootJS {
 		return memberProxy;
 	}
 
+	void ObjectProxyFactory::createObjectProxy(void* address, TClassRef &type, v8::Local<v8::Object> proxy) {
+		// TODO
+	}
+
 	ObjectProxy* ObjectProxyFactory::determineProxy(const TDataMember& type, TClassRef ref) {
 		std::string typeString = std::string(type.GetTypeName());
 		if(memberProxyMap.find(typeString) == memberProxyMap.end()) {
