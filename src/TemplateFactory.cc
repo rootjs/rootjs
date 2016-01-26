@@ -29,7 +29,7 @@ namespace RootJS
 		prototype->SetClassName(v8::String::NewFromUtf8(isolate, name.c_str()));
 
 		v8::Local<v8::ObjectTemplate> instance = prototype->InstanceTemplate();
-		instance->SetInternalFieldCount(1); // each instance stores a reference to TClass using TClassRef
+		instance->SetInternalFieldCount(1); // each instance stores a reference to an ObjectProxy
 
 		// instance->SetNamedPropertyHandler(getGetterCallback(), getSetterCallback());
 		// instance->Set(isolate, "data", v8::Number::New(isolate, 5));
