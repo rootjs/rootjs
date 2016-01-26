@@ -24,4 +24,8 @@ namespace RootJS {
 			proxy->setValue(value);
 		}
 	}
+
+	void CallbackHandler::ctorCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+
+	}
 }
