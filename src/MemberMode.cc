@@ -4,7 +4,8 @@ namespace RootJS {
 MemberMode::MemberMode(const TDataMember& type) : ProxyMode(type)  {
 currentObject = &type;
 }
-
+MemberMode::~MemberMode(){
+}
 bool MemberMode::isGlobal() {
 	return false;
 }
