@@ -35,6 +35,9 @@ namespace RootJS
 
 		if(instance->InternalFieldCount() < 1)
 		{
+			isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Unexpected internal field count.")));
+
+			info.GetReturnValue().Set(v8::Undefined(isolate));
 			return;
 		}
 
@@ -51,6 +54,10 @@ namespace RootJS
 			v8::Local<v8::Function> ctor = args.Callee();
 			args.GetReturnValue().Set(ctor->NewInstance(argc, argv));
 			*/
+
+			isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Can not call this constructor as plain function. Use the new operator.")));
+
+			info.GetReturnValue().Set(v8::Undefined(isolate));
 			return;
 		}
 
@@ -58,28 +65,30 @@ namespace RootJS
 		DictFuncPtr_t dictPtr = gClassTable->GetDict(*v8::String::Utf8Value(info.Data()));
 		if(dictPtr == nullptr)
 		{
+			isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Could not retrieve TClass name.")));
+
+			info.GetReturnValue().Set(v8::Undefined(isolate));
 			return;
 		}
 
 		TClass *clazz = dictPtr();
 		if(clazz == nullptr)
 		{
+			isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "TClass pointer is null.")));
+
+			info.GetReturnValue().Set(v8::Undefined(isolate));
 			return;
 		}
 
 		v8::Local<v8::Function> *callback = nullptr;
-		int endIndex = 0;
+		int endIndex = info.Length() - 1;
 
 		if(info.Length() > 0)
 		{
 			if(info[info.Length() - 1]->IsFunction())
 			{
 				*callback = v8::Local<v8::Function>::Cast(info[info.Length() - 1]);
-				endIndex = (info.Length() > 1) ? info.Length() - 1 : 0;
-			}
-			else
-			{
-				endIndex = info.Length() - 1;
+				endIndex--;
 			}
 		}
 
@@ -97,8 +106,11 @@ namespace RootJS
 			{
 				std::string msg("No suitable constructor found for the supplied arguments. Could not create a new: ");
 				msg.append(clazz->GetName());
+				msg.append(".");
+
 				isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, msg.c_str())));
 
+				info.GetReturnValue().Set(v8::Undefined(isolate));
 				return;
 			}
 
@@ -114,6 +126,7 @@ namespace RootJS
 
 		// TODO: AsyncRunner...
 
+		info.GetReturnValue().Set(v8::Undefined(isolate)); // TODO remove this line
 	}
 
 	void CallbackHandler::getterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
@@ -128,19 +141,9 @@ namespace RootJS
 	{
 		v8::Local<v8::Array> args;
 
-		if(info.Length() < 1)
+		if(info.Length() < 1 || beginIndex >= info.Length() || beginIndex < 0 || endIndex >= info.Length() || endIndex < 0)
 		{
 			return v8::Array::New(info.GetIsolate(), 0);
-		}
-
-		if(beginIndex >= info.Length() || beginIndex < 0)
-		{
-			beginIndex = 0;
-		}
-
-		if(endIndex >= info.Length() || endIndex < 0)
-		{
-			endIndex = info.Length() - 1;
 		}
 
 		if(endIndex >= beginIndex)
