@@ -24,7 +24,7 @@ namespace RootJS
 		 * Create a javascript prototype template of the specified ROOT class.
 		 * Generated FunctionTemplate's may be used to create instances of javascript objects encapsulating objects of the specified ROOT class.
 		 *
-		 * @param clazz
+		 * @param classRef
 		 *			the class to generate a template from
 		 *
 		 * @return the generated FunctionTemplate
