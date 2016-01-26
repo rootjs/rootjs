@@ -144,7 +144,7 @@ namespace RootJS
 
 		if(endIndex >= beginIndex)
 		{
-			args = v8::Array::New(info.GetIsolate(), endIndex - beginIndex);
+			args = v8::Array::New(info.GetIsolate(), endIndex - beginIndex + 1);
 
 			for(int i = beginIndex; i <= endIndex; i++)
 			{
@@ -153,7 +153,7 @@ namespace RootJS
 		}
 		else
 		{
-			args = v8::Array::New(info.GetIsolate(), beginIndex - endIndex);
+			args = v8::Array::New(info.GetIsolate(), beginIndex - endIndex + 1);
 
 			for(int i = beginIndex; i <= endIndex; i--)
 			{
