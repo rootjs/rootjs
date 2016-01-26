@@ -98,6 +98,8 @@ namespace RootJS
 				std::string msg("No suitable constructor found for the supplied arguments. Could not create a new: ");
 				msg.append(clazz->GetName());
 				isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, msg.c_str())));
+
+				return;
 			}
 
 			//try
@@ -112,7 +114,6 @@ namespace RootJS
 
 		// TODO: AsyncRunner...
 
-		info.GetReturnValue().Set(instance); // TODO: remove this line
 	}
 
 	void CallbackHandler::getterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
