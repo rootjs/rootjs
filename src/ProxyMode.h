@@ -14,11 +14,14 @@ namespace rootJS {
 	class ProxyMode {
 
 	public:
-		ProxyMode(const TObject &foo);
-		virtual ~ProxyMode();
+		ProxyMode(const TObject &foo) {};
+		virtual ~ProxyMode() {};
 
-		virtual bool isGlobal();
-		virtual Long_t GetOffset();
+		virtual bool isGlobal() { return false; };
+		virtual Long_t GetOffset() { return 0; };
+		virtual bool isConst() = 0;
+		virtual bool isStatic() = 0;
+		virtual const char* getTypeName() = 0;
 
 	protected:
 	private:

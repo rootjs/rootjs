@@ -10,6 +10,11 @@ namespace rootJS {
 		~GlobalMode();
 		virtual bool isGlobal();
 		virtual Long_t GetOffset();
+
+		virtual bool isConst();
+		virtual bool isStatic() { return true; };
+		virtual const char* getTypeName();
+
 		const TGlobal &currentObject;
 	protected:
 	};
