@@ -13,7 +13,7 @@ namespace rootJS {
 
 	}
 
-	NumberProxy::NumberProxy(void * object, const TGlobal & type, TClassRef scope): PrimitiveProxy(object, type, scope) {
+	NumberProxy::NumberProxy(const TGlobal & type, TClassRef scope): PrimitiveProxy(type, scope) {
 
 	}
 
@@ -66,8 +66,8 @@ namespace rootJS {
     }
 
 #define ROOTJS_NUMBER_PROXY_2( datatype , numbertype )                   \
-    ObjectProxy* NumberProxy::datatype##Construct(void *address ,const TGlobal& type, TClassRef scope) {   \
-		NumberProxy* proxy = new NumberProxy(address, type, scope);                              \
+    ObjectProxy* NumberProxy::datatype##Construct(const TGlobal& type, TClassRef scope) {   \
+		NumberProxy* proxy = new NumberProxy(type, scope);                              	\
         proxy->numberType = NumberType::numbertype;                                             \
         return proxy;                                                                               \
     }

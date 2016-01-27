@@ -7,11 +7,7 @@ namespace rootJS {
 
 	ObjectProxy::ObjectProxy(const TDataMember &type, TClassRef scope)
 		: Proxy(nullptr, type, scope) {
-		currentmode = new MemberMode(type);
-	}
-	ObjectProxy::ObjectProxy(void* address, const TGlobal &type, TClassRef scope)
-	: Proxy(address, type, scope) {
-		currentmode = new GlobalMode(type);
+		currentmode = new MemberMode(type, nullptr);
 	}
 
 	ObjectProxy::ObjectProxy(const TGlobal &type, TClassRef scope)
@@ -34,12 +30,16 @@ namespace rootJS {
 	}
 
 	Long_t ObjectProxy::getOffset() {
-		return currentmode->GetOffset();
+		return currentmode->getOffset();
 	}
 
 	void ObjectProxy::set(ObjectProxy &value) {
 		// TODO: validate type equality
 		address = value.getAddress();
+	}
+
+	void *ObjectProxy::getAddress() {
+		return currentmode->getAddress();
 	}
 
 	v8::Local<v8::Value> ObjectProxy::get() {

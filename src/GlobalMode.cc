@@ -1,7 +1,8 @@
 #include "GlobalMode.h"
 
 namespace rootJS {
-	GlobalMode::GlobalMode(const  TGlobal& type) : ProxyMode(type), currentObject(type) {
+	GlobalMode::GlobalMode(const  TGlobal& type)
+		: ProxyMode(type, type.GetAddress()), currentObject(type) {
 
 	}
 	bool GlobalMode::isGlobal() {

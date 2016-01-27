@@ -15,7 +15,7 @@
 
 namespace rootJS {
 	typedef ObjectProxy* (*MemberProxyInitializator)(const TDataMember&, TClassRef);
-	typedef ObjectProxy* (*GlobalProxyInitializator)(void*, const TGlobal&, TClassRef);
+	typedef ObjectProxy* (*GlobalProxyInitializator)(const TGlobal&, TClassRef);
 
 	class ObjectProxyFactory {
 	private:

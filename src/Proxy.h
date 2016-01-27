@@ -32,7 +32,7 @@ namespace rootJS {
 		 * get the address of the encapsulated object
 		 * @return the encapsulated object's address
 		 */
-		void* getAddress();
+		virtual void* getAddress();
 
 		/**
 		 * get meta information about the encapsulated objcet's scope
