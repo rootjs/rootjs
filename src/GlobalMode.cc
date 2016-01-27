@@ -15,4 +15,5 @@ RootJS::ProxyMode::~ProxyMode() {
 }
 
 Long_t RootJS::ProxyMode::GetOffset() {
+	return 0;
 }
