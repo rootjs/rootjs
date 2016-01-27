@@ -35,7 +35,7 @@ namespace rootJS {
 
 
 		//TODO remove
-		ObjectProxy(void* address,const TGlobal g, TClassRef r);
+		ObjectProxy(void* address,const TGlobal &g, TClassRef r);
 
 		/**
 		 * Create a new ObjectProxy of a TGlobal.
@@ -59,7 +59,7 @@ namespace rootJS {
 		/*
 		*Returns an object encapsulating meta
 		*/
-		ProxyMode &getTypeInfo();
+		ProxyMode *getTypeInfo();
 
 		/*
 		*get the offset
@@ -115,7 +115,7 @@ namespace rootJS {
 	protected:
 		v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
 	private:
-		ProxyMode currentmode;
+		ProxyMode *currentmode;
 	};
 }
 

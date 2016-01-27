@@ -14,4 +14,16 @@ namespace rootJS {
 	Long_t GlobalMode::GetOffset() {
 		return 0;
 	}
+
+	bool GlobalMode::isConst() {
+		if(currentObject.Property() & kIsConstant) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	const char* GlobalMode::getTypeName() {
+		return currentObject.GetTypeName();
+	}
 }

@@ -74,7 +74,7 @@ describe('Interface', function() {
               root.kInitTreatAsZero.should.equal(1e-12);
           });
 
-		  xit('should fail to write to const globals', function() {
+		  it('should fail to write to const globals', function() {
 			  (function(){
 				  root.kInitTreatAsZero = 0;
 			  }).should.throw();

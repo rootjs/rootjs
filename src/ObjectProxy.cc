@@ -6,30 +6,35 @@
 namespace rootJS {
 
 	ObjectProxy::ObjectProxy(const TDataMember &type, TClassRef scope)
-		: Proxy(nullptr, type, scope) , currentmode(type) {
-		currentmode = MemberMode(type);
+		: Proxy(nullptr, type, scope) {
+		currentmode = new MemberMode(type);
 	}
-	ObjectProxy::ObjectProxy(void* address,const TGlobal g, TClassRef r): Proxy(address, type, scope),currentmode(type) {}
+	ObjectProxy::ObjectProxy(void* address, const TGlobal &type, TClassRef scope)
+	: Proxy(address, type, scope) {
+		currentmode = new GlobalMode(type);
+	}
 
 	ObjectProxy::ObjectProxy(const TGlobal &type, TClassRef scope)
-		: Proxy(nullptr, type, scope),currentmode(type) {
-		currentmode = GlobalMode(type);
+		: Proxy(nullptr, type, scope) {
+		currentmode = new GlobalMode(type);
 
 	}
 
-	ObjectProxy::~ObjectProxy() {}
+	ObjectProxy::~ObjectProxy() {
+		delete currentmode;
+		currentmode = nullptr;
+	}
 
 	const char* ObjectProxy::getTypeName() {
-		// TODO implement (if this is even necessary)
-		return nullptr;
+		return currentmode->getTypeName();
 	}
 
-	ProxyMode &ObjectProxy::getTypeInfo() {
+	ProxyMode *ObjectProxy::getTypeInfo() {
 		return currentmode;
 	}
 
 	Long_t ObjectProxy::getOffset() {
-		return currentmode.GetOffset();
+		return currentmode->GetOffset();
 	}
 
 	void ObjectProxy::set(ObjectProxy &value) {
@@ -59,15 +64,15 @@ namespace rootJS {
 	}
 
 	bool ObjectProxy::isGlobal() {
-		return currentmode.isGlobal();
+		return currentmode->isGlobal();
 	}
 
 	bool ObjectProxy::isConst() {
-		return false; // TODO
+		return currentmode->isConst();
 	}
 
 	bool ObjectProxy::isStatic() {
-		return false; // TODO
+		return currentmode->isStatic(); // TODO
 	}
 
 	void ObjectProxy::setValue(v8::Local<v8::Value> value) {
