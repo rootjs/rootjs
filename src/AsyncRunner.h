@@ -8,7 +8,7 @@
 namespace rootJS {
 
 	class AsyncRunner {
-	typedef void (*AsyncFunction)(AsyncRunner* runner, void* param);
+		typedef void (*AsyncFunction)(AsyncRunner* runner, void* param);
 	private:
 		AsyncFunction *func;
 		void *param;

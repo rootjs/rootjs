@@ -15,7 +15,7 @@ namespace rootJS
 	public:
 		/**
 		 * Check if the type is a boolean type.
-		 * 
+		 *
 		 * @param type the type to be checked
 		 * @return if the type is a boolean type
 		 */

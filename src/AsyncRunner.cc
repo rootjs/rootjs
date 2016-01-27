@@ -4,7 +4,7 @@ namespace rootJS {
 	AsyncRunner::AsyncRunner(AsyncFunction *func, void *param, v8::Local<v8::Function> callback):
 		func(func), param(param), callback(callback) {
 
-		}
+	}
 
 	void AsyncRunner::run() {
 		uv_work_t *req = new uv_work_t();
