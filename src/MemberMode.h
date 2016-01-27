@@ -16,7 +16,12 @@ namespace rootJS {
 
 		virtual bool isGlobal();
 		virtual Long_t GetOffset();
-		const TDataMember * currentObject;
+
+		virtual bool isConst();
+		virtual bool isStatic();
+		virtual const char* getTypeName();
+
+		const TDataMember &currentObject;
 	protected:
 	};
 }
