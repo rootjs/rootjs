@@ -2,12 +2,15 @@
 #define SRC_OBJECTPROXY_H_
 
 #include "Proxy.h"
-
+#include "ProxyMode.h"
+#include "MemberMode.h"
+#include "GlobalMode.h"
 #include <v8.h>
 
 #include <TDataMember.h>
 #include <TClassRef.h>
 #include <TGlobal.h>
+#include <RConfig.h>
 
 namespace rootJS {
 
@@ -15,13 +18,12 @@ namespace rootJS {
 	 *The ObjectProxy class is used to represent ROOT objects.
 	 *It differentiates between primitive and non-primitive object types.
 	 */
-	class ObjectProxy: public Proxy {
+	class ObjectProxy : public Proxy {
 
 	public:
 		enum InternalField { Pointer };
-
 		/**
-		 * Create a new ObjectProxy.
+		 * Create a new ObjectProxy of a TObject.
 		 *
 		 * @param type
 		 * 			the type of the encapsulated object
@@ -29,13 +31,14 @@ namespace rootJS {
 		 * @param scope
 		 *			the scope of the encapsulated object
 		 */
-		ObjectProxy(const TDataMember& type, TClassRef scope);
+		ObjectProxy(const TDataMember &type, TClassRef scope);
+
+
+		//TODO remove
+		ObjectProxy(void* address,const TGlobal g, TClassRef r);
 
 		/**
-		 * Creates a new ObjectProxy.
-		 *
-		 * @param object
-		 *			the memory address of the encapsulated object
+		 * Create a new ObjectProxy of a TGlobal.
 		 *
 		 * @param type
 		 * 			the type of the encapsulated object
@@ -43,16 +46,26 @@ namespace rootJS {
 		 * @param scope
 		 *			the scope of the encapsulated object
 		 */
-		ObjectProxy(void *object, const TGlobal& type, TClassRef scope);
+		ObjectProxy(const TGlobal &type, TClassRef scope);
 
 		virtual ~ObjectProxy();
 
 		/**
-		 * Return the meta information about the type of the encapsulated object.
-		 *
-		 * @return the meta information about the type of the encapsulated object.
+		 * Return the name of the type
+		 * @return the name of the type
 		 */
-		const TDataMember& getType();
+		const char* getTypeName();
+
+		/*
+		*Returns an object encapsulating meta
+		*/
+		ProxyMode &getTypeInfo();
+
+		/*
+		*get the offset
+		@return the offset
+		*/
+		Long_t getOffset();
 
 		/**
 		 * Assign the specified value to this ObjectProxy.
@@ -60,14 +73,7 @@ namespace rootJS {
 		 * @param value
 		 * 			the value to assign to this ObjectProxy
 		 */
-		virtual void set(ObjectProxy& value);
-
-		/**
-		 * Setter for v8 values, writes new data to memory
-		 * @param value
-		 * 			the value set via node, to be stored at the memory address
-		 */
-		virtual void setValue(v8::Local<v8::Value> value);
+		virtual void set(ObjectProxy &value);
 
 		/**
 		 * Return the encapsulating javascript value.
@@ -92,6 +98,8 @@ namespace rootJS {
 		 */
 		virtual v8::Local<v8::Object> getProxy();
 
+		virtual void setValue(v8::Local<v8::Value> value);
+
 		/**
 		 * Check if this proxy encapsulates a primitive type.
 		 *
@@ -106,9 +114,9 @@ namespace rootJS {
 
 	protected:
 		v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
-
+	private:
+		ProxyMode currentmode;
 	};
-
 }
 
 #endif /* SRC_OBJECTPROXY_H_ */

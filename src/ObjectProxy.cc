@@ -3,63 +3,74 @@
 #include <TObject.h>
 #include <TGlobal.h>
 
-rootJS::ObjectProxy::ObjectProxy(const TDataMember& type, TClassRef scope) :
-	Proxy(nullptr, type, scope) {
+namespace rootJS {
 
-}
+	ObjectProxy::ObjectProxy(const TDataMember &type, TClassRef scope)
+		: Proxy(nullptr, type, scope) , currentmode(type) {
+		currentmode = MemberMode(type);
+	}
+	ObjectProxy::ObjectProxy(void* address,const TGlobal g, TClassRef r): Proxy(address, type, scope),currentmode(type) {}
 
-rootJS::ObjectProxy::ObjectProxy(void *object, const TGlobal & type,
-                                 TClassRef scope) :
-	Proxy(object, type, scope) {
+	ObjectProxy::ObjectProxy(const TGlobal &type, TClassRef scope)
+		: Proxy(nullptr, type, scope),currentmode(type) {
+		currentmode = GlobalMode(type);
 
-}
+	}
 
-rootJS::ObjectProxy::~ObjectProxy() {
+	ObjectProxy::~ObjectProxy() {}
 
-}
+	const char* ObjectProxy::getTypeName() {
+		// TODO implement (if this is even necessary)
+		return nullptr;
+	}
 
-const TDataMember& rootJS::ObjectProxy::getType() {
-	return dynamic_cast<const TDataMember&>(type);
-}
+	ProxyMode &ObjectProxy::getTypeInfo() {
+		return currentmode;
+	}
 
-void rootJS::ObjectProxy::set(ObjectProxy& value) {
-	// TODO: validate type equality
-	address = value.getAddress();
-}
+	Long_t ObjectProxy::getOffset() {
+		return currentmode.GetOffset();
+	}
 
-v8::Local<v8::Value> rootJS::ObjectProxy::get() {
-	// objects just return their holder - i.e the proxy member
-	return getProxy();
-}
+	void ObjectProxy::set(ObjectProxy &value) {
+		// TODO: validate type equality
+		address = value.getAddress();
+	}
 
-void rootJS::ObjectProxy::setProxy(v8::Local<v8::Object> proxy) {
-	this->proxy.Reset(v8::Isolate::GetCurrent(), proxy);
-}
+	v8::Local<v8::Value> ObjectProxy::get() {
+		// objects just return their holder - i.e the proxy member
+		return getProxy();
+	}
 
-v8::Local<v8::Object> rootJS::ObjectProxy::getProxy() {
-	return v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(), proxy);
-}
+	void ObjectProxy::setProxy(v8::Local<v8::Object> proxy) {
+		this->proxy.Reset(v8::Isolate::GetCurrent(), proxy);
+	}
 
-bool rootJS::ObjectProxy::isPrimitive() {
-	return false;
-}
+	v8::Local<v8::Object> ObjectProxy::getProxy() {
+		return v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(), proxy);
+	}
 
-bool rootJS::ObjectProxy::isTemplate() {
-	return false; //TODO
-}
+	bool ObjectProxy::isPrimitive() {
+		return false;
+	}
 
-bool rootJS::ObjectProxy::isGlobal() {
-	return false; //TODO
-}
+	bool ObjectProxy::isTemplate() {
+		return false; // TODO
+	}
 
-bool rootJS::ObjectProxy::isConst() {
-	return false; //TODO
-}
+	bool ObjectProxy::isGlobal() {
+		return currentmode.isGlobal();
+	}
 
-bool rootJS::ObjectProxy::isStatic() {
-	return false; //TODO
-}
+	bool ObjectProxy::isConst() {
+		return false; // TODO
+	}
 
-void rootJS::ObjectProxy::setValue(v8::Local<v8::Value> value) {
-	return;
+	bool ObjectProxy::isStatic() {
+		return false; // TODO
+	}
+
+	void ObjectProxy::setValue(v8::Local<v8::Value> value) {
+		return;
+	}
 }
