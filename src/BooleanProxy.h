@@ -3,6 +3,8 @@
 
 #include "PrimitiveProxy.h"
 
+#include <string>
+
 #include <TClassRef.h>
 #include <TDataMember.h>
 
@@ -11,6 +13,14 @@ namespace rootJS
 	class BooleanProxy: public PrimitiveProxy
 	{
 	public:
+		/**
+		 * Check if the type is a boolean type.
+		 * 
+		 * @param type the type to be checked
+		 * @return if the type is a boolean type
+		 */
+		static bool isBoolean(std::string type);
+
 		/**
 		 * Create a new BooleanProxy.
 		 *

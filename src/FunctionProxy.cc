@@ -1,3 +1,4 @@
+#include "BooleanProxy.h"
 #include "FunctionProxy.h"
 #include "ObjectProxy.h"
 
@@ -89,7 +90,7 @@ namespace rootJS {
 					if (args[i]->IsBoolean())
 					{
 						// TODO proper type validation
-						if (strcmp(expectedArg->GetTypeName(), "bool") == 0)
+						if (BooleanProxy::isBoolean(expectedArg->GetTypeName()))
 						{
 							v8::Boolean *booleanArg = static_cast<v8::Boolean*>(*args[i]);
 							bool value = booleanArg->Value();
