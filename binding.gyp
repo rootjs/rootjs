@@ -22,6 +22,7 @@
 				'src/FunctionProxyFactory.cc',
 				'src/CallbackHandler.cc',
 				'src/NodeApplication.cc',
+				'src/AsyncRunner.cc',
 				'src/CallbackHandler.cc',
 				'src/TemplateFactory.cc'
 			],
