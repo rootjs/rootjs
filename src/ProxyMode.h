@@ -7,22 +7,22 @@
 #include <RConfig.h>
 namespace rootJS {
 
-/**
- * This class encapsulates the differences in behaviour between TMember and
- * TGlobal
- * */
-class ProxyMode {
+	/**
+	 * This class encapsulates the differences in behaviour between TMember and
+	 * TGlobal
+	 * */
+	class ProxyMode {
 
-public:
-  ProxyMode(const TObject &foo);
-  virtual ~ProxyMode();
+	public:
+		ProxyMode(const TObject &foo);
+		virtual ~ProxyMode();
 
-  virtual bool isGlobal();
-  virtual Long_t GetOffset();
+		virtual bool isGlobal();
+		virtual Long_t GetOffset();
 
-protected:
-private:
-};
+	protected:
+	private:
+	};
 }
 
 #endif /* SRC_PROXYMODE_H_ */

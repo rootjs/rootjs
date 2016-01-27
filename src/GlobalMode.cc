@@ -1,15 +1,17 @@
 #include "GlobalMode.h"
 
 namespace rootJS {
-GlobalMode::GlobalMode(const  TGlobal& type) : ProxyMode(type), currentObject(type){
+	GlobalMode::GlobalMode(const  TGlobal& type) : ProxyMode(type), currentObject(type) {
 
-}
-bool GlobalMode::isGlobal() { return true; }
+	}
+	bool GlobalMode::isGlobal() {
+		return true;
+	}
 
-GlobalMode::~GlobalMode() {
-}
+	GlobalMode::~GlobalMode() {
+	}
 
-Long_t GlobalMode::GetOffset() {
-	return 0;
-}
+	Long_t GlobalMode::GetOffset() {
+		return 0;
+	}
 }

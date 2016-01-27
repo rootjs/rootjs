@@ -9,15 +9,15 @@
 
 namespace rootJS {
 
-class MemberMode : public ProxyMode {
-public:
-  MemberMode(const TDataMember &);
-  ~MemberMode();
+	class MemberMode : public ProxyMode {
+	public:
+		MemberMode(const TDataMember &);
+		~MemberMode();
 
-  virtual bool isGlobal();
-  virtual Long_t GetOffset();
-  const TDataMember * currentObject;
-protected:
-};
+		virtual bool isGlobal();
+		virtual Long_t GetOffset();
+		const TDataMember * currentObject;
+	protected:
+	};
 }
 #endif

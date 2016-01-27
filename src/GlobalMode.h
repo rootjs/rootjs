@@ -4,15 +4,15 @@
 
 namespace rootJS {
 
-class GlobalMode: public ProxyMode {
-public:
-  GlobalMode(const TGlobal & type);
-  ~GlobalMode();
-  virtual bool isGlobal();
-  virtual Long_t GetOffset();
-  const TGlobal &currentObject;
-protected:
-};
+	class GlobalMode: public ProxyMode {
+	public:
+		GlobalMode(const TGlobal & type);
+		~GlobalMode();
+		virtual bool isGlobal();
+		virtual Long_t GetOffset();
+		const TGlobal &currentObject;
+	protected:
+	};
 }
 
 #endif /* SRC_GLOBALMODE_H_ */
