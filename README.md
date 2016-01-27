@@ -10,3 +10,7 @@ When you have ROOT6 installed, simply run `npm install`.
 When you installed rootJS, simply run `npm test`.
 
 We currently use a mocha testsuite but might add something to (unit-)test C++ code directly.
+
+#Dependencies
+* You need to have ROOT installed (root-config needs to be available in your PATH)
+* You need libuv, on Ubuntu you can use `sudo apt-get install libuv1-dev` to install it
