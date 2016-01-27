@@ -7,7 +7,7 @@
 #include <TROOT.h>
 #include <string>
 
-namespace RootJS {
+namespace rootJS {
 
 	NodeHandler *NodeHandler::instance;
 	bool NodeHandler::initialized;

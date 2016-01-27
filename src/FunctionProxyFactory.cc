@@ -6,7 +6,7 @@
 #include <TClass.h>
 #include <TClassRef.h>
 
-namespace RootJS {
+namespace rootJS {
 
 	FunctionProxyFactory::FunctionProxyFactory() {
 		//TODO

@@ -14,7 +14,7 @@
 #include "TClassRef.h"
 #include "TClassTable.h"
 
-namespace RootJS
+namespace rootJS
 {
 	class CallbackHandler
 	{

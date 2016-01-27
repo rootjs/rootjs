@@ -14,7 +14,7 @@
 #include <TList.h>
 #include <TMethodArg.h>
 
-namespace RootJS {
+namespace rootJS {
 	std::map<TFunction*, CallFunc_t*> FunctionProxy::functions;
 
 	CallFunc_t* FunctionProxy::getCallFunc(TFunction* method)

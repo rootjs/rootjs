@@ -13,7 +13,7 @@
 #include <TClass.h>
 #include <TMap.h>
 
-namespace RootJS {
+namespace rootJS {
 	typedef ObjectProxy* (*MemberProxyInitializator)(const TDataMember&, TClassRef);
 	typedef ObjectProxy* (*GlobalProxyInitializator)(void*, const TGlobal&, TClassRef);
 

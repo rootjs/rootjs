@@ -1,6 +1,6 @@
 #include "PrimitiveProxy.h"
 
-namespace RootJS {
+namespace rootJS {
 
 	PrimitiveProxy::PrimitiveProxy(const TDataMember& type, TClassRef scope): ObjectProxy(type, scope) {
 

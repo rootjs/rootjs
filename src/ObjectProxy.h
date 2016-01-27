@@ -9,7 +9,7 @@
 #include <TClassRef.h>
 #include <TGlobal.h>
 
-namespace RootJS {
+namespace rootJS {
 
 	/**
 	 *The ObjectProxy class is used to represent ROOT objects.

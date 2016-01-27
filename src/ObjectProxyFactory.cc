@@ -14,7 +14,7 @@
 /* Includes for proxyMap */
 #include "NumberProxy.h"
 
-namespace RootJS {
+namespace rootJS {
 
 	std::map<std::string, MemberProxyInitializator> ObjectProxyFactory::memberProxyMap;
 	std::map<std::string, GlobalProxyInitializator> ObjectProxyFactory::globalProxyMap;

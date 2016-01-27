@@ -4,7 +4,7 @@
 #include "TObject.h"
 #include "TClassRef.h"
 
-namespace RootJS {
+namespace rootJS {
 	/**
 	 * The proxy super class from which both proxies inherit.
 	 * The proxies act as intermediary between Node.js and ROOT.

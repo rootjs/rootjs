@@ -13,7 +13,7 @@
 
 class CallbackHandler;
 
-namespace RootJS
+namespace rootJS
 {
 	class TemplateFactory
 	{

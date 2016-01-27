@@ -9,7 +9,7 @@
 
 #include <v8.h>
 
-namespace RootJS {
+namespace rootJS {
 	enum class NumberType {
 	    INT_T, DOUBLE_T, SHORT_T, USHORT_T, UINT_T,  LONG_T, ULONG_T, FLOAT_T,
 	    LONG64_T, ULONG64_T, LONGDOUBLE_T

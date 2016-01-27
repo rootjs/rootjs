@@ -3,7 +3,7 @@
 
 #include "TApplication.h"
 
-namespace RootJS {
+namespace rootJS {
 	class NodeApplication : public TApplication {
 	public:
 		/**

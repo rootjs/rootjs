@@ -2,7 +2,7 @@
 #include <iostream>
 #include <v8.h>
 
-namespace RootJS {
+namespace rootJS {
 
 	NumberProxy::NumberProxy(const TDataMember& type, TClassRef scope): PrimitiveProxy(type, scope) {
 

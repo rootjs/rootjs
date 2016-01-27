@@ -6,7 +6,7 @@
 #include <TClassRef.h>
 #include <TDataMember.h>
 
-namespace RootJS
+namespace rootJS
 {
 	class BooleanProxy: public PrimitiveProxy
 	{

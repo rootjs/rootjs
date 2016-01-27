@@ -9,7 +9,7 @@
 #include <TClass.h>
 #include <TClassRef.h>
 
-namespace RootJS {
+namespace rootJS {
 	class FunctionProxyFactory {
 	private:
 		FunctionProxyFactory(void);

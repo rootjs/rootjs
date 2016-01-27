@@ -1,6 +1,6 @@
 #include "BooleanProxy.h"
 
-namespace RootJS
+namespace rootJS
 {
 	BooleanProxy::BooleanProxy(TDataMember type, TClassRef scope)
 		: PrimitiveProxy(type, scope)

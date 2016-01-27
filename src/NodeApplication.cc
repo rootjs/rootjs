@@ -8,7 +8,7 @@
 #include <TError.h>
 #include <Getline.h>
 
-namespace RootJS {
+namespace rootJS {
 	NodeApplication::NodeApplication(const char* acn, Int_t* argc, char** argv):
 		TApplication( acn, argc, argv ) {
 		// save current interpreter context

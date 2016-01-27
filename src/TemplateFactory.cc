@@ -1,6 +1,6 @@
 #include "TemplateFactory.h"
 
-namespace RootJS
+namespace rootJS
 {
 	// Initialize static class members
 	std::map<std::string, v8::Persistent<v8::FunctionTemplate>> TemplateFactory::templates;

@@ -1,6 +1,6 @@
 #include "CallbackHandler.h"
 
-namespace RootJS
+namespace rootJS
 {
 
 	std::map<std::string, ObjectProxy*> CallbackHandler::globalProxyMap;
