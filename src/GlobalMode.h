@@ -12,7 +12,9 @@ namespace rootJS {
 		virtual Long_t GetOffset();
 
 		virtual bool isConst();
-		virtual bool isStatic() { return true; };
+		virtual bool isStatic() {
+			return true;
+		};
 		virtual const char* getTypeName();
 
 		const TGlobal &currentObject;

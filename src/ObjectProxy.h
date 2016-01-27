@@ -33,10 +33,6 @@ namespace rootJS {
 		 */
 		ObjectProxy(const TDataMember &type, TClassRef scope);
 
-
-		//TODO remove
-		ObjectProxy(void* address,const TGlobal &g, TClassRef r);
-
 		/**
 		 * Create a new ObjectProxy of a TGlobal.
 		 *
@@ -47,6 +43,11 @@ namespace rootJS {
 		 *			the scope of the encapsulated object
 		 */
 		ObjectProxy(const TGlobal &type, TClassRef scope);
+
+		/*
+		 * Gets the address of the encapsulated object
+		 */
+		virtual void* getAddress();
 
 		virtual ~ObjectProxy();
 

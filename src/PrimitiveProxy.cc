@@ -6,7 +6,7 @@ namespace rootJS {
 
 	}
 
-	PrimitiveProxy::PrimitiveProxy(void *object, const TGlobal & type, TClassRef scope): ObjectProxy(object, type, scope) {
+	PrimitiveProxy::PrimitiveProxy(const TGlobal & type, TClassRef scope): ObjectProxy(type, scope) {
 
 	}
 

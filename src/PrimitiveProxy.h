@@ -29,7 +29,7 @@ namespace rootJS {
 		 *      A pointer to the object that should be prxied.
 		 *      We need a pointer to get the correct address.
 		 */
-		PrimitiveProxy(void *object, const TGlobal & type, TClassRef scope);
+		PrimitiveProxy(const TGlobal & type, TClassRef scope);
 
 		/**
 		 * Check if this proxy encapsulates a primitive type.

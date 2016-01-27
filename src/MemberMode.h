@@ -11,11 +11,11 @@ namespace rootJS {
 
 	class MemberMode : public ProxyMode {
 	public:
-		MemberMode(const TDataMember &);
+		MemberMode(const TDataMember &, void* baseAddress);
 		~MemberMode();
 
 		virtual bool isGlobal();
-		virtual Long_t GetOffset();
+		virtual Long_t getOffset();
 
 		virtual bool isConst();
 		virtual bool isStatic();

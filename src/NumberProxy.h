@@ -13,8 +13,8 @@
 
 namespace rootJS {
 	enum class NumberType {
-		INT_T, DOUBLE_T, SHORT_T, USHORT_T, UINT_T,  LONG_T, ULONG_T, FLOAT_T,
-		LONG64_T, ULONG64_T, LONGDOUBLE_T
+	    INT_T, DOUBLE_T, SHORT_T, USHORT_T, UINT_T,  LONG_T, ULONG_T, FLOAT_T,
+	    LONG64_T, ULONG64_T, LONGDOUBLE_T
 	};
 
 
@@ -52,7 +52,7 @@ namespace rootJS {
 		 *      A pointer to the object that should be prxied.
 		 *      We need a pointer to get the correct address.
 		 */
-		NumberProxy(void *object, const TGlobal & type, TClassRef scope);
+		NumberProxy(const TGlobal & type, TClassRef scope);
 
 		/**
 		 * This calls the constructor.
@@ -71,8 +71,8 @@ namespace rootJS {
         static ObjectProxy* datatype##Construct(const TDataMember& type, TClassRef scope);
 
 #define ROOTJS_NUMBER_PROXY_DECLARE_2( datatype )                   \
-        static ObjectProxy* datatype##Construct(void *address ,const TGlobal& type, TClassRef scope);   \
-
+        static ObjectProxy* datatype##Construct(const TGlobal& type, TClassRef scope);   \
+ 
 		ROOTJS_NUMBER_PROXY_DECLARE(int);
 		ROOTJS_NUMBER_PROXY_DECLARE_2(int);
 

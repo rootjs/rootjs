@@ -53,7 +53,7 @@ namespace rootJS {
 
 		TClassRef classRef = TClassRef(klass);
 
-		ObjectProxy *proxy = new ObjectProxy((TObject*)object.GetAddress(), object, classRef);
+		ObjectProxy *proxy = new ObjectProxy(object, classRef);
 		//Set an empty proxy and fill iit in the following loops
 		proxy->setProxy(v8::Object::New(v8::Isolate::GetCurrent()));
 
@@ -107,7 +107,7 @@ namespace rootJS {
 		if(globalProxyMap.find(typeString) == globalProxyMap.end()) {
 			return nullptr;
 		}
-		return globalProxyMap[typeString](address, type, ref);
+		return globalProxyMap[typeString](type, ref);
 	}
 
 	void ObjectProxyFactory::initializeProxyMap() {
