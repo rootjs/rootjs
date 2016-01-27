@@ -72,6 +72,8 @@ node_modules
 # Optional REPL history
 .node_repl_history
 
+### EDITORS ###
+
 # eclipse settings
 /.project
 /.settings/
@@ -80,3 +82,6 @@ node_modules
 #codeblocks settings
 *.cbp
 *.layout
+
+# vim
+*.swp
