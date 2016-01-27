@@ -19,7 +19,7 @@ namespace rootJS {
 
 	ObjectProxy::~ObjectProxy() {}
 
-	char *const ObjectProxy::getTypeName() {
+	const char* ObjectProxy::getTypeName() {
 		// TODO implement (if this is even necessary)
 		return nullptr;
 	}

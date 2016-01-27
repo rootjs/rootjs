@@ -54,7 +54,7 @@ namespace rootJS {
 		 * Return the name of the type
 		 * @return the name of the type
 		 */
-		char *const getTypeName();
+		const char* getTypeName();
 
 		/*
 		*Returns an object encapsulating meta
