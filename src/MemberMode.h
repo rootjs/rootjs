@@ -7,7 +7,7 @@
 #include <TClassRef.h>
 #include <TGlobal.h>
 
-namespace RootJS {
+namespace rootJS {
 
 class MemberMode : public ProxyMode {
 public:

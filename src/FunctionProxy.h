@@ -13,7 +13,7 @@
 #include <TClassRef.h>
 #include <TFunction.h>
 
-namespace RootJS {
+namespace rootJS {
 	/**
 	 * Represents a ROOT callable and provides functionality to invoke those callables.
 	 * Also acts as a static cache for already created FunctionProxy objects.

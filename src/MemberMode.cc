@@ -1,5 +1,5 @@
 #include "MemberMode.h"
-namespace RootJS {
+namespace rootJS {
 
 MemberMode::MemberMode(const TDataMember& type) : ProxyMode(type)  {
 currentObject = &type;

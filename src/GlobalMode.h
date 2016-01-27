@@ -2,7 +2,7 @@
 #define SRC_GLOBALMODE_H_
 #include "ProxyMode.h"
 
-namespace RootJS {
+namespace rootJS {
 
 class GlobalMode: public ProxyMode {
 public:

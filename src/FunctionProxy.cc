@@ -11,8 +11,10 @@
 #include <TCollection.h>
 #include <TFunction.h>
 #include <TIterator.h>
+#include <TList.h>
+#include <TMethodArg.h>
 
-namespace RootJS {
+namespace rootJS {
 	std::map<TFunction*, CallFunc_t*> FunctionProxy::functions;
 
 	CallFunc_t* FunctionProxy::getCallFunc(TFunction* method)
@@ -25,6 +27,7 @@ namespace RootJS {
 		else
 		{
 			// TODO handle TFunction not in functions cache
+			return nullptr;
 		}
 	}
 
@@ -55,80 +58,94 @@ namespace RootJS {
 
 	std::vector<ObjectProxy*> FunctionProxy::validateArgs(v8::FunctionCallbackInfo<v8::Value> args)
 	{
-		std::vector<ObjectProxy*> proxiedArgs;
-		//TFunction method = this->getType();
+		std::vector<ObjectProxy*> validatedArgs;
 
-		v8::Object *objectArg;
-		void *arg;
-		for (int i = 0; i < args.Length(); i++)
+		TFunction method = this->getType();
+		if (method.GetNargs() <= args.Length() && args.Length() <= method.GetNargsOpt())
 		{
-			// Check if the argument is a JavaScript object
-			if (args[i]->IsObject())
+			TList *expectedArgs = method.GetListOfMethodArgs();
+			for (int i = 0; i < args.Length(); i++)
 			{
-				objectArg = static_cast<v8::Object*>(*args[i]);
-				if (objectArg->InternalFieldCount() > 0)
+				TMethodArg *expectedArg = static_cast<TMethodArg*>(expectedArgs->At(i));
+
+				// Check if the argument is a JavaScript object
+				if (args[i]->IsObject())
 				{
-					arg = objectArg->GetAlignedPointerFromInternalField(ObjectProxy::InternalField::Pointer);
-					proxiedArgs.push_back(static_cast<ObjectProxy*>(arg));
+					v8::Object *objectArg = static_cast<v8::Object*>(*args[i]);
+					if (objectArg->InternalFieldCount() > 0)
+					{
+						// TODO validate arg
+						void *arg = objectArg->GetAlignedPointerFromInternalField(ObjectProxy::InternalField::Pointer);
+						validatedArgs.push_back(static_cast<ObjectProxy*>(arg));
+					}
+					else
+					{
+						// TODO throw JS internalFieldNotFound exception
+					}
 				}
 				else
 				{
-					// TODO throw JS exception
-				}
-			}
-			else
-			{
-				// Else, it must be a JavaScript primitive
-				if (args[i]->IsBoolean())
-				{
-					// TODO
-				}
-				else if (args[i]->IsNumber())
-				{
-					// TODO
-				}
-				else if (args[i]->IsString())
-				{
-					// TODO
-				}
-				else
-				{
-					// TODO throw JS exception
+					// Else, it must be a JavaScript primitive
+					if (args[i]->IsBoolean())
+					{
+						// TODO proper type validation
+						if (strcmp(expectedArg->GetTypeName(), "bool") == 0)
+						{
+							v8::Boolean *booleanArg = static_cast<v8::Boolean*>(*args[i]);
+							bool value = booleanArg->Value();
+							// TODO push_back ObjectProxy*
+						}
+						else
+						{
+							// TODO throw JS invalidArgument exception
+						}
+					}
+					else if (args[i]->IsNumber())
+					{
+						// TODO
+					}
+					else if (args[i]->IsString())
+					{
+						// TODO
+					}
+					else
+					{
+						// TODO
+					}
 				}
 			}
 		}
+		else
+		{
+			// TODO throw JS invalidArgCount exception
+		}
 
-		return proxiedArgs;
+		return validatedArgs;
 	}
 
-	ObjectProxy FunctionProxy::call(ObjectProxy args[]) const
+	// TODO
+	/*ObjectProxy FunctionProxy::call(ObjectProxy args[]) const
 	{
-		// TODO
 	}
 
 	bool FunctionProxy::processCall(TFunction* method, void* args, void* self, void* result)
 	{
-		// TODO
 	}
 
 	void* FunctionProxy::callConstructor(TFunction* method, TClassRef type, void* args)
 	{
-		// TODO
 	}
 
 	void FunctionProxy::callDestructor(TClassRef type, void* self)
 	{
-		// TODO
 	}
 
 	void* FunctionProxy::callObject(TFunction* method, void* self, void* args, TClassRef resType)
 	{
-		// TODO
 	}
 
 	template <typename T>
 	T FunctionProxy::callPrimitive(TFunction* method, void* self, void* args)
 	{
-		// TODO
-	}
+	}*/
 }

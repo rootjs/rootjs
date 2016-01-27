@@ -5,7 +5,7 @@
 #include <TClassRef.h>
 #include <TGlobal.h>
 #include <RConfig.h>
-namespace RootJS {
+namespace rootJS {
 
 /**
  * This class encapsulates the differences in behaviour between TMember and

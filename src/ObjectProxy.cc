@@ -3,7 +3,7 @@
 #include <TObject.h>
 #include <TGlobal.h>
 
-namespace RootJS {
+namespace rootJS {
 
 ObjectProxy::ObjectProxy(const TDataMember &type, TClassRef scope)
     : Proxy(nullptr, type, scope) , currentmode(type){

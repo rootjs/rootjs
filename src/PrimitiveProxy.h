@@ -6,7 +6,7 @@
 #include <TDataMember.h>
 #include <TClassRef.h>
 
-namespace RootJS {
+namespace rootJS {
 	class PrimitiveProxy: public ObjectProxy {
 	public:
 		/**

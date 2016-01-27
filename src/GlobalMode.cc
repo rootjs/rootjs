@@ -1,6 +1,6 @@
 #include "GlobalMode.h"
 
-namespace RootJS {
+namespace rootJS {
 GlobalMode::GlobalMode(const  TGlobal& type) : ProxyMode(type), currentObject(type){
 
 }

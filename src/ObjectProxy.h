@@ -12,7 +12,7 @@
 #include <TGlobal.h>
 #include <RConfig.h>
 
-namespace RootJS {
+namespace rootJS {
 
 /**
  *The ObjectProxy class is used to represent ROOT objects.

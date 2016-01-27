@@ -1,6 +1,6 @@
 #include "ProxyMode.h"
 
-namespace RootJS {
+namespace rootJS {
 
 ProxyMode::ProxyMode(const TObject & obj) {
 }
@@ -13,6 +13,3 @@ Long_t ProxyMode::GetOffset(){
 	return 0;
 }
 }
-
-
-

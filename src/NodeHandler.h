@@ -5,7 +5,7 @@
 #include <node.h>
 #include <TClassRef.h>
 
-namespace RootJS {
+namespace rootJS {
 
 	class NodeHandler {
 	private:

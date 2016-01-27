@@ -4,69 +4,71 @@
 #include "TObject.h"
 #include "TClassRef.h"
 
-namespace RootJS {
-/**
- * The proxy super class from which both proxies inherit.
- * The proxies act as intermediary between Node.js and ROOT.
- */
-class Proxy {
-private:
-protected:
-  Proxy(void *address, const TObject &type, TClassRef &scope);
-  virtual ~Proxy();
+namespace rootJS {
+	/**
+	 * The proxy super class from which both proxies inherit.
+	 * The proxies act as intermediary between Node.js and ROOT.
+	 */
+	class Proxy {
+	private:
 
-  void *address;       /**<adress of encapsulated object in memory*/
-  const TObject &type; /**<type meta information of encapsulated object */
-  TClassRef &scope;    /**<scope meta information of encapsulated object*/
+	protected:
+		Proxy(void* address, const TObject & type, TClassRef & scope);
+		virtual ~Proxy();
 
-public:
-  /**
-   * set the address this proxy points to
-   * @param address the new address
-   */
-  virtual void setAddress(void *address);
+		void* address; /**<adress of encapsulated object in memory*/
+		const TObject& type; /**<type meta information of encapsulated object */
+		TClassRef& scope; /**<scope meta information of encapsulated object*/
 
-  /**
-   * get the address of the encapsulated object
-   * @return the encapsulated object's address
-   */
-  void *getAddress();
+	public:
 
-  /**
-   * get meta information about the encapsulated objcet's scope
-   * @return meta information about the scope
-   */
-  TClassRef &getScope();
+		/**
+		 * set the address this proxy points to
+		 * @param address the new address
+		 */
+		virtual void setAddress(void* address);
 
-  /**
-   * get meta information about the encapsulated objcet's type
-   * @return meta information about the type
-   */
-  virtual const TObject &getType();
+		/**
+		 * get the address of the encapsulated object
+		 * @return the encapsulated object's address
+		 */
+		void* getAddress();
 
-  /**
-   * check if the encapsulated object is a template
-   * @return if the encapsulated object is a template
-   */
-  virtual bool isTemplate() = 0;
+		/**
+		 * get meta information about the encapsulated objcet's scope
+		 * @return meta information about the scope
+		 */
+		TClassRef& getScope();
 
-  /**
-   * check if the encapsulated object is global
-   * @return if the encapsulated object is global
-   */
-  virtual bool isGlobal() = 0;
+		/**
+		 * get meta information about the encapsulated objcet's type
+		 * @return meta information about the type
+		 */
+		virtual const TObject& getType();
 
-  /**
-   * check if the encapsulated object is constant
-   * @return if the encapsulated object is constant
-   */
-  virtual bool isConst() = 0;
+		/**
+		 * check if the encapsulated object is a template
+		 * @return if the encapsulated object is a template
+		 */
+		virtual bool isTemplate() = 0;
 
-  /**
-   * check if the encapsulated object is static
-   * @return if the encapsulated object is static
-   */
-  virtual bool isStatic() = 0;
-};
+		/**
+		 * check if the encapsulated object is global
+		 * @return if the encapsulated object is global
+		 */
+		virtual bool isGlobal() = 0;
+
+		/**
+		 * check if the encapsulated object is constant
+		 * @return if the encapsulated object is constant
+		 */
+		virtual bool isConst() = 0;
+
+		/**
+		 * check if the encapsulated object is static
+		 * @return if the encapsulated object is static
+		 */
+		virtual bool isStatic() = 0;
+	};
 }
 #endif /* PROXY_H_ */
