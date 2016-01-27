@@ -9,7 +9,7 @@ namespace rootJS {
 		: Proxy(nullptr, type, scope) , currentmode(type) {
 		currentmode = MemberMode(type);
 	}
-	ObjectProxy::ObjectProxy(void* adress,const TGlobal g, TClassRef r): Proxy(nullptr, type, scope),currentmode(type) {}
+	ObjectProxy::ObjectProxy(void* address,const TGlobal g, TClassRef r): Proxy(address, type, scope),currentmode(type) {}
 
 	ObjectProxy::ObjectProxy(const TGlobal &type, TClassRef scope)
 		: Proxy(nullptr, type, scope),currentmode(type) {

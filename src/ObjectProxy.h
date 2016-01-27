@@ -35,7 +35,7 @@ namespace rootJS {
 
 
 		//TODO remove
-		ObjectProxy(void* adress,const TGlobal g, TClassRef r);
+		ObjectProxy(void* address,const TGlobal g, TClassRef r);
 
 		/**
 		 * Create a new ObjectProxy of a TGlobal.
