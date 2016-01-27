@@ -28,7 +28,7 @@ namespace rootJS {
 			char** argv = new char*[ argc ];
 			argv[ 0 ] = (char*)"node";
 
-			gApplication = new NodeApplication( "RootJS", &argc, argv );
+			gApplication = new NodeApplication( "rootJS", &argc, argv );
 			delete[] argv;
 
 			return kTRUE;

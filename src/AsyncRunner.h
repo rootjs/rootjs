@@ -5,7 +5,7 @@
 #include <v8.h>
 #include <uv.h>
 
-namespace RootJS {
+namespace rootJS {
 
 	class AsyncRunner {
 	typedef void (*AsyncFunction)(AsyncRunner* runner, void* param);

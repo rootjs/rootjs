@@ -1,6 +1,6 @@
 #include "AsyncRunner.h"
 
-namespace RootJS {
+namespace rootJS {
 	AsyncRunner::AsyncRunner(AsyncFunction *func, void *param, v8::Local<v8::Function> callback):
 		func(func), param(param), callback(callback) {
 

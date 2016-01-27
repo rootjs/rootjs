@@ -3,63 +3,63 @@
 #include <TObject.h>
 #include <TGlobal.h>
 
-RootJS::ObjectProxy::ObjectProxy(const TDataMember& type, TClassRef scope) :
+rootJS::ObjectProxy::ObjectProxy(const TDataMember& type, TClassRef scope) :
 	Proxy(nullptr, type, scope) {
 
 }
 
-RootJS::ObjectProxy::ObjectProxy(void *object, const TGlobal & type,
+rootJS::ObjectProxy::ObjectProxy(void *object, const TGlobal & type,
                                  TClassRef scope) :
 	Proxy(object, type, scope) {
 
 }
 
-RootJS::ObjectProxy::~ObjectProxy() {
+rootJS::ObjectProxy::~ObjectProxy() {
 
 }
 
-const TDataMember& RootJS::ObjectProxy::getType() {
+const TDataMember& rootJS::ObjectProxy::getType() {
 	return dynamic_cast<const TDataMember&>(type);
 }
 
-void RootJS::ObjectProxy::set(ObjectProxy& value) {
+void rootJS::ObjectProxy::set(ObjectProxy& value) {
 	// TODO: validate type equality
 	address = value.getAddress();
 }
 
-v8::Local<v8::Value> RootJS::ObjectProxy::get() {
+v8::Local<v8::Value> rootJS::ObjectProxy::get() {
 	// objects just return their holder - i.e the proxy member
 	return getProxy();
 }
 
-void RootJS::ObjectProxy::setProxy(v8::Local<v8::Object> proxy) {
+void rootJS::ObjectProxy::setProxy(v8::Local<v8::Object> proxy) {
 	this->proxy.Reset(v8::Isolate::GetCurrent(), proxy);
 }
 
-v8::Local<v8::Object> RootJS::ObjectProxy::getProxy() {
+v8::Local<v8::Object> rootJS::ObjectProxy::getProxy() {
 	return v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(), proxy);
 }
 
-bool RootJS::ObjectProxy::isPrimitive() {
+bool rootJS::ObjectProxy::isPrimitive() {
 	return false;
 }
 
-bool RootJS::ObjectProxy::isTemplate() {
+bool rootJS::ObjectProxy::isTemplate() {
 	return false; //TODO
 }
 
-bool RootJS::ObjectProxy::isGlobal() {
+bool rootJS::ObjectProxy::isGlobal() {
 	return false; //TODO
 }
 
-bool RootJS::ObjectProxy::isConst() {
+bool rootJS::ObjectProxy::isConst() {
 	return false; //TODO
 }
 
-bool RootJS::ObjectProxy::isStatic() {
+bool rootJS::ObjectProxy::isStatic() {
 	return false; //TODO
 }
 
-void RootJS::ObjectProxy::setValue(v8::Local<v8::Value> value) {
+void rootJS::ObjectProxy::setValue(v8::Local<v8::Value> value) {
 	return;
 }
