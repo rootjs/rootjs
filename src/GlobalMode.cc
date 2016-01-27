@@ -4,17 +4,12 @@ namespace RootJS {
 GlobalMode::GlobalMode(const  TGlobal& type) : ProxyMode(type), currentObject(type){
 
 }
-bool ProxyMode::isGlobal() { return true; }
+bool GlobalMode::isGlobal() { return true; }
 
-
-
-RootJS::ProxyMode::ProxyMode(const TObject& foo) {
+GlobalMode::~GlobalMode() {
 }
 
-RootJS::ProxyMode::~ProxyMode() {
-}
-
-Long_t RootJS::ProxyMode::GetOffset() {
+Long_t GlobalMode::GetOffset() {
 	return 0;
 }
 }

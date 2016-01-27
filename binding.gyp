@@ -14,6 +14,7 @@
 #				'src/FunctionProxy.cc',
 				'src/NodeHandler.cc',
 				'src/Proxy.cc',		
+'src/ProxyMode.cc',
 'src/GlobalMode.cc',				
 'src/MemberMode.cc',				
 'src/ObjectProxyFactory.cc',
