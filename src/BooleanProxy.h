@@ -10,6 +10,9 @@
 
 namespace rootJS
 {
+	/**
+	 * Proxies a bool.
+	 */
 	class BooleanProxy: public PrimitiveProxy
 	{
 	public:
@@ -27,7 +30,7 @@ namespace rootJS
 		 * @param type the type of the excapsulated object
 		 * @param scope the scope of the encapsulated object
 		 */
-		BooleanProxy(TDataMember type, TClassRef scope);
+		BooleanProxy(const TDataMember& type, TClassRef scope);
 	};
 }
 

@@ -4,6 +4,8 @@
 #include "ObjectProxy.h"
 #include "PrimitiveProxy.h"
 
+#include <string>
+
 #include <TDataMember.h>
 #include <TClassRef.h>
 
@@ -22,6 +24,14 @@ namespace rootJS {
 
 		Double_t castToDouble(void*);
 	public:
+		/**
+		 * Check if the type is a number type.
+		 *
+		 * @param type the type to be checked
+		 * @return if the type is a number type
+		 */
+		static bool isNumber(std::string type);
+
 		/**
 		 * Create a new NumberProxy.
 		 *

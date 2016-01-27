@@ -3,6 +3,11 @@
 #include <v8.h>
 
 namespace rootJS {
+	bool NumberProxy::isNumber(std::string type)
+	{
+		// TODO
+		return false;
+	}
 
 	NumberProxy::NumberProxy(const TDataMember& type, TClassRef scope): PrimitiveProxy(type, scope) {
 

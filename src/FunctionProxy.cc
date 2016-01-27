@@ -1,6 +1,8 @@
 #include "BooleanProxy.h"
 #include "FunctionProxy.h"
+#include "NumberProxy.h"
 #include "ObjectProxy.h"
+#include "StringProxy.h"
 
 #include <map>
 #include <string>
@@ -103,15 +105,29 @@ namespace rootJS {
 					}
 					else if (args[i]->IsNumber())
 					{
-						// TODO
+						if (NumberProxy::isNumber(expectedArg->GetTypeName()))
+						{
+							// TODO
+						}
+						else
+						{
+							// TODO throw JS invalidArgument exception
+						}
 					}
 					else if (args[i]->IsString())
 					{
-						// TODO
+						if (StringProxy::isString(expectedArg->GetTypeName()))
+						{
+							// TODO
+						}
+						else
+						{
+							// TODO throw JS invalidArgument exception
+						}
 					}
 					else
 					{
-						// TODO
+						// TODO throw unknownType exception
 					}
 				}
 			}
