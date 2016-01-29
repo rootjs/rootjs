@@ -1,5 +1,6 @@
 #include "CallbackHandler.h"
-
+#include <iostream>
+#include <TROOT.h>
 namespace rootJS
 {
 
@@ -167,5 +168,18 @@ namespace rootJS
 
 		return args;
 	}
-}
 
+	void CallbackHandler::staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+		if(args.Callee()->InternalFieldCount() == 0) {
+			return globalFunctionCallback(args);
+		}
+		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
+
+		std::cout << *str << std::endl;
+	}
+
+	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
+		FunctionProxyFactory::fromArgs(std::string(*str), TClassRef(), args);
+	}
+}

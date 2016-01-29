@@ -102,6 +102,10 @@ namespace rootJS
 		 */
 		static void setterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
 
+		static void staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
+		static void globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+
 	private:
 		static std::map<std::string, ObjectProxy*> globalProxyMap;
 

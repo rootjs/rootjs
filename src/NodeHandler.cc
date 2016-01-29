@@ -6,6 +6,7 @@
 
 #include <TROOT.h>
 #include <string>
+#include <iostream>
 
 namespace rootJS {
 
@@ -29,10 +30,11 @@ namespace rootJS {
 
 	void NodeHandler::exposeROOT() {
 		exposeGlobals();
+		exposeGlobalFunctions();
 	}
 
 	void NodeHandler::exposeGlobals() {
-		TCollection *globals = gROOT->GetListOfGlobals();
+		TCollection *globals = gROOT->GetListOfGlobals(kTRUE);
 
 		TIter next(globals);
 		while(TObject *global = next()) {
@@ -54,6 +56,15 @@ namespace rootJS {
 				    &CallbackHandler::globalSetterCallback
 				);
 			}
+		}
+	}
+
+	void NodeHandler::exposeGlobalFunctions() {
+		TCollection *globals = gROOT->GetListOfGlobalFunctions(kTRUE);
+
+		TIter next(globals);
+		while(TObject *global = next()) {
+			NODE_SET_METHOD(this->exports, global->GetName(), CallbackHandler::staticFunctionCallback);
 		}
 	}
 }
