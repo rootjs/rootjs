@@ -27,7 +27,7 @@ namespace rootJS {
 		FunctionProxyFactory(void);
 
 	public:
-		static FunctionProxy* createFunctionProxy(TFunction function, TClassRef scope);
+		static FunctionProxy* createFunctionProxy(TFunction *function, TClassRef scope);
 		static FunctionProxy* fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo<v8::Value> args);
 
 		/**

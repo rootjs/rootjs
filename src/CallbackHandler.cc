@@ -180,6 +180,7 @@ namespace rootJS
 
 	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
 		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
-		FunctionProxyFactory::fromArgs(std::string(*str), TClassRef(), args);
+		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(std::string(*str), TClassRef(), args);
+		proxy->call(args);
 	}
 }

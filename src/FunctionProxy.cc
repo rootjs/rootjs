@@ -1,5 +1,5 @@
-#include "BooleanProxy.h"
 #include "FunctionProxy.h"
+#include "BooleanProxy.h"
 #include "NumberProxy.h"
 #include "ObjectProxy.h"
 #include "StringProxy.h"
@@ -11,6 +11,8 @@
 #include <v8.h>
 
 #include <TClassRef.h>
+#include <TInterpreter.h>
+
 #include <TCollection.h>
 #include <TFunction.h>
 #include <TIterator.h>
@@ -140,11 +142,30 @@ namespace rootJS {
 		return validatedArgs;
 	}
 
-	// TODO
-	/*ObjectProxy FunctionProxy::call(ObjectProxy args[]) const
-	{
-	}
 
+	v8::Local<v8::Object> FunctionProxy::call(const v8::FunctionCallbackInfo<v8::Value>& args)
+	{
+		CallFunc_t* callFunc = (CallFunc_t*)address;
+		if(!callFunc) {
+			//TODO Handle this, should not segfault (maybe throw something...)
+		}
+		TInterpreter::CallFuncIFacePtr_t facePtr = gCling->CallFunc_IFacePtr( callFunc );
+		void *result;
+		std::vector<void*> buf( args.Length() );
+
+		switch(facePtr.fKind) {
+		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
+
+			facePtr.fGeneric(nullptr, 1, buf.data(), result);
+			break;
+		default:
+			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
+		}
+
+		return v8::Object::New(v8::Isolate::GetCurrent());
+	}
+	/*
+	// TODO
 	bool FunctionProxy::processCall(TFunction* method, void* args, void* self, void* result)
 	{
 	}

@@ -23,8 +23,8 @@ namespace rootJS {
 		//TODO
 	}
 
-	FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction function, TClassRef scope) {
-		return nullptr; //TODO
+	FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction *function, TClassRef scope) {
+		return new FunctionProxy(FunctionProxy::getCallFunc(function), *function, scope);
 	}
 
 	FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo<v8::Value> args) {
@@ -41,7 +41,7 @@ namespace rootJS {
 				}
 			}
 		} else {
-			//TODO push something to the validFuncs vector
+			validFuncs = FunctionProxy::getMethodsFromName(scope, name);
 		}
 
 		for(TFunction* value: validFuncs) {
@@ -62,10 +62,10 @@ namespace rootJS {
 			}
 		}
 		if(callableFunction) {
-			std::cout << "FUNCTION FOUND!!!" << std::endl;
+			return createFunctionProxy(callableFunction, scope);
 		}
 
-		return nullptr; //TODO
+		return nullptr;
 	}
 
 	void* FunctionProxyFactory::createInstance(TClassRef &type, v8::Local<v8::Array> args) {

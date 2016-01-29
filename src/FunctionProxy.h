@@ -69,7 +69,21 @@ namespace rootJS {
 		 * @param args the arguments for the function call.
 		 * @return the function's return value encasulated in an ObjectProxy
 		 */
-		ObjectProxy call(ObjectProxy args[]) const;
+		v8::Local<v8::Object> call(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+		virtual bool isConst() {
+			return true;
+		};
+		virtual bool isGlobal() {
+			return true; /*TODO*/
+		};
+		virtual bool isStatic() {
+			return true; /*TODO*/
+		};
+		virtual bool isTemplate() {
+			return false; /*TODO*/
+		};
+
 
 	private:
 		static bool processCall(TFunction* method, void* args, void* self, void* result);
