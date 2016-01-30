@@ -3,7 +3,7 @@
 namespace rootJS {
 	GlobalMode::GlobalMode(const  TGlobal& type)
 		: ProxyMode(type, nullptr), currentObject(type) {
-			baseAddress = type.GetAddress();
+		baseAddress = type.GetAddress();
 	}
 	bool GlobalMode::isGlobal() {
 		return true;
