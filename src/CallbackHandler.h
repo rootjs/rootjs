@@ -7,12 +7,8 @@
 
 #include "ObjectProxy.h"
 #include "ObjectProxyFactory.h"
+#include "FunctionProxy.h"
 #include "FunctionProxyFactory.h"
-
-#include "Rtypes.h"
-#include "TClass.h"
-#include "TClassRef.h"
-#include "TClassTable.h"
 
 namespace rootJS
 {
@@ -30,7 +26,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void setGlobalProxy(const std::string &name, ObjectProxy* proxy);
+			static void registerGlobalObject(const std::string &name, ObjectProxy* proxy);
 
 			/**
 			 * 	TODO: fill in description
@@ -60,6 +56,88 @@ namespace rootJS
 			static void globalSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
 
 			/**
+			 * 	TODO: fill in description
+			 *
+			 *	@param name
+			 *
+			 *
+			 *	@param proxy
+			 *
+			 *
+			 */
+			static void registerGlobalFunction(const std::string &name, FunctionProxy* proxy);
+
+			/**
+			 * TODO: fill in description
+			 *
+			 * @param  info
+			 *
+			 *
+			 */
+			static void globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info);
+
+			/**
+			 * 	TODO: fill in description
+			 *
+			 *	@param name
+			 *
+			 *
+			 *	@param proxy
+			 *
+			 *
+			 */
+			static void registerStaticObject(const std::string &name, ObjectProxy* proxy);
+
+
+			/**
+			 * 	TODO: fill in description
+			 *
+			 *	@param property
+			 *
+			 *
+			 *	@param info
+			 *
+			 *
+			 */
+			static void staticGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+
+			/**
+			 * 	TODO: fill in description
+			 *
+			 *	@param property
+			 *
+			 *
+			 *	@param value
+			 *
+			 *
+			 *	@param info
+			 *
+			 *
+			 */
+			static void staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+
+			/**
+			 * 	TODO: fill in description
+			 *
+			 *	@param name
+			 *
+			 *
+			 *	@param proxy
+			 *
+			 *
+			 */
+			static void registerStaticFunction(const std::string &name, FunctionProxy* proxy);
+
+			/**
+			 * 	TODO: fill in description
+			 *
+			 *	@param info
+			 *
+			 *
+			 */
+			static void staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info);
+
+			/**
 			 * 	This callback method may be invoked whenever a JavaScript prototype function of an encapsulated ROOT class was called.
 			 *
 			 * 	Based on the supplied arguments the suitable C++ constructor will be called.
@@ -85,7 +163,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void getterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+			static void memberGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
 
 			/**
 			 * 	TODO: fill in description
@@ -100,10 +178,23 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void setterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+			static void memberSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+
+			/**
+			 * TODO: fill in description
+			 *
+			 * @param  info
+			 *
+			 *
+			 */
+			static void memberFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info);
 
 		private:
-			static std::map<std::string, ObjectProxy*> globalProxyMap;
+			static std::map<std::string, ObjectProxy*> globalObjectMap;
+			static std::map<std::string, ObjectProxy*> staticObjectMap;
+
+			static std::map<std::string, FunctionProxy*> globalFunctionMap;
+			static std::map<std::string, FunctionProxy*> staticFunctionMap;
 
 			static v8::Local<v8::Array> getInfoArgs(int beginIndex, int endIndex, const v8::FunctionCallbackInfo<v8::Value>& info);
 	};
