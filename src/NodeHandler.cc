@@ -12,6 +12,18 @@ namespace rootJS {
 	NodeHandler *NodeHandler::instance;
 	bool NodeHandler::initialized;
 
+void NodeHandler::exposeGlobalFunctions() {
+}
+
+void NodeHandler::exposeMacros() {
+}
+
+void NodeHandler::exposeClasses() {
+}
+
+void NodeHandler::exposeClass(TClassRef klass) {
+}
+
 	void NodeHandler::initialize(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
 		if(!initialized) {
 			NodeApplication::CreateNodeApplication();
@@ -39,7 +51,6 @@ namespace rootJS {
 			/*
 			 * As we iterate through TObjects all these items can be pumped through
 			 * the ObjectProxyFactory
-			 * TODO: Implement something for scalar globals (often constants)
 			 */
 			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(*((TGlobal*)global));
 			if(proxy != nullptr) {
@@ -56,4 +67,13 @@ namespace rootJS {
 			}
 		}
 	}
+
+v8::Local<v8::Object> NodeHandler::getExports(void) {
+}
+
+}
+
+void NODE_MODULE(rootjs, NodeHandler::initialize)
+()
+{
 }
