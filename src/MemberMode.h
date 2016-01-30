@@ -10,19 +10,19 @@
 namespace rootJS {
 
 	class MemberMode : public ProxyMode {
-		public:
-			MemberMode(const TDataMember &, void* baseAddress);
-			~MemberMode();
+	public:
+		MemberMode(const TDataMember &, void* baseAddress);
+		~MemberMode();
 
-			virtual bool isGlobal();
-			virtual Long_t getOffset();
+		virtual bool isGlobal();
+		virtual Long_t getOffset();
 
-			virtual bool isConst();
-			virtual bool isStatic();
-			virtual const char* getTypeName();
+		virtual bool isConst();
+		virtual bool isStatic();
+		virtual const char* getTypeName();
 
-			const TDataMember &currentObject;
-		protected:
+		const TDataMember &currentObject;
+	protected:
 	};
 }
 #endif

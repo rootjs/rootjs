@@ -5,20 +5,20 @@
 namespace rootJS {
 
 	class GlobalMode: public ProxyMode {
-		public:
-			GlobalMode(const TGlobal & type);
-			~GlobalMode();
-			virtual bool isGlobal();
-			virtual Long_t GetOffset();
+	public:
+		GlobalMode(const TGlobal & type);
+		~GlobalMode();
+		virtual bool isGlobal();
+		virtual Long_t GetOffset();
 
-			virtual bool isConst();
-			virtual bool isStatic() {
-				return true;
-			};
-			virtual const char* getTypeName();
+		virtual bool isConst();
+		virtual bool isStatic() {
+			return true;
+		};
+		virtual const char* getTypeName();
 
-			const TGlobal &currentObject;
-		protected:
+		const TGlobal &currentObject;
+	protected:
 	};
 }
 
