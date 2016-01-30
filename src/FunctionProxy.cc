@@ -3,8 +3,10 @@
 #include "NumberProxy.h"
 #include "ObjectProxy.h"
 #include "StringProxy.h"
+#include "Toolbox.h"
 
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -129,7 +131,9 @@ namespace rootJS {
 					}
 					else
 					{
-						// TODO throw JS internalFieldNotFound exception
+						std::ostringstream msgStream;
+						msgStream << "Error while validating arg " << i << ": v8::Object at " << &(*(*args[i])) << " has no internal fields";
+						Toolbox::throwException(msgStream.str());
 					}
 				}
 				else
@@ -146,7 +150,9 @@ namespace rootJS {
 						}
 						else
 						{
-							// TODO throw JS invalidArgument exception
+							std::ostringstream msgStream;
+							msgStream << "Error while validating arg " << i << ": Expected " << expectedArg->GetTypeNormalizedName() << " but got Boolean instead";
+							Toolbox::throwException(msgStream.str());
 						}
 					}
 					else if (args[i]->IsNumber())
@@ -157,7 +163,9 @@ namespace rootJS {
 						}
 						else
 						{
-							// TODO throw JS invalidArgument exception
+							std::ostringstream msgStream;
+							msgStream << "Error while validating arg " << i << ": Expected " << expectedArg->GetTypeNormalizedName() << " but got Number instead";
+							Toolbox::throwException(msgStream.str());
 						}
 					}
 					else if (args[i]->IsString())
@@ -168,19 +176,40 @@ namespace rootJS {
 						}
 						else
 						{
-							// TODO throw JS invalidArgument exception
+							std::ostringstream msgStream;
+							msgStream << "Error while validating arg " << i << ": Expected " << expectedArg->GetTypeNormalizedName() << " but got String instead";
+							Toolbox::throwException(msgStream.str());
 						}
 					}
 					else
 					{
-						// TODO throw unknownType exception
+						std::ostringstream msgStream;
+						msgStream << "Error while validating arg " << i << ": v8::Value at " << &(*(*args[i])) << "is neither a v8::Object nor a v8::Primitive";
+						Toolbox::throwException(msgStream.str());
 					}
 				}
 			}
 		}
 		else
 		{
-			// TODO throw JS invalidArgCount exception
+			std::ostringstream msgStream;
+			msgStream << method.GetName();
+
+			if (method.GetNargs() == method.GetNargsOpt())
+			{
+				msgStream << " takes exactly " << method.GetNargs();
+			}
+			else if (args.Length() < method.GetNargs())
+			{
+				msgStream << " takes at least " << method.GetNargs();
+			}
+			else if (args.Length() > method.GetNargsOpt())
+			{
+				msgStream << " takes at most " << method.GetNargsOpt();
+			}
+
+			msgStream << " arguments (" << args.Length() << " given)";
+			Toolbox::throwException(msgStream.str());
 		}
 
 		return validatedArgs;
@@ -193,7 +222,7 @@ namespace rootJS {
 			return nullptr;
 		}
 		switch(iterator->second) {
-			case mappedTypes::CHAR:
+		case mappedTypes::CHAR:
 			v8::String::Utf8Value string(originalArg->ToString());
 			char *str = (char *) malloc(string.length() + 1);
 			strcpy(str, *string);

@@ -26,25 +26,28 @@
 				'src/NodeApplication.cc',
 				'src/AsyncRunner.cc',
 				'src/CallbackHandler.cc',
-				'src/TemplateFactory.cc'
+				'src/TemplateFactory.cc',
+				'src/Toolbox.cc'
 			],
 
 			'cflags_cc!'  : [ '-fno-rtti' ],       			# exclude rtti flag
 			'cflags_cc'   : [ '<@(root_cflags)' ],
 			'ldflags_cc'  : [ '<@(root_ldflags)' ],
 			'include_dirs': [ '<@(root_incdir)' ], 			# using variable instead of '/usr/include/root'
-			'libraries'   : [ '<@(root_glibs)' ],   			# using variable instead of '/usr/lib/root/libXXX.so'
+			'libraries'   : [ '<@(root_glibs)' ],   		# using variable instead of '/usr/lib/root/libXXX.so'
 
 			"conditions": [
-			  [ 'OS=="mac"', {
-					"xcode_settings": {
-					  "OTHER_CPLUSPLUSFLAGS" : [ "-std=c++11", "-stdlib=libc++" ],
-					  "OTHER_LDFLAGS": [ "-stdlib=libc++" ],
-					  "MACOSX_DEPLOYMENT_TARGET": "10.7",
-					  "GCC_ENABLE_CPP_RTTI": "YES"
-					},
-			  }],
-			],
-    }
-    ]
+				[
+					'OS=="mac"', {
+						"xcode_settings": {
+							"OTHER_CPLUSPLUSFLAGS" : [ "-std=c++11", "-stdlib=libc++" ],
+							"OTHER_LDFLAGS": [ "-stdlib=libc++" ],
+							"MACOSX_DEPLOYMENT_TARGET": "10.7",
+							"GCC_ENABLE_CPP_RTTI": "YES"
+						}
+					}
+				]
+			]
+		}
+	]
 }

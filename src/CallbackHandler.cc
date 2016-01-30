@@ -186,7 +186,7 @@ namespace rootJS
 		if(proxy != nullptr) {
 			proxy->call(args);
 		} else {
-			Toolbox::throwException("The method could not be determined.");
+			Toolbox::throwException(std::string("The method could not be determined."));
 		}
 	}
 }
