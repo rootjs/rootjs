@@ -13,11 +13,13 @@
 #include <TClass.h>
 #include <TMap.h>
 
-namespace rootJS {
+namespace rootJS
+{
 	typedef ObjectProxy* (*MemberProxyInitializator)(const TDataMember&, TClassRef);
 	typedef ObjectProxy* (*GlobalProxyInitializator)(const TGlobal&, TClassRef);
 
-	class ObjectProxyFactory {
+	class ObjectProxyFactory
+	{
 		private:
 			ObjectProxyFactory(void);
 			static const char* getClassNameFromType(const char*);
@@ -42,6 +44,19 @@ namespace rootJS {
 			 *
 			 */
 			static void createObjectProxy(void* address, TClassRef &type, v8::Local<v8::Object> proxy);
+
+			/**
+			 *	Encapsulate the data at the specified address into the specified JavaScript object.
+			 *
+			 *	@param address
+			 *			the address of the data which should be encapsulated
+			 *
+			 *	@param type
+			 *			the type of the data which should be encapsulated
+			 *
+			 */
+			static ObjectProxy* createObjectProxy(void* address, TClassRef &type);
+
 			// static ObjectProxy* createObjectProxy(void* address, TClassRef &type, v8::Local<v8::Object> proxy);
 
 			static ObjectProxy* determineProxy(const TDataMember&, TClassRef);
