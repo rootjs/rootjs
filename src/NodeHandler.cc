@@ -3,6 +3,7 @@
 #include "ObjectProxyFactory.h"
 #include "CallbackHandler.h"
 #include "NodeApplication.h"
+#include "TemplateFactory.h"
 
 #include <TROOT.h>
 #include <string>
@@ -19,14 +20,13 @@ void NodeHandler::exposeMacros() {
 }
 
 void NodeHandler::exposeClasses() {
-	TCollection classes = gROOT->GetListOfClasses();
+	TCollection* classes = gROOT->GetListOfClasses();
 	TIter next(classes);
-	while (TClassRef *clazz = next()) {
-		if (clazz & kIsClass) {
-			exposeClass(*clazz);
+	while (TObject *clazz = next()) {
+		if (((TClass*)clazz)->Property() & kIsClass) {
+			exposeClass(TClassRef((TClass*)clazz));
 		}
 	}
-
 }
 
 void NodeHandler::exposeClass(TClassRef clazz) {
