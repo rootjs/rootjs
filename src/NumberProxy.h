@@ -13,8 +13,8 @@
 
 namespace rootJS {
 	enum class NumberType {
-	    INT_T, DOUBLE_T, SHORT_T, USHORT_T, UINT_T,  LONG_T, ULONG_T, FLOAT_T,
-	    LONG64_T, ULONG64_T, LONGDOUBLE_T
+		INT_T, DOUBLE_T, SHORT_T, USHORT_T, UINT_T,  LONG_T, ULONG_T, FLOAT_T,
+		LONG64_T, ULONG64_T, LONGDOUBLE_T
 	};
 
 
@@ -72,7 +72,7 @@ namespace rootJS {
 
 #define ROOTJS_NUMBER_PROXY_DECLARE_2( datatype )                   \
         static ObjectProxy* datatype##Construct(const TGlobal& type, TClassRef scope);   \
- 
+
 		ROOTJS_NUMBER_PROXY_DECLARE(int);
 		ROOTJS_NUMBER_PROXY_DECLARE_2(int);
 
