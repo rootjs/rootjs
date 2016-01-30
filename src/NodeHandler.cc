@@ -23,17 +23,35 @@ void NodeHandler::exposeClasses() {
 	TCollection* classes = gROOT->GetListOfClasses();
 	TIter next(classes);
 	while (TObject *clazz = next()) {
-		if (((TClass*)clazz)->Property() & kIsClass) {
-			exposeClass(TClassRef((TClass*)clazz));
+		if (((TClass*) clazz)->Property() & kIsClass) {
+			std::stack<std::string> stk;
+			//TODO split class name by "::" and put it on a stack
+			this->exports->Set(
+					v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
+							TClassRef((TClass*) clazz)->GetName()),
+					exposeClassRec(stk.top(), stk)->GetFunction());
 		}
 	}
 }
 
-void NodeHandler::exposeClass(TClassRef clazz) {
-
-	v8::Local<v8::FunctionTemplate> tmpl = TemplateFactory::createTemplate(
-			(TClassRef) clazz);
-	this->exports->Set(clazz->GetName(), tmpl->GetFunction());
+v8::Local<v8::FunctionTemplate> NodeHandler::exposeClassRec(std::string name,
+		std::stack<std::string>& stk) {
+	std::string curname = name;
+	stk.pop();
+	DictFuncPtr_t dictFunc = gClassTable->GetDict(name.c_str());
+	//TODO implement map to avoid duplicates and check for double assignments of identical
+	// classes to the same class/name space and avoid them
+	if (dictFunc == nullptr) {
+		//TODO throw exception
+	}
+	if (stk.empty()) {
+		return TemplateFactory::createTemplate(TClassRef(dictFunc()));
+	} else {
+		v8::Local<v8::FunctionTemplate> rectmpl = exposeClassRec(stk.top(), stk);
+		v8::Local<v8::FunctionTemplate> curtmpl = TemplateFactory::createTemplate(TClassRef(dictFunc()));
+		curtmpl->Set(v8::Isolate::GetCurrent(),curname.c_str(),rectmpl);
+		return curtmpl;
+	}
 }
 
 void NodeHandler::initialize(v8::Local<v8::Object> exports,
@@ -83,6 +101,5 @@ void NodeHandler::exposeGlobals() {
 		}
 	}
 }
-
 
 }

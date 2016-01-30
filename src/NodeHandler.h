@@ -1,6 +1,7 @@
 #ifndef NODE_HANDLER_H
 #define NODE_HANDLER_H
 
+#include <stack>
 #include <v8.h>
 #include <node.h>
 #include <TClassRef.h>
@@ -32,6 +33,7 @@ namespace rootJS {
 			void exposeMacros();
 			void exposeClasses();
 			void exposeClass(TClassRef klass);
+			v8::Local<v8::FunctionTemplate> exposeClassRec(std::string,std::stack<std::string>&);
 
 		public:
 			static void initialize(v8::Local<v8::Object>, v8::Local<v8::Object>);
