@@ -6,21 +6,26 @@
 #include <TClass.h>
 #include <TClassRef.h>
 
-namespace rootJS {
+namespace rootJS
+{
 
-	FunctionProxyFactory::FunctionProxyFactory() {
+	FunctionProxyFactory::FunctionProxyFactory()
+	{
 		//TODO
 	}
 
-	FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction function, TClassRef scope) {
+	FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction *function, TClassRef const& scope)
+	{
 		return nullptr; //TODO
 	}
 
-	FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo<v8::Value> args) {
+	FunctionProxy* FunctionProxyFactory::fromArgs(std::string &name, TClassRef const& scope, const v8::FunctionCallbackInfo<v8::Value>& args)
+	{
 		return nullptr; //TODO
 	}
 
-	void* FunctionProxyFactory::createInstance(TClassRef &type, v8::Local<v8::Array> args) {
+	void* FunctionProxyFactory::createInstance(TClassRef &type, v8::Local<v8::Array> args)
+	{
 		// TODO
 		return nullptr;
 	}

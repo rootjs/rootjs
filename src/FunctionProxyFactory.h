@@ -9,13 +9,15 @@
 #include <TClass.h>
 #include <TClassRef.h>
 
-namespace rootJS {
-	class FunctionProxyFactory {
+namespace rootJS
+{
+	class FunctionProxyFactory
+	{
 		private:
 			FunctionProxyFactory(void);
 		public:
-			static FunctionProxy* createFunctionProxy(TFunction function, TClassRef scope);
-			static FunctionProxy* fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo<v8::Value> args);
+			static FunctionProxy* createFunctionProxy(TFunction *function, TClassRef const& scope);
+			static FunctionProxy* fromArgs(std::string &name, TClassRef const& scope, const v8::FunctionCallbackInfo<v8::Value>& args);
 
 			/**
 			 * Create a new instance of the specified type using the constructor suitable to the supplied arguments.
