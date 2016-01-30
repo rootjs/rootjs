@@ -12,32 +12,32 @@ namespace rootJS {
 	 * TGlobal
 	 * */
 	class ProxyMode {
-	protected:
-		void* baseAddress;
-	public:
-		ProxyMode(const TObject &foo, void *baseAddres) {
-			baseAddress = baseAddress;
-		};
-		virtual ~ProxyMode() {};
+		protected:
+			void* baseAddress;
+		public:
+			ProxyMode(const TObject &foo, void *baseAddres) {
+				baseAddress = baseAddress;
+			};
+			virtual ~ProxyMode() {};
 
-		virtual bool isGlobal() {
-			return false;
-		};
-		virtual Long_t getOffset() {
-			return 0;
-		};
-		virtual bool isConst() = 0;
-		virtual bool isStatic() = 0;
-		virtual const char* getTypeName() = 0;
-		virtual void* getBaseAddress() {
-			return baseAddress;
-		};
-		virtual void* getAddress() {
-			return (void*)((char*)getBaseAddress() + getOffset());
-		}
+			virtual bool isGlobal() {
+				return false;
+			};
+			virtual Long_t getOffset() {
+				return 0;
+			};
+			virtual bool isConst() = 0;
+			virtual bool isStatic() = 0;
+			virtual const char* getTypeName() = 0;
+			virtual void* getBaseAddress() {
+				return baseAddress;
+			};
+			virtual void* getAddress() {
+				return (void*)((char*)getBaseAddress() + getOffset());
+			}
 
-	protected:
-	private:
+		protected:
+		private:
 	};
 }
 
