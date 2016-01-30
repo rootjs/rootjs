@@ -15,6 +15,9 @@
 #include <TMethodArg.h>
 
 namespace rootJS {
+	enum class mappedTypes {
+		CHAR
+	};
 	/**
 	 * Represents a ROOT callable and provides functionality to invoke those callables.
 	 * Also acts as a static cache for already created FunctionProxy objects.
@@ -104,6 +107,8 @@ namespace rootJS {
 		static T callPrimitive(TFunction* method, void* self, void* args);
 
 		static std::map<TFunction*, CallFunc_t*> functions;
+		static std::map<std::string, mappedTypes> typeMap;
+		//TODO: feel free to remove this line
 	};
 }
 

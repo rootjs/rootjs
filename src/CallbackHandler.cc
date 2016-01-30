@@ -1,4 +1,6 @@
 #include "CallbackHandler.h"
+#include "Toolbox.h"
+
 #include <iostream>
 #include <TROOT.h>
 namespace rootJS
@@ -181,6 +183,10 @@ namespace rootJS
 	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
 		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(std::string(*str), TClassRef(), args);
-		proxy->call(args);
+		if(proxy != nullptr) {
+			proxy->call(args);
+		} else {
+			Toolbox::throwException("The method could not be determined.");
+		}
 	}
 }

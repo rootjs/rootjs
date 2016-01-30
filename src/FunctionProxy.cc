@@ -21,6 +21,9 @@
 
 namespace rootJS {
 	std::map<TFunction*, CallFunc_t*> FunctionProxy::functions;
+	std::map<std::string, mappedTypes> FunctionProxy::typeMap = {
+		{"char", mappedTypes::CHAR}
+	};
 
 	CallFunc_t* FunctionProxy::getCallFunc(const TClassRef& classRef, TFunction* method)
 	{
@@ -184,10 +187,22 @@ namespace rootJS {
 	}
 
 	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg) {
-		char* res = (char*)malloc(100);
-		std::string str ("Test string...");
-  		str.copy(res,100,0);
-		return res;
+		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(std::string(arg->GetTypeName()));
+		if(iterator == typeMap.end()) {
+			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
+			return nullptr;
+		}
+		switch(iterator->second) {
+			case mappedTypes::CHAR:
+			v8::String::Utf8Value string(originalArg->ToString());
+			char *str = (char *) malloc(string.length() + 1);
+			strcpy(str, *string);
+			return str;
+			break;
+		}
+
+		//TODO: This will explode - huge fireball
+		return nullptr;
 	}
 
 	v8::Local<v8::Object> FunctionProxy::call(const v8::FunctionCallbackInfo<v8::Value>& args)
