@@ -9,8 +9,8 @@
 
 namespace rootJS {
 
-	NodeHandler *NodeHandler::instance;
-	bool NodeHandler::initialized;
+NodeHandler *NodeHandler::instance;
+bool NodeHandler::initialized;
 
 void NodeHandler::exposeGlobalFunctions() {
 }
@@ -19,61 +19,70 @@ void NodeHandler::exposeMacros() {
 }
 
 void NodeHandler::exposeClasses() {
-}
-
-void NodeHandler::exposeClass(TClassRef klass) {
-}
-
-	void NodeHandler::initialize(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
-		if(!initialized) {
-			NodeApplication::CreateNodeApplication();
-			ObjectProxyFactory::initializeProxyMap();
-			instance = new NodeHandler(exports);
-			instance->exposeROOT();
-		} else {
-			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "The NodeHandler can only be initialized once."));
+	TCollection classes = gROOT->GetListOfClasses();
+	TIter next(classes);
+	while (TClassRef *clazz = next()) {
+		if (clazz & kIsClass) {
+			exposeClass(*clazz);
 		}
 	}
 
-	NodeHandler::NodeHandler(v8::Local<v8::Object> exports) {
-		this->exports = exports;
+}
+
+void NodeHandler::exposeClass(TClassRef clazz) {
+
+	v8::Local<v8::FunctionTemplate> tmpl = TemplateFactory::createTemplate(
+			(TClassRef) clazz);
+	this->exports->Set(clazz->GetName(), tmpl->GetFunction());
+}
+
+void NodeHandler::initialize(v8::Local<v8::Object> exports,
+		v8::Local<v8::Object> module) {
+	if (!initialized) {
+		NodeApplication::CreateNodeApplication();
+		ObjectProxyFactory::initializeProxyMap();
+		instance = new NodeHandler(exports);
+		instance->exposeROOT();
+	} else {
+		v8::Isolate::GetCurrent()->ThrowException(
+				v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
+						"The NodeHandler can only be initialised once."));
 	}
+}
 
-	void NodeHandler::exposeROOT() {
-		exposeGlobals();
-	}
+NodeHandler::NodeHandler(v8::Local<v8::Object> exports) {
+	this->exports = exports;
+}
 
-	void NodeHandler::exposeGlobals() {
-		TCollection *globals = gROOT->GetListOfGlobals();
+void NodeHandler::exposeROOT() {
+	exposeGlobals();
+}
 
-		TIter next(globals);
-		while(TObject *global = next()) {
-			/*
-			 * As we iterate through TObjects all these items can be pumped through
-			 * the ObjectProxyFactory
-			 */
-			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(*((TGlobal*)global));
-			if(proxy != nullptr) {
-				v8::Local<v8::String> name = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName());
+void NodeHandler::exposeGlobals() {
+	TCollection *globals = gROOT->GetListOfGlobals();
 
-				CallbackHandler::setGlobalProxy(std::string(global->GetName()), proxy);
+	TIter next(globals);
+	while (TObject *global = next()) {
+		/*
+		 * As we iterate through TObjects all these items can be pumped through
+		 * the ObjectProxyFactory
+		 */
+		ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(
+				*((TGlobal*) global));
+		if (proxy != nullptr) {
+			v8::Local<v8::String> name = v8::String::NewFromUtf8(
+					v8::Isolate::GetCurrent(), global->GetName());
 
-				this->exports->Set(name, proxy->get());
-				this->exports->SetAccessor(
-				    name,
-				    &CallbackHandler::globalGetterCallback,
-				    &CallbackHandler::globalSetterCallback
-				);
-			}
+			CallbackHandler::setGlobalProxy(std::string(global->GetName()),
+					proxy);
+
+			this->exports->Set(name, proxy->get());
+			this->exports->SetAccessor(name,
+					&CallbackHandler::globalGetterCallback,
+					&CallbackHandler::globalSetterCallback);
 		}
 	}
-
-v8::Local<v8::Object> NodeHandler::getExports(void) {
 }
 
-}
 
-void NODE_MODULE(rootjs, NodeHandler::initialize)
-()
-{
 }
