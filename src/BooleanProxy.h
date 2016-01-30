@@ -15,22 +15,22 @@ namespace rootJS
 	 */
 	class BooleanProxy: public PrimitiveProxy
 	{
-	public:
-		/**
-		 * Check if the type is a boolean type.
-		 *
-		 * @param type the type to be checked
-		 * @return if the type is a boolean type
-		 */
-		static bool isBoolean(std::string type);
+		public:
+			/**
+			 * Check if the type is a boolean type.
+			 *
+			 * @param type the type to be checked
+			 * @return if the type is a boolean type
+			 */
+			static bool isBoolean(std::string type);
 
-		/**
-		 * Create a new BooleanProxy.
-		 *
-		 * @param type the type of the excapsulated object
-		 * @param scope the scope of the encapsulated object
-		 */
-		BooleanProxy(const TDataMember& type, TClassRef scope);
+			/**
+			 * Create a new BooleanProxy.
+			 *
+			 * @param type the type of the excapsulated object
+			 * @param scope the scope of the encapsulated object
+			 */
+			BooleanProxy(const TDataMember& type, TClassRef scope);
 	};
 }
 
