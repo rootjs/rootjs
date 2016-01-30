@@ -12,6 +12,7 @@
 
 #include <TClassRef.h>
 #include <TFunction.h>
+#include <TMethodArg.h>
 
 namespace rootJS {
 	/**
@@ -26,7 +27,7 @@ namespace rootJS {
 		 * @param method the callable whose CallFunc object shall be returned
 		 * @return a pointer to the CallFunc object provided by cling
 		 */
-		static CallFunc_t* getCallFunc(TFunction* method);
+		static CallFunc_t* getCallFunc(const TClassRef& klass, TFunction* method);
 
 		/**
 		 * Get all methods of the specified class with the specified name.
@@ -44,7 +45,7 @@ namespace rootJS {
 		 * @param function the function's reflection object
 		 * @param scope the class that the function belongs to
 		 */
-		FunctionProxy(void* address, TFunction function, TClassRef scope);
+		FunctionProxy(void* address, TFunction* function, TClassRef scope);
 
 		/**
 		 * Get the wrapped function's TFunction object which contains the meta data of its corresponding function
@@ -86,6 +87,9 @@ namespace rootJS {
 
 
 	private:
+		TFunction* function;
+		TList* argsReflection;
+
 		static bool processCall(TFunction* method, void* args, void* self, void* result);
 
 		static void* callConstructor(TFunction* method, TClassRef type, void* args);
@@ -93,6 +97,8 @@ namespace rootJS {
 		static void callDestructor(TClassRef type, void* self);
 
 		static void* callObject(TFunction* method, void* self, void* args, TClassRef resType);
+
+		static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg);
 
 		template <typename T>
 		static T callPrimitive(TFunction* method, void* self, void* args);

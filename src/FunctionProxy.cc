@@ -22,7 +22,7 @@
 namespace rootJS {
 	std::map<TFunction*, CallFunc_t*> FunctionProxy::functions;
 
-	CallFunc_t* FunctionProxy::getCallFunc(TFunction* method)
+	CallFunc_t* FunctionProxy::getCallFunc(const TClassRef& classRef, TFunction* method)
 	{
 		std::map<TFunction*, CallFunc_t*>::iterator iterator = FunctionProxy::functions.find(method);
 		if (iterator != FunctionProxy::functions.end())
@@ -31,8 +31,48 @@ namespace rootJS {
 		}
 		else
 		{
-			// TODO handle TFunction not in functions cache
+			CallFunc_t* callf = nullptr;
+			TFunction* func = (TFunction*)method;
+			std::string callString = "";
+
+			ClassInfo_t* gcl;
+			gcl = classRef.GetClass() ? classRef->GetClassInfo() : nullptr;
+			if ( ! gcl ) {
+				gcl = gInterpreter->ClassInfo_Factory();
+			}
+
+			TCollection* method_args = func->GetListOfMethodArgs();
+			TIter iarg( method_args );
+
+			TMethodArg* method_arg = 0;
+			while ((method_arg = (TMethodArg*)iarg.Next())) {
+				std::string fullType = method_arg->GetTypeNormalizedName();
+				if ( callString.empty() )
+					callString = fullType;
+				else
+					callString += ", " + fullType;
+			}
+
+			Long_t offset = 0;
+			callf = gInterpreter->CallFunc_Factory();
+
+			gInterpreter->CallFunc_SetFuncProto(
+			    callf,
+			    gcl,
+			    func ? func->GetName() : classRef->GetName(),
+			    callString.c_str(),
+			    func ? (func->Property() & kIsConstMethod) : kFALSE,
+			    &offset,
+			    ROOT::kExactMatch );
+
+			if ( ! gInterpreter->CallFunc_IsValid( callf ) ) {
+				v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Cling sucks"));
+			} else {
+				return callf;
+			}
+
 			return nullptr;
+
 		}
 	}
 
@@ -50,10 +90,11 @@ namespace rootJS {
 		return methods;
 	}
 
-	FunctionProxy::FunctionProxy(void* address, TFunction function, TClassRef scope)
-		: Proxy(address, function, scope)
+	FunctionProxy::FunctionProxy(void* address, TFunction* function, TClassRef scope)
+		: Proxy(address, *function, scope)
 	{
-		// TODO
+		function = function;
+		argsReflection = function->GetListOfMethodArgs();
 	}
 
 	const TFunction& FunctionProxy::getType()
@@ -142,6 +183,12 @@ namespace rootJS {
 		return validatedArgs;
 	}
 
+	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg) {
+		char* res = (char*)malloc(100);
+		std::string str ("Test string...");
+  		str.copy(res,100,0);
+		return res;
+	}
 
 	v8::Local<v8::Object> FunctionProxy::call(const v8::FunctionCallbackInfo<v8::Value>& args)
 	{
@@ -150,16 +197,25 @@ namespace rootJS {
 			//TODO Handle this, should not segfault (maybe throw something...)
 		}
 		TInterpreter::CallFuncIFacePtr_t facePtr = gCling->CallFunc_IFacePtr( callFunc );
-		void *result;
+		void *self; //TODO?
+		void *result; //TODO?
 		std::vector<void*> buf( args.Length() );
+		for(int i = 0; i < args.Length(); i++) {
+			void* bufEl = bufferParam(((TMethodArg*)argsReflection->At(i)), args[i]);
+			buf[i] = &bufEl;
+		}
 
 		switch(facePtr.fKind) {
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
 
-			facePtr.fGeneric(nullptr, 1, buf.data(), result);
+			facePtr.fGeneric(&self, args.Length(), buf.data(), &result);
 			break;
 		default:
 			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
+		}
+
+		for(int i = 0; i < args.Length(); i++) {
+			free((*((void**)buf[i])));
 		}
 
 		return v8::Object::New(v8::Isolate::GetCurrent());
