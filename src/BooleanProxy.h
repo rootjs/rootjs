@@ -4,6 +4,7 @@
 #include "PrimitiveProxy.h"
 
 #include <string>
+#include <regex>
 
 #include <TClassRef.h>
 #include <TDataMember.h>
