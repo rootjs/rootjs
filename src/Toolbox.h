@@ -16,14 +16,7 @@ namespace rootJS
 			 *
 			 * @param message the exception message
 			 */
-			static void throwException(char *message);
-
-			/**
-			 * Throws new v8 exception.
-			 *
-			 * @param message the exception message
-			 */
-			static void throwException(std::string message);
+			static void throwException(const char *message);
 	};
 }
 
