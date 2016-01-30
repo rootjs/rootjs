@@ -4,6 +4,7 @@
 #include "ObjectProxy.h"
 #include "StringProxy.h"
 #include "Toolbox.h"
+#include "PointerMode.h"
 
 #include <map>
 #include <sstream>
@@ -15,6 +16,7 @@
 #include <TClassRef.h>
 #include <TInterpreter.h>
 
+#include <TROOT.h>
 #include <TCollection.h>
 #include <TFunction.h>
 #include <TIterator.h>
@@ -100,6 +102,7 @@ namespace rootJS {
 	{
 		function = function;
 		argsReflection = function->GetListOfMethodArgs();
+		returnType = function->GetReturnTypeName();
 	}
 
 	const TFunction& FunctionProxy::getType()
@@ -227,22 +230,21 @@ namespace rootJS {
 			char *str = (char *) malloc(string.length() + 1);
 			strcpy(str, *string);
 			return str;
-			break;
 		}
 
 		//TODO: This will explode - huge fireball
 		return nullptr;
 	}
 
-	v8::Local<v8::Object> FunctionProxy::call(const v8::FunctionCallbackInfo<v8::Value>& args)
+	v8::Local<v8::Value> FunctionProxy::call(const v8::FunctionCallbackInfo<v8::Value>& args)
 	{
 		CallFunc_t* callFunc = (CallFunc_t*)address;
 		if(!callFunc) {
 			//TODO Handle this, should not segfault (maybe throw something...)
 		}
 		TInterpreter::CallFuncIFacePtr_t facePtr = gCling->CallFunc_IFacePtr( callFunc );
-		void *self; //TODO?
-		void *result; //TODO?
+		void *self = nullptr; //TODO?
+		void *result = nullptr; //TODO?
 		std::vector<void*> buf( args.Length() );
 		for(int i = 0; i < args.Length(); i++) {
 			void* bufEl = bufferParam(((TMethodArg*)argsReflection->At(i)), args[i]);
@@ -259,10 +261,15 @@ namespace rootJS {
 		}
 
 		for(int i = 0; i < args.Length(); i++) {
-			free((*((void**)buf[i])));
+			free(*((void**)buf[i]));
 		}
 
-		return v8::Object::New(v8::Isolate::GetCurrent());
+		PointerMode mode(result, returnType);
+
+
+		gROOT->GetListOfGlobals(kTRUE)->Dump();
+
+		return v8::Null(v8::Isolate::GetCurrent());
 	}
 	/*
 	// TODO

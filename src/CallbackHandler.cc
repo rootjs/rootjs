@@ -184,7 +184,7 @@ namespace rootJS
 		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(std::string(*str), TClassRef(), args);
 		if(proxy != nullptr) {
-			proxy->call(args);
+			args.GetReturnValue().Set(proxy->call(args));
 		} else {
 			Toolbox::throwException(std::string("The method could not be determined."));
 		}
