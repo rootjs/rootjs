@@ -26,12 +26,14 @@ namespace rootJS {
 
 			/* Private constructor - Singleton */
 			NodeHandler(v8::Local<v8::Object>);
+			std::stack<std::string> splitClassName (std::string);
 
 			void exposeROOT();
 			void exposeGlobalFunctions();
 			void exposeGlobals();
 			void exposeMacros();
 			void exposeClasses();
+			//TODO check if this method is still needed
 			void exposeClass(TClassRef klass);
 			v8::Local<v8::FunctionTemplate> exposeClassRec(std::string,std::stack<std::string>&);
 

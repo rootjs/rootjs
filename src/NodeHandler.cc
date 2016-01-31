@@ -24,10 +24,11 @@ void NodeHandler::exposeClasses() {
 	TIter next(classes);
 	while (TObject *clazz = next()) {
 		if (((TClass*) clazz)->Property() & kIsClass) {
-			std::stack<std::string> stk;
-			//TODO split class name by "::" and put it on a stack
+			std::string splitname = (clazz->GetName());
+			std::stack stk = splitClassName(splitname);
 			std::string curname = stk.top();
-			this->exports->Set(curname.c_str(),exposeClassRec(stk.top(), stk)->GetFunction());
+			this->exports->Set(curname.c_str(),
+					exposeClassRec(stk.top(), stk)->GetFunction());
 		}
 	}
 }
@@ -45,11 +46,33 @@ v8::Local<v8::FunctionTemplate> NodeHandler::exposeClassRec(std::string name,
 	if (stk.empty()) {
 		return TemplateFactory::createTemplate(TClassRef(dictFunc()));
 	} else {
-		v8::Local<v8::FunctionTemplate> rectmpl = exposeClassRec(stk.top(), stk);
-		v8::Local<v8::FunctionTemplate> curtmpl = TemplateFactory::createTemplate(TClassRef(dictFunc()));
-		curtmpl->Set(v8::Isolate::GetCurrent(),curname.c_str(),rectmpl);
+		v8::Local<v8::FunctionTemplate> rectmpl = exposeClassRec(stk.top(),
+				stk);
+		v8::Local<v8::FunctionTemplate> curtmpl =
+				TemplateFactory::createTemplate(TClassRef(dictFunc()));
+		curtmpl->Set(v8::Isolate::GetCurrent(), curname.c_str(), rectmpl);
 		return curtmpl;
 	}
+}
+
+std::stack<std::string> NodeHandler::splitClassName(std::string name) {
+
+	std::string delimiter = "::";
+	std::stack<std::string> stk;
+	std::stack<std::string> revstk;
+	size_t pos = 0;
+	std::string token;
+	while ((pos = name.find(delimiter)) != std::string::npos) {
+		token = name.substr(0, pos);
+		stk.push(token);
+		name.erase(0, pos + delimiter.length());
+	}
+	stk.push(name);
+	while (!stk.empty()) {
+		revstk.push(stk.top());
+		stk.pop();
+	}
+	return revstk;
 }
 
 void NodeHandler::initialize(v8::Local<v8::Object> exports,
