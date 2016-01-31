@@ -27,10 +27,12 @@ namespace rootJS
 			/**
 			 * Create a new StringProxy.
 			 *
-			 * @param type the type of the encapsulated object
+			 * @param info the type of the encapsulated object
 			 * @param scope the scope of the encapsulated object
 			 */
-			StringProxy(const TDataMember& type, TClassRef scope);
+			StringProxy(void *address, MetaInfo *info, TClass *scope);
+
+			StringProxy(MetaInfo *info, TClass *scope);
 	};
 }
 

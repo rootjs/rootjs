@@ -2,15 +2,20 @@
 
 namespace rootJS
 {
-	StringProxy::isString(std::string type)
+	bool StringProxy::isString(std::string type)
 	{
 		// TODO
 		return false;
 	}
 
-	StringProxy::StringProxy(const TDataMember& type, TClassRef scope)
-		: PrimitiveProxy(type, scope)
+	StringProxy::StringProxy(void *address, MetaInfo *info, TClass *scope) : PrimitiveProxy(address, info, scope)
 	{
 		// TODO
 	}
+
+	StringProxy::StringProxy(MetaInfo *info, TClass *scope) : StringProxy(nullptr, info, scope)
+	{
+		// TODO
+	}
+
 }
