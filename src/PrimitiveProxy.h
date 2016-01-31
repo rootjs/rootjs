@@ -3,33 +3,29 @@
 
 #include "ObjectProxy.h"
 
-#include <TDataMember.h>
-#include <TClassRef.h>
-
 namespace rootJS {
 	class PrimitiveProxy: public ObjectProxy {
 		public:
+
 			/**
 			 * Create a new PrimitiveProxy.
 			 *
-			 * @param type
-			 * 			the type of the encapsulated object
+			 * @param address
+			 *
+			 * @param info
 			 *
 			 * @param scope
-			 *			the scope of the encapsulated object
 			 */
-			PrimitiveProxy(const TDataMember& type, TClassRef scope);
+			PrimitiveProxy(void* address, MetaInfo *info, TClass *scope);
 
 			/**
-			 * Creates a new ObjectProxy.
-			 * Use this constructor when you do not have a TDataMember
-			 * (This happens when you want to proxy an object which is globally available)
+			 * Create a new PrimitiveProxy.
 			 *
-			 * @param object
-			 *      A pointer to the object that should be prxied.
-			 *      We need a pointer to get the correct address.
+			 * @param info
+			 *
+			 * @param scope
 			 */
-			PrimitiveProxy(const TGlobal & type, TClassRef scope);
+			PrimitiveProxy(MetaInfo *info, TClass *scope);
 
 			/**
 			 * Check if this proxy encapsulates a primitive type.
@@ -40,4 +36,4 @@ namespace rootJS {
 	};
 }
 
-#endif /* PRIMITIVE_PROXY_H */
+#endif

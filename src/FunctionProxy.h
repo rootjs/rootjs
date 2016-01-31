@@ -11,6 +11,7 @@
 #include <v8.h>
 
 #include <TClassRef.h>
+#include <TClass.h>
 #include <TFunction.h>
 
 namespace rootJS {
@@ -41,17 +42,17 @@ namespace rootJS {
 			 * Create a new FunctionProxy.
 			 *
 			 * @param address memory address of the proxied function
-			 * @param function the function's reflection object
+			 * @param info the function's reflection object
 			 * @param scope the class that the function belongs to
 			 */
-			FunctionProxy(void* address, TFunction function, TClassRef scope);
+			FunctionProxy(void *address, TFunction *info, TClass *scope);
 
 			/**
 			 * Get the wrapped function's TFunction object which contains the meta data of its corresponding function
 			 *
 			 * @return the TFunction object that contains the function's reflection data
 			 */
-			const TFunction& getType();
+			TFunction* getMetaInfo();
 
 			/**
 			 * Check whether the arguments encapsulated in the FunctionCallbackInfo
@@ -72,6 +73,8 @@ namespace rootJS {
 			ObjectProxy call(ObjectProxy args[]) const;
 
 		private:
+			TFunction *info;
+
 			static bool processCall(TFunction* method, void* args, void* self, void* result);
 
 			static void* callConstructor(TFunction* method, TClassRef type, void* args);

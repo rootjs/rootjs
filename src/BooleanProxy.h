@@ -28,11 +28,15 @@ namespace rootJS
 			/**
 			 * Create a new BooleanProxy.
 			 *
-			 * @param type the type of the excapsulated object
-			 * @param scope the scope of the encapsulated object
 			 */
-			BooleanProxy(const TDataMember& type, TClassRef scope);
+			BooleanProxy(MetaInfo *info, TClass *scope);
+
+			/**
+			 * Create a new BooleanProxy.
+			 *
+			 */
+			BooleanProxy(void *address, MetaInfo *info, TClass *scope);
 	};
 }
 
-#endif // BOOLEAN_PROXY_H
+#endif

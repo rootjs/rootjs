@@ -1,4 +1,8 @@
 #include "NodeHandler.h"
+
+#include "Proxy.h"
+#include "GlobalInfo.h"
+
 #include "ObjectProxy.h"
 #include "ObjectProxyFactory.h"
 #include "CallbackHandler.h"
@@ -50,7 +54,8 @@ namespace rootJS
 			 * the ObjectProxyFactory
 			 * TODO: Implement something for scalar globals (often constants)
 			 */
-			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(*((TGlobal*)global));
+			void *address = ((TGlobal*)global)->GetAddress();
+			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(address, new GlobalInfo(((TGlobal*)global)), const_cast<TClass*>(Proxy::GLOBAL_SCOPE));
 			if(proxy != nullptr)
 			{
 				v8::Local<v8::String> name = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName());

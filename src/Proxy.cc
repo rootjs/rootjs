@@ -1,25 +1,26 @@
 #include "Proxy.h"
 
-rootJS::Proxy::Proxy(void* address, const TObject & type, TClassRef & scope) :
-	address(address), type(type), scope(scope) {
+namespace rootJS {
 
-}
+	const TClass* Proxy::GLOBAL_SCOPE = (TClass*) -1;
 
-rootJS::Proxy::~Proxy() {
-}
+	Proxy::Proxy(void* address, TClass *scope) : address(address), scopeRef(scope) {
 
-void rootJS::Proxy::setAddress(void* address) {
-	this->address = address;
-}
+	}
 
-void* rootJS::Proxy::getAddress() {
-	return address;
-}
+	Proxy::~Proxy() {
+	}
 
-TClassRef& rootJS::Proxy::getScope() {
-	return scope;
-}
+	void Proxy::setAddress(void* address) {
+		this->address = address;
+	}
 
-const TObject& rootJS::Proxy::getType() {
-	return type;
+	void* Proxy::getAddress() {
+		return address;
+	}
+
+	TClass* Proxy::getScope() {
+		return scopeRef.GetClass();
+	}
+
 }

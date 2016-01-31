@@ -24,12 +24,12 @@ namespace rootJS
 			 * Create a JavasScript prototype template of the specified ROOT class.
 			 * Generated FunctionTemplate's may be used to create instances of JavasScript objects encapsulating objects of the specified ROOT class.
 			 *
-			 * @param classRef
+			 * @param clazz
 			 *			the class to generate a template from
 			 *
 			 * @return the generated FunctionTemplate
 			 */
-			static v8::Local<v8::FunctionTemplate> createTemplate(TClassRef const& classRef);
+			static v8::Local<v8::FunctionTemplate> createTemplate(TClass *clazz);
 
 			// static v8::Local<v8::FunctionTemplate> createTemplate(std::string const& name);
 

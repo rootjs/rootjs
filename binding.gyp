@@ -11,23 +11,24 @@
 		{
 			'target_name': 'rootjs',
 			'sources': [
-				'src/FunctionProxy.cc',
-				'src/NodeHandler.cc',
+				'src/Toolbox.cc',
 				'src/Proxy.cc',
-				'src/GlobalMode.cc',
-				'src/MemberMode.cc',
-				'src/ObjectProxyFactory.cc',
 				'src/ObjectProxy.cc',
-				'src/PrimitiveProxy.cc',
-				'src/BooleanProxy.cc',
-				'src/NumberProxy.cc',
+				'src/FunctionProxy.cc',
+				'src/MetaInfo.cc',
+				'src/ObjectInfo.cc',
+				'src/GlobalInfo.cc',
+				'src/MemberInfo.cc',
+				'src/ObjectProxyFactory.cc',
 				'src/FunctionProxyFactory.cc',
-				'src/CallbackHandler.cc',
-				'src/NodeApplication.cc',
-				'src/AsyncRunner.cc',
-				'src/CallbackHandler.cc',
 				'src/TemplateFactory.cc',
-				'src/Toolbox.cc'
+				'src/PrimitiveProxy.cc',
+				'src/NumberProxy.cc',
+				'src/BooleanProxy.cc',
+				'src/AsyncRunner.cc',
+				'src/NodeHandler.cc',
+				'src/NodeApplication.cc',
+				'src/CallbackHandler.cc'
 			],
 
 			'cflags_cc!'  : [ '-fno-rtti' ],       			# exclude rtti flag

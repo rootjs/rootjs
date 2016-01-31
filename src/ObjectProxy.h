@@ -2,70 +2,60 @@
 #define SRC_OBJECTPROXY_H_
 
 #include "Proxy.h"
-#include "ProxyMode.h"
-#include "MemberMode.h"
-#include "GlobalMode.h"
 #include <v8.h>
+#include "MetaInfo.h"
 
-#include <TDataMember.h>
-#include <TClassRef.h>
-#include <TGlobal.h>
-#include <RConfig.h>
-
-namespace rootJS {
+namespace rootJS
+{
 
 	/**
 	 *The ObjectProxy class is used to represent ROOT objects.
 	 *It differentiates between primitive and non-primitive object types.
 	 */
-	class ObjectProxy : public Proxy {
+	class ObjectProxy : public Proxy
+	{
 
 		public:
-			/**
-			 * Create a new ObjectProxy of a TObject.
-			 *
-			 * @param type
-			 * 			the type of the encapsulated object
-			 *
-			 * @param scope
-			 *			the scope of the encapsulated object
-			 */
-			ObjectProxy(const TDataMember &type, TClassRef scope);
 
 			/**
-			 * Create a new ObjectProxy of a TGlobal.
+			 * Create a new ObjectProxy.
 			 *
-			 * @param type
-			 * 			the type of the encapsulated object
+			 * @param address
+			 * 			the memory address of the encapsulated object
+			 *
+			 * @param info
+			 * 			the meta info about the encapsulated object
 			 *
 			 * @param scope
 			 *			the scope of the encapsulated object
 			 */
-			ObjectProxy(const TGlobal &type, TClassRef scope);
+			ObjectProxy(void* address, MetaInfo *info, TClass* scope);
+
+			/**
+			 * Create a new ObjectProxy.
+			 *
+			 * @param info
+			 * 			the meta info about the encapsulated object
+			 *
+			 * @param scope
+			 *			the scope of the encapsulated object
+			 */
+			ObjectProxy(MetaInfo *info, TClass* scope);
+
+			virtual ~ObjectProxy();
 
 			/*
 			 * Gets the address of the encapsulated object
 			 */
 			virtual void* getAddress();
 
-			virtual ~ObjectProxy();
-
-			/**
-			 * Return the name of the type
-			 * @return the name of the type
-			 */
-			const char* getTypeName();
 
 			/*
-			*Returns an object encapsulating meta
+			* Returns an object encapsulating meta
+			*
+			* @return
 			*/
-			ProxyMode *getTypeInfo();
-
-			/*
-			*get the offset
-			@return the offset
-			*/
-			Long_t getOffset();
+			MetaInfo *getMetaInfo();
 
 			/**
 			 * Assign the specified value to this ObjectProxy.
@@ -74,6 +64,11 @@ namespace rootJS {
 			 * 			the value to assign to this ObjectProxy
 			 */
 			virtual void set(ObjectProxy &value);
+
+			/*
+			 * TODO remove
+			 */
+			virtual void setValue(v8::Local<v8::Value> value);
 
 			/**
 			 * Return the encapsulating javascript value.
@@ -98,8 +93,6 @@ namespace rootJS {
 			 */
 			virtual v8::Local<v8::Object> getProxy();
 
-			virtual void setValue(v8::Local<v8::Value> value);
-
 			/**
 			 * Check if this proxy encapsulates a primitive type.
 			 *
@@ -114,9 +107,8 @@ namespace rootJS {
 
 		protected:
 			v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
-		private:
-			ProxyMode *currentmode;
+			MetaInfo *info;
 	};
 }
 
-#endif /* SRC_OBJECTPROXY_H_ */
+#endif

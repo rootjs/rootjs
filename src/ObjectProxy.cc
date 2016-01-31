@@ -1,36 +1,22 @@
 #include "ObjectProxy.h"
 
-#include <TObject.h>
-#include <TGlobal.h>
-
 namespace rootJS {
 
-	ObjectProxy::ObjectProxy(const TDataMember &type, TClassRef scope)
-		: Proxy(nullptr, type, scope) {
-		currentmode = new MemberMode(type, nullptr);
+	ObjectProxy::ObjectProxy(void* address, MetaInfo *info, TClass* scope) : Proxy(address, scope), info(info) {
+
 	}
 
-	ObjectProxy::ObjectProxy(const TGlobal &type, TClassRef scope)
-		: Proxy(nullptr, type, scope) {
-		currentmode = new GlobalMode(type);
+	ObjectProxy::ObjectProxy(MetaInfo *info, TClass* scope) : ObjectProxy(nullptr, info, scope) {
 
 	}
 
 	ObjectProxy::~ObjectProxy() {
-		delete currentmode;
-		currentmode = nullptr;
+		delete info;
+		info = nullptr;
 	}
 
-	const char* ObjectProxy::getTypeName() {
-		return currentmode->getTypeName();
-	}
-
-	ProxyMode *ObjectProxy::getTypeInfo() {
-		return currentmode;
-	}
-
-	Long_t ObjectProxy::getOffset() {
-		return currentmode->getOffset();
+	MetaInfo* ObjectProxy::getMetaInfo() {
+		return info;
 	}
 
 	void ObjectProxy::set(ObjectProxy &value) {
@@ -38,8 +24,12 @@ namespace rootJS {
 		address = value.getAddress();
 	}
 
+	void ObjectProxy::setValue(v8::Local<v8::Value> value) {
+		// TODO remove
+	}
+
 	void *ObjectProxy::getAddress() {
-		return currentmode->getAddress();
+		return address;
 	}
 
 	v8::Local<v8::Value> ObjectProxy::get() {
@@ -48,7 +38,13 @@ namespace rootJS {
 	}
 
 	void ObjectProxy::setProxy(v8::Local<v8::Object> proxy) {
-		this->proxy.Reset(v8::Isolate::GetCurrent(), proxy);
+		if(this->proxy.IsEmpty()) {
+			this->proxy.Reset(v8::Isolate::GetCurrent(), proxy);
+			/*
+			this->proxy.SetWeak(this, dtorCallback);
+			this->proxy.MarkIndependent();
+			*/
+		}
 	}
 
 	v8::Local<v8::Object> ObjectProxy::getProxy() {
@@ -64,18 +60,14 @@ namespace rootJS {
 	}
 
 	bool ObjectProxy::isGlobal() {
-		return currentmode->isGlobal();
+		return info->getProperty() & kIsStatic;
 	}
 
 	bool ObjectProxy::isConst() {
-		return currentmode->isConst();
+		return info->getProperty() & kIsConstant;
 	}
 
 	bool ObjectProxy::isStatic() {
-		return currentmode->isStatic(); // TODO
-	}
-
-	void ObjectProxy::setValue(v8::Local<v8::Value> value) {
-		return;
+		return info->getProperty() & kIsStatic;
 	}
 }

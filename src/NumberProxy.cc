@@ -1,31 +1,75 @@
 #include "NumberProxy.h"
-#include <iostream>
-#include <v8.h>
 
-namespace rootJS {
+namespace rootJS
+{
+
+	NumberProxy::NumberProxy(void *address, MetaInfo *info, TClass *scope) : PrimitiveProxy(address, info, scope)
+	{
+		numberType = NumberType::DOUBLE_T;
+		/*
+		switch(info->getTypeName())
+		{
+		case "Int_t":
+			numberType = NumberType::INT_T;
+			break;
+		case "Double_t":
+			numberType = NumberType::DOUBLE_T;
+			break;
+		case "Short_t":
+			numberType = NumberType::SHORT_T;
+			break;
+		case "UShort_t":
+			numberType = NumberType::USHORT_T;
+			break;
+		case "Long_t":
+			numberType = NumberType::LONG_T;
+			break;
+		case "Ulong_t":
+			numberType = NumberType::ULONG_T;
+			break;
+		case "Float_t":
+			numberType = NumberType::FLOAT_T;
+			break;
+		case "Long64_t":
+			numberType = NumberType::LONG64_T;
+			break;
+		case "ULong64_t":
+			numberType = NumberType::ULONG64_T;
+			break;
+		case "LongDouble_t":
+			numberType = NumberType::LONGDOUBLE_T;
+			break;
+		default:
+			numberType = NumberType::DOUBLE_T;
+			break;
+		}
+		*/
+
+	}
+
+	NumberProxy::NumberProxy(MetaInfo *info, TClass *scope) : NumberProxy(nullptr, info, scope)
+	{
+	}
+
 	bool NumberProxy::isNumber(std::string type)
 	{
 		// TODO
 		return false;
 	}
 
-	NumberProxy::NumberProxy(const TDataMember& type, TClassRef scope): PrimitiveProxy(type, scope) {
-
-	}
-
-	NumberProxy::NumberProxy(const TGlobal & type, TClassRef scope): PrimitiveProxy(type, scope) {
-
-	}
-
-	v8::Local<v8::Value> NumberProxy::get() {
-		if(getAddress()) {
+	v8::Local<v8::Value> NumberProxy::get()
+	{
+		if(getAddress())
+		{
 			return v8::Number::New(v8::Isolate::GetCurrent(), castToDouble(getAddress()));
 		}
 		return getProxy();
 	}
 
-	Double_t NumberProxy::castToDouble(void *ptr) {
-		switch(numberType) {
+	Double_t NumberProxy::castToDouble(void *ptr)
+	{
+		switch(numberType)
+		{
 
 #define SWITCH_CAST_DOUBLE(numbertype, pointer)           \
         case NumberType::numbertype:                                \
@@ -59,15 +103,8 @@ namespace rootJS {
 	}
 
 #define ROOTJS_NUMBER_PROXY( datatype , numbertype )                   \
-    ObjectProxy* NumberProxy::datatype##Construct(const TDataMember& type, TClassRef scope) {   \
-        NumberProxy* proxy = new NumberProxy(type, scope);                                 \
-        proxy->numberType = NumberType::numbertype;                                             \
-        return proxy;                                                                               \
-    }
-
-#define ROOTJS_NUMBER_PROXY_2( datatype , numbertype )                   \
-    ObjectProxy* NumberProxy::datatype##Construct(const TGlobal& type, TClassRef scope) {   \
-		NumberProxy* proxy = new NumberProxy(type, scope);                              	\
+    ObjectProxy* NumberProxy::datatype##Construct(MetaInfo *info, TClass *scope) {   \
+        NumberProxy* proxy = new NumberProxy(info, scope);                                 \
         proxy->numberType = NumberType::numbertype;                                             \
         return proxy;                                                                               \
     }
@@ -92,40 +129,27 @@ namespace rootJS {
 	ROOTJS_NUMBER_PROXY(_int64, LONG64_T )
 	ROOTJS_NUMBER_PROXY(u_int64, ULONG64_T )
 
-	//Constructor number 2
-	ROOTJS_NUMBER_PROXY_2(int, INT_T )
-	ROOTJS_NUMBER_PROXY_2(uint, UINT_T )
 
-	ROOTJS_NUMBER_PROXY_2(short, SHORT_T )
-	ROOTJS_NUMBER_PROXY_2(ushort, USHORT_T )
-
-	ROOTJS_NUMBER_PROXY_2(float, FLOAT_T )
-
-	ROOTJS_NUMBER_PROXY_2(double, DOUBLE_T)
-	ROOTJS_NUMBER_PROXY_2(ldouble, LONGDOUBLE_T )
-
-	ROOTJS_NUMBER_PROXY_2(long, LONG_T )
-	ROOTJS_NUMBER_PROXY_2(ulong, ULONG_T )
-
-	ROOTJS_NUMBER_PROXY_2(_int64, LONG64_T )
-	ROOTJS_NUMBER_PROXY_2(u_int64, ULONG64_T )
-
-	ROOTJS_NUMBER_PROXY_2(llong, LONG64_T )
-	ROOTJS_NUMBER_PROXY_2(ullong, ULONG64_T )
-
-	void NumberProxy::setValue(v8::Local<v8::Value> value) {
-		if(isConst()) {
+	void NumberProxy::setValue(v8::Local<v8::Value> value)
+	{
+		if(isConst())
+		{
 			v8::Isolate::GetCurrent()->ThrowException(
 			    v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
 			                            "This value cannot be overwritten, it's constant."
 			                           ));
 		}
 		double numberValue;
-		if(value->IsNumberObject()) {
+		if(value->IsNumberObject())
+		{
 			numberValue = v8::Local<v8::NumberObject>::Cast(value)->NumberValue();
-		} else if(value->IsNumber()) {
+		}
+		else if(value->IsNumber())
+		{
 			numberValue = v8::Local<v8::Number>::Cast(value)->Value();
-		} else {
+		}
+		else
+		{
 			v8::Isolate::GetCurrent()->ThrowException(
 			    v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
 			                            "This element can only store numbers."
@@ -144,7 +168,8 @@ namespace rootJS {
             break;
 
 
-		switch(numberType) {
+		switch(numberType)
+		{
 			SWITCH_SET_VALUE(INT_T,int)
 			SWITCH_SET_VALUE_DOUBLE(DOUBLE_T)
 

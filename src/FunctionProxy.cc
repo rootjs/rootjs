@@ -50,22 +50,20 @@ namespace rootJS {
 		return methods;
 	}
 
-	FunctionProxy::FunctionProxy(void* address, TFunction function, TClassRef scope)
-		: Proxy(address, function, scope)
+	FunctionProxy::FunctionProxy(void* address, TFunction *info, TClass* scope) : Proxy(address, scope), info(info)
 	{
-		// TODO
 	}
 
-	const TFunction& FunctionProxy::getType()
+	TFunction* FunctionProxy::getMetaInfo()
 	{
-		return dynamic_cast<const TFunction&>(Proxy::getType());
+		return info;
 	}
 
 	std::vector<ObjectProxy*> FunctionProxy::validateArgs(v8::FunctionCallbackInfo<v8::Value> args)
 	{
 		std::vector<ObjectProxy*> validatedArgs;
 
-		TFunction method = this->getType();
+		TFunction method = *(this->getMetaInfo());
 		if (method.GetNargs() <= args.Length() && args.Length() <= method.GetNargsOpt())
 		{
 			TList *expectedArgs = method.GetListOfMethodArgs();
@@ -95,7 +93,7 @@ namespace rootJS {
 					// Else, it must be a JavaScript primitive
 					if (args[i]->IsBoolean())
 					{
-						// TODO proper type validation
+						// TODO proper function validation
 						if (BooleanProxy::isBoolean(expectedArg->GetTypeName()))
 						{
 							v8::Boolean *booleanArg = static_cast<v8::Boolean*>(*args[i]);

@@ -14,17 +14,17 @@ namespace rootJS
 		//TODO
 	}
 
-	FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction *function, TClassRef const& scope)
+	FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction *function, TClass* scope)
 	{
 		return nullptr; //TODO
 	}
 
-	FunctionProxy* FunctionProxyFactory::fromArgs(std::string &name, TClassRef const& scope, const v8::FunctionCallbackInfo<v8::Value>& args)
+	FunctionProxy* FunctionProxyFactory::fromArgs(std::string &name, TClass *scope, const v8::FunctionCallbackInfo<v8::Value>& args)
 	{
 		return nullptr; //TODO
 	}
 
-	void* FunctionProxyFactory::createInstance(TClassRef &type, v8::Local<v8::Array> args)
+	void* FunctionProxyFactory::createInstance(TClass *type, v8::Local<v8::Array> args)
 	{
 		// TODO
 		return nullptr;

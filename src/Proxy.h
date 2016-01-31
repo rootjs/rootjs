@@ -1,26 +1,27 @@
 #ifndef PROXY_H_
 #define PROXY_H_
 
-#include "TObject.h"
+#include "TClass.h"
 #include "TClassRef.h"
 
 namespace rootJS {
+
 	/**
 	 * The proxy super class from which both proxies inherit.
 	 * The proxies act as intermediary between Node.js and ROOT.
 	 */
 	class Proxy {
-		private:
 
 		protected:
-			Proxy(void* address, const TObject & type, TClassRef & scope);
+			Proxy(void *address, TClass *scope);
 			virtual ~Proxy();
 
 			void* address; /**<adress of encapsulated object in memory*/
-			const TObject& type; /**<type meta information of encapsulated object */
-			TClassRef& scope; /**<scope meta information of encapsulated object*/
+			TClassRef scopeRef; /**<scope meta information of encapsulated object*/
 
 		public:
+
+			static const TClass* GLOBAL_SCOPE;
 
 			/**
 			 * set the address this proxy points to
@@ -38,13 +39,7 @@ namespace rootJS {
 			 * get meta information about the encapsulated objcet's scope
 			 * @return meta information about the scope
 			 */
-			TClassRef& getScope();
-
-			/**
-			 * get meta information about the encapsulated objcet's type
-			 * @return meta information about the type
-			 */
-			virtual const TObject& getType();
+			TClass* getScope();
 
 			/**
 			 * check if the encapsulated object is a template
@@ -71,4 +66,4 @@ namespace rootJS {
 			virtual bool isStatic() = 0;
 	};
 }
-#endif /* PROXY_H_ */
+#endif

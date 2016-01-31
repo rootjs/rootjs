@@ -1,5 +1,7 @@
 #include "TemplateFactory.h"
 
+#include "MemberInfo.h"
+
 #include "ObjectProxy.h"
 #include "ObjectProxyFactory.h"
 #include "FunctionProxy.h"
@@ -15,6 +17,7 @@
 #include "RtypesCore.h"
 #include "Rtypes.h"
 
+
 namespace rootJS
 {
 	// Initialize static class members
@@ -26,11 +29,14 @@ namespace rootJS
 	TemplateFactory::~TemplateFactory()
 	{}
 
-	v8::Local<v8::FunctionTemplate> TemplateFactory::createTemplate(TClassRef const& classRef)
+	v8::Local<v8::FunctionTemplate> TemplateFactory::createTemplate(TClass *clazz)
 	{
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
-		TClass *clazz = classRef.GetClass();
+		if(clazz == nullptr) {
+			// TODO
+		}
+
 		std::string className(clazz->GetName());
 
 		// Check if template has been already created
@@ -89,7 +95,7 @@ namespace rootJS
 					methodName.append("::");
 					methodName.append(method->GetName());
 
-					FunctionProxy *proxy = FunctionProxyFactory::createFunctionProxy(method, classRef);
+					FunctionProxy *proxy = FunctionProxyFactory::createFunctionProxy(method, clazz);
 					CallbackHandler::registerStaticFunction(methodName, proxy);
 
 					prototype->Set(v8::String::NewFromUtf8(isolate, method->GetName()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, v8::String::NewFromUtf8(isolate, className.c_str())));
@@ -118,20 +124,12 @@ namespace rootJS
 			if(member->Property() & kIsStatic)
 			{
 				void *address = (void*) member->GetOffsetCint();
+				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(address, new MemberInfo(member), clazz);
 
-				TClass *memberClazz = classFromName(member->GetTypeName());
-				if(memberClazz == nullptr)
-				{
-					// TODO: log this
-					continue;
-				}
-				TClassRef classRef(memberClazz);
-
-				std::string memberName(memberClazz->GetName());
+				std::string memberName(className);
 				memberName.append("::");
 				memberName.append(member->GetName());
 
-				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(address, classRef);
 				CallbackHandler::registerStaticObject(memberName, proxy);
 
 				prototype->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback);

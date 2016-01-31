@@ -4,6 +4,7 @@
 #include "TClass.h"
 #include "TClassRef.h"
 #include "TClassTable.h"
+#include "ObjectInfo.h"
 
 namespace rootJS
 {
@@ -132,14 +133,13 @@ namespace rootJS
 			}
 		}
 
-		TClassRef classRef(clazz);
 		v8::Local<v8::Array> args = getInfoArgs(0, endIndex, info);
 
 		if(callback == nullptr)	// create object on current thread
 		{
 
 			// try
-			void *address = FunctionProxyFactory::createInstance(classRef, args);
+			void *address = FunctionProxyFactory::createInstance(clazz, args);
 			// catch
 
 			if(address == nullptr)
@@ -155,7 +155,7 @@ namespace rootJS
 			}
 
 			//try
-			/* ObjectProxy proxy* = */ ObjectProxyFactory::createObjectProxy(address, classRef, instance); /*address, type, holder*/
+			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(address, new ObjectInfo(clazz), clazz, instance); /*address, type, holder*/
 			//catch
 			/* instance->SetAlignedPointerInInternalField(0, proxy); */
 

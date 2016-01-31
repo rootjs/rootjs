@@ -16,8 +16,8 @@ namespace rootJS
 		private:
 			FunctionProxyFactory(void);
 		public:
-			static FunctionProxy* createFunctionProxy(TFunction *function, TClassRef const& scope);
-			static FunctionProxy* fromArgs(std::string &name, TClassRef const& scope, const v8::FunctionCallbackInfo<v8::Value>& args);
+			static FunctionProxy* createFunctionProxy(TFunction *function, TClass *scope);
+			static FunctionProxy* fromArgs(std::string &name, TClass *scope, const v8::FunctionCallbackInfo<v8::Value>& args);
 
 			/**
 			 * Create a new instance of the specified type using the constructor suitable to the supplied arguments.
@@ -30,8 +30,8 @@ namespace rootJS
 			 *
 			 * @return the address to the newly created instance of the specified type or nullptr if no suitable constructor was found
 			 */
-			static void* createInstance(TClassRef &type, v8::Local<v8::Array> args);
+			static void* createInstance(TClass *type, v8::Local<v8::Array> args);
 	};
 }
 
-#endif //FUNCTION_PROXY_FACTORY_H
+#endif

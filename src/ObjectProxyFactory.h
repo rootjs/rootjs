@@ -13,22 +13,37 @@
 #include <TClass.h>
 #include <TMap.h>
 
+#include "MetaInfo.h"
+
 namespace rootJS
 {
-	typedef ObjectProxy* (*MemberProxyInitializator)(const TDataMember&, TClassRef);
-	typedef ObjectProxy* (*GlobalProxyInitializator)(const TGlobal&, TClassRef);
+	typedef ObjectProxy* (*PrimitiveProxyInitializator)(MetaInfo*, TClass*);
+
+	/*
+	typedef ObjectProxy* (*MemberProxyInitializator)(MetaInfo*, TClass*);
+	typedef ObjectProxy* (*GlobalProxyInitializator)(MetaInfo*, TClass*);
+	 */
 
 	class ObjectProxyFactory
 	{
 		private:
 			ObjectProxyFactory(void);
+
 			static const char* getClassNameFromType(const char*);
-			static void traverseClass(TClassRef&, ObjectProxy&);
+
+			static void traverseClass(TClass *clazz, ObjectProxy &holder);
+
+			static std::map<std::string, PrimitiveProxyInitializator> primitiveProxyMap;
+
+			/*
 			static std::map<std::string, MemberProxyInitializator> memberProxyMap;
 			static std::map<std::string, GlobalProxyInitializator> globalProxyMap;
+			*/
+
 		public:
-			static ObjectProxy* createObjectProxy(TGlobal & object);
-			static ObjectProxy* createObjectProxy(const TDataMember&, TClassRef, ObjectProxy&);
+			static ObjectProxy* createObjectProxy(void *address, MetaInfo *type, TClass *scope);
+
+			static ObjectProxy* createObjectProxy(ObjectProxy &holder, MetaInfo *type, TClass *scope);
 
 			/**
 			 *	Encapsulate the data at the specified address into the specified JavaScript object.
@@ -44,28 +59,14 @@ namespace rootJS
 			 *
 			 *	@return a new ObjectProxy holding the specified JavaScript Object for exposure
 			 */
-			static ObjectProxy* createObjectProxy(void* address, TClassRef &type, v8::Local<v8::Object> proxy);
-
-			/**
-			 *	Encapsulate the data at the specified address.
-			 *
-			 *	@param address
-			 *			the address of the data which should be encapsulated
-			 *
-			 *	@param type
-			 *			the type of the data which should be encapsulated
-			 *
-			 *	@return a new ObjectProxy holding a JavaScript Object for exposure
-			 */
-			static ObjectProxy* createObjectProxy(void* address, TClassRef &type);
+			static ObjectProxy* createObjectProxy(void* address, MetaInfo *type, TClass *scope, v8::Local<v8::Object> proxy);
 
 			// static ObjectProxy* createObjectProxy(void* address, TClassRef &type, v8::Local<v8::Object> proxy);
 
-			static ObjectProxy* determineProxy(const TDataMember&, TClassRef);
-			static ObjectProxy* determineProxy(void*, const TGlobal&, TClassRef);
+			static ObjectProxy* determineProxy(MetaInfo *info, TClass *scope);
 
-			static void initializeProxyMap(void);
+			static void initializeProxyMap();
 	};
 }
 
-#endif /*OBJECT_PROXY_FACTORY_H*/
+#endif
