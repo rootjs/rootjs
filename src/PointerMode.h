@@ -8,10 +8,16 @@ namespace rootJS {
 		public:
 			PointerMode(void* baseAddr, const char* typeName);
 			~PointerMode() {};
-			virtual bool isGlobal() { return true; };
-			virtual Long_t GetOffset() { return 0; };
+			virtual bool isGlobal() {
+				return true;
+			};
+			virtual Long_t GetOffset() {
+				return 0;
+			};
 
-			virtual bool isConst() { return true; };
+			virtual bool isConst() {
+				return true;
+			};
 			virtual bool isStatic() {
 				return true;
 			};
