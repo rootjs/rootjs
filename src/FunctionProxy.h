@@ -73,7 +73,7 @@ namespace rootJS {
 			 * @param args the arguments for the function call.
 			 * @return the function's return value encasulated in an ObjectProxy
 			 */
-			v8::Local<v8::Object> call(const v8::FunctionCallbackInfo<v8::Value>& args);
+			v8::Local<v8::Value> call(const v8::FunctionCallbackInfo<v8::Value>& args);
 
 			virtual bool isConst() {
 				return true;
@@ -92,6 +92,7 @@ namespace rootJS {
 		private:
 			TFunction* function;
 			TList* argsReflection;
+			const char* returnType;
 
 			static bool processCall(TFunction* method, void* args, void* self, void* result);
 

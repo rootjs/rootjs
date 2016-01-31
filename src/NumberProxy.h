@@ -58,6 +58,8 @@ namespace rootJS {
 			 * This calls the constructor.
 			 * We cannot create pointers to constructors,
 			 * but need to map the constructors in out Factory.
+			 * This is a macro to declare the constructors for the
+			 * various number types.
 
 			 * @param type
 			 * 			the type of the encapsulated object
@@ -65,31 +67,18 @@ namespace rootJS {
 			 * @param scope
 			 *			the scope of the encapsulated object
 			 */
-			//static ObjectProxy* intConstruct(const TDataMember& type, TClassRef scope);
-
 #define ROOTJS_NUMBER_PROXY_DECLARE( datatype )                   \
         static ObjectProxy* datatype##Construct(const TDataMember& type, TClassRef scope);
 
-#define ROOTJS_NUMBER_PROXY_DECLARE_2( datatype )                   \
-        static ObjectProxy* datatype##Construct(const TGlobal& type, TClassRef scope);   \
- 
 			ROOTJS_NUMBER_PROXY_DECLARE(int);
-			ROOTJS_NUMBER_PROXY_DECLARE_2(int);
-
-			ROOTJS_NUMBER_PROXY_DECLARE(double);
-			ROOTJS_NUMBER_PROXY_DECLARE_2(double);
+			ROOTJS_NUMBER_PROXY_DECLARE(uint);
 
 			ROOTJS_NUMBER_PROXY_DECLARE(short);
 			ROOTJS_NUMBER_PROXY_DECLARE(ushort);
 
-			ROOTJS_NUMBER_PROXY_DECLARE_2(short);
-			ROOTJS_NUMBER_PROXY_DECLARE_2(ushort);
-
-
-			ROOTJS_NUMBER_PROXY_DECLARE(uint);
-
 			ROOTJS_NUMBER_PROXY_DECLARE(float);
 
+			ROOTJS_NUMBER_PROXY_DECLARE(double);
 			ROOTJS_NUMBER_PROXY_DECLARE(ldouble);
 
 			ROOTJS_NUMBER_PROXY_DECLARE(long);
@@ -102,11 +91,32 @@ namespace rootJS {
 			ROOTJS_NUMBER_PROXY_DECLARE(u_int64);
 
 
+			/**
+			* This calls the constructor.
+			* We cannot create pointers to constructors,
+			* but need to map the constructors in out Factory.
+			* This is a macro to declare the constructors for the
+			* various number types.
 
+			* @param type
+			* 			the type of the encapsulated object
+			*
+			* @param scope
+			*			the scope of the encapsulated object
+			*/
+#define ROOTJS_NUMBER_PROXY_DECLARE_2( datatype )                   \
+        static ObjectProxy* datatype##Construct(const TGlobal& type, TClassRef scope);
+
+
+			ROOTJS_NUMBER_PROXY_DECLARE_2(int);
 			ROOTJS_NUMBER_PROXY_DECLARE_2(uint);
+
+			ROOTJS_NUMBER_PROXY_DECLARE_2(short);
+			ROOTJS_NUMBER_PROXY_DECLARE_2(ushort);
 
 			ROOTJS_NUMBER_PROXY_DECLARE_2(float);
 
+			ROOTJS_NUMBER_PROXY_DECLARE_2(double);
 			ROOTJS_NUMBER_PROXY_DECLARE_2(ldouble);
 
 			ROOTJS_NUMBER_PROXY_DECLARE_2(long);
@@ -115,26 +125,8 @@ namespace rootJS {
 			ROOTJS_NUMBER_PROXY_DECLARE_2(llong);
 			ROOTJS_NUMBER_PROXY_DECLARE_2(ullong);
 
-
 			ROOTJS_NUMBER_PROXY_DECLARE_2(_int64);
 			ROOTJS_NUMBER_PROXY_DECLARE_2(u_int64);
-
-
-			/**
-			* This calls the constructor.
-			* We cannot create pointers to constructors,
-			* but need to map the constructors in out Factory.
-
-			* @param address
-			* 		  the address of the global
-			*
-			* @param type
-			* 			the type of the encapsulated object
-			*
-			* @param scope
-			*			the scope of the encapsulated object
-			*/
-			//static ObjectProxy* intConstruct(void *address, const TGlobal& type, TClassRef scope);
 
 			/**
 			* This calls the constructor.
@@ -154,9 +146,6 @@ namespace rootJS {
 			 * We cannot create pointers to constructors,
 			 * but need to map the constructors in out Factory.
 
-			 * @param address
-			 * 		  the address of the global
-			 *
 			 * @param type
 			 * 			the type of the encapsulated object
 			 *

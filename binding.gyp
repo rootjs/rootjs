@@ -27,7 +27,8 @@
 				'src/AsyncRunner.cc',
 				'src/CallbackHandler.cc',
 				'src/TemplateFactory.cc',
-				'src/Toolbox.cc'
+				'src/Toolbox.cc',
+				'src/PointerMode.cc'
 			],
 
 			'cflags_cc!'  : [ '-fno-rtti' ],       			# exclude rtti flag

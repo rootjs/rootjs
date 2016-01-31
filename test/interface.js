@@ -80,5 +80,18 @@ describe('Interface', function() {
 			  }).should.throw();
 		  });
       });
+	  describe('functions', function() {
+		  it('should not be possible to call Printf without the corect args', function() {
+			  (function() {
+				  root.Printf();
+			  }).should.throw();
+			  (function() {
+				  root.Printf(true);
+			  }).should.throw();
+			  (function() {
+				  root.Printf("test");
+			  }).should.not.throw();
+		  })
+	  });
   });
 });
