@@ -2,6 +2,7 @@
 #include "BooleanProxy.h"
 #include "NumberProxy.h"
 #include "ObjectProxy.h"
+#include "ObjectProxyFactory.h"
 #include "StringProxy.h"
 #include "Toolbox.h"
 #include "PointerMode.h"
@@ -261,8 +262,12 @@ namespace rootJS {
 			free(*((void**)buf[i]));
 		}
 
-		PointerMode mode(result, returnType);
+		PointerMode mode((void*)&result, function->GetReturnTypeName());
+		ObjectProxy* proxy = ObjectProxyFactory::determineProxy(mode, TClassRef());
 
+		if(proxy) {
+			return proxy->get();
+		}
 
 
 		return v8::Null(v8::Isolate::GetCurrent());

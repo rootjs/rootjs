@@ -121,6 +121,9 @@ namespace rootJS {
 		//Int_t
 		proxyMap["Int_t"] = &NumberProxy::intConstruct;
 
+		//Int_t
+		proxyMap["UInt_t"] = &NumberProxy::uintConstruct;
+
 		//Double_t
 		proxyMap["Double_t"] = &NumberProxy::doubleConstruct;
 	}

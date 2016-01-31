@@ -95,12 +95,12 @@ namespace rootJS {
 				}
 				else
 				{
-					Toolbox::throwException(std::string("v8::Object contains no InternalField entries"));
+					//Toolbox::throwException(std::string("v8::Object contains no InternalField entries"));
 				}
 			}
 			else
 			{
-				Toolbox::throwException(std::string("FAIL! v8::Value is neither a v8::Primitive nor a v8::Object"));
+				//Toolbox::throwException(std::string("FAIL! v8::Value is neither a v8::Primitive nor a v8::Object"));
 			}
 
 			return false;

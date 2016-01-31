@@ -15,8 +15,8 @@ namespace rootJS {
 		protected:
 			void* baseAddress;
 		public:
-			ProxyMode(const TObject &foo, void *baseAddres) {
-				baseAddress = baseAddress;
+			ProxyMode(const TObject &foo, void *baseAddress) {
+				this->baseAddress = baseAddress;
 			};
 			virtual ~ProxyMode() {};
 
