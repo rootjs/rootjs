@@ -3,6 +3,7 @@
 
 #include "Proxy.h"
 #include "ObjectProxy.h"
+#include "FunctionMode.h"
 
 #include <map>
 #include <string>
@@ -12,8 +13,12 @@
 
 #include <TClassRef.h>
 #include <TFunction.h>
+#include <TMethodArg.h>
 
 namespace rootJS {
+	enum class mappedTypes {
+		CHAR
+	};
 	/**
 	 * Represents a ROOT callable and provides functionality to invoke those callables.
 	 * Also acts as a static cache for already created FunctionProxy objects.
@@ -26,7 +31,7 @@ namespace rootJS {
 			 * @param method the callable whose CallFunc object shall be returned
 			 * @return a pointer to the CallFunc object provided by cling
 			 */
-			static CallFunc_t* getCallFunc(TFunction* method);
+			static CallFunc_t* getCallFunc(const TClassRef& klass, TFunction* method);
 
 			/**
 			 * Get all methods of the specified class with the specified name.
@@ -44,14 +49,7 @@ namespace rootJS {
 			 * @param function the function's reflection object
 			 * @param scope the class that the function belongs to
 			 */
-			FunctionProxy(void* address, TFunction function, TClassRef scope);
-
-			/**
-			 * Get the wrapped function's TFunction object which contains the meta data of its corresponding function
-			 *
-			 * @return the TFunction object that contains the function's reflection data
-			 */
-			const TFunction& getType();
+			FunctionProxy(void* address, FunctionMode& mode, TFunction* function, TClassRef scope);
 
 			/**
 			 * Check whether the arguments encapsulated in the FunctionCallbackInfo
@@ -69,9 +67,28 @@ namespace rootJS {
 			 * @param args the arguments for the function call.
 			 * @return the function's return value encasulated in an ObjectProxy
 			 */
-			ObjectProxy call(ObjectProxy args[]) const;
+			v8::Local<v8::Value> call(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+			virtual bool isConst() {
+				return true;
+			};
+			virtual bool isGlobal() {
+				return true; /*TODO*/
+			};
+			virtual bool isStatic() {
+				return true; /*TODO*/
+			};
+			virtual bool isTemplate() {
+				return false; /*TODO*/
+			};
+
 
 		private:
+			void *address;
+			TFunction* function;
+			TList* argsReflection;
+			const char* returnType;
+
 			static bool processCall(TFunction* method, void* args, void* self, void* result);
 
 			static void* callConstructor(TFunction* method, TClassRef type, void* args);
@@ -80,10 +97,14 @@ namespace rootJS {
 
 			static void* callObject(TFunction* method, void* self, void* args, TClassRef resType);
 
+			static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg);
+
 			template <typename T>
 			static T callPrimitive(TFunction* method, void* self, void* args);
 
 			static std::map<TFunction*, CallFunc_t*> functions;
+			static std::map<std::string, mappedTypes> typeMap;
+			//TODO: feel free to remove this line
 	};
 }
 

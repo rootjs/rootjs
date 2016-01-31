@@ -12,7 +12,7 @@ namespace rootJS
 	{
 		public:
 			/**
-			 * Enumerates the the internal fields of v8::Objects.
+			 * Enumerates the internal fields of v8::Objects.
 			 */
 			enum v8ObjectInternalField { ObjectProxyPtr };
 

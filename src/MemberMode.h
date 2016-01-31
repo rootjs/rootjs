@@ -22,6 +22,9 @@ namespace rootJS {
 			virtual const char* getTypeName();
 
 			const TDataMember &currentObject;
+			virtual ProxyMode* clone() {
+				return new MemberMode(currentObject, baseAddress);
+			};
 		protected:
 	};
 }

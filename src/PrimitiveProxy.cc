@@ -2,11 +2,7 @@
 
 namespace rootJS {
 
-	PrimitiveProxy::PrimitiveProxy(const TDataMember& type, TClassRef scope): ObjectProxy(type, scope) {
-
-	}
-
-	PrimitiveProxy::PrimitiveProxy(const TGlobal & type, TClassRef scope): ObjectProxy(type, scope) {
+	PrimitiveProxy::PrimitiveProxy(ProxyMode& type, TClassRef scope): ObjectProxy(type, scope) {
 
 	}
 

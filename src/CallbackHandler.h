@@ -189,6 +189,8 @@ namespace rootJS
 			 */
 			static void memberFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info);
 
+
+
 		private:
 			static std::map<std::string, ObjectProxy*> globalObjectMap;
 			static std::map<std::string, ObjectProxy*> staticObjectMap;

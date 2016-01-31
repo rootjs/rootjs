@@ -1,10 +1,12 @@
 #include "CallbackHandler.h"
+#include "Toolbox.h"
 
 #include "Rtypes.h"
 #include "TClass.h"
 #include "TClassRef.h"
 #include "TClassTable.h"
 
+#include <TROOT.h>
 namespace rootJS
 {
 
@@ -43,8 +45,15 @@ namespace rootJS
 		globalFunctionMap[name] = proxy;
 	}
 
-	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
-	{}
+	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
+		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(std::string(*str), TClassRef(), args);
+		if(proxy != nullptr) {
+			args.GetReturnValue().Set(proxy->call(args));
+		} else {
+			Toolbox::throwException(std::string("The method could not be determined."));
+		}
+	}
 
 
 	void CallbackHandler::registerStaticObject(const std::string &name, ObjectProxy* proxy)
@@ -64,8 +73,13 @@ namespace rootJS
 		staticFunctionMap[name] = proxy;
 	}
 
-	void CallbackHandler::staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
-	{}
+	void CallbackHandler::staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
+	{
+		if(args.Callee()->InternalFieldCount() == 0) {
+			return globalFunctionCallback(args);
+		}
+		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
+	}
 
 
 	void CallbackHandler::ctorCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
@@ -168,7 +182,6 @@ namespace rootJS
 
 		info.GetReturnValue().Set(v8::Undefined(isolate)); // TODO remove this line
 	}
-
 
 	void CallbackHandler::memberGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
 	{}

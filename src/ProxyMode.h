@@ -15,8 +15,8 @@ namespace rootJS {
 		protected:
 			void* baseAddress;
 		public:
-			ProxyMode(const TObject &foo, void *baseAddres) {
-				baseAddress = baseAddress;
+			ProxyMode(const TObject &foo, void *baseAddress) {
+				this->baseAddress = baseAddress;
 			};
 			virtual ~ProxyMode() {};
 
@@ -35,6 +35,8 @@ namespace rootJS {
 			virtual void* getAddress() {
 				return (void*)((char*)getBaseAddress() + getOffset());
 			}
+
+			virtual ProxyMode* clone() = 0;
 
 		protected:
 		private:

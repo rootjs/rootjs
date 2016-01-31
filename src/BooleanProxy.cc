@@ -15,7 +15,7 @@ namespace rootJS
 		return false;
 	}
 
-	BooleanProxy::BooleanProxy(const TDataMember& type, TClassRef scope)
+	BooleanProxy::BooleanProxy(ProxyMode& type, TClassRef scope)
 		: PrimitiveProxy(type, scope)
 	{
 		// TODO
