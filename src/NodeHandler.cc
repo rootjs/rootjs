@@ -26,10 +26,8 @@ void NodeHandler::exposeClasses() {
 		if (((TClass*) clazz)->Property() & kIsClass) {
 			std::stack<std::string> stk;
 			//TODO split class name by "::" and put it on a stack
-			this->exports->Set(
-					v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
-							TClassRef((TClass*) clazz)->GetName()),
-					exposeClassRec(stk.top(), stk)->GetFunction());
+			std::string curname = stk.top();
+			this->exports->Set(curname.c_str(),exposeClassRec(stk.top(), stk)->GetFunction());
 		}
 	}
 }
