@@ -44,7 +44,7 @@ namespace rootJS
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, MetaInfo *type, TClass *scope)
 	{
-		if(address == nullptr || scope == nullptr)
+		if(address == nullptr)
 		{
 			return nullptr;
 		}
@@ -60,7 +60,8 @@ namespace rootJS
 			 * TODO
 			 */
 
-			proxy = new ObjectProxy(address, type, scope);
+			// proxy = new ObjectProxy(address, type, scope);
+			return nullptr;
 		}
 
 		return proxy;
@@ -85,7 +86,9 @@ namespace rootJS
 			/*
 			 * TODO
 			 */
-			proxy = new ObjectProxy(address, type, scope);
+
+			// proxy = new ObjectProxy(address, type, scope);
+			return nullptr;
 		}
 
 		return proxy;

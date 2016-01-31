@@ -49,13 +49,20 @@ namespace rootJS
 		TIter next(globals);
 		while(TObject *global = next())
 		{
+
+			if( !((TGlobal*)global)->IsValid() ) {
+				continue;
+			}
+
 			/*
 			 * As we iterate through TObjects all these items can be pumped through
 			 * the ObjectProxyFactory
 			 * TODO: Implement something for scalar globals (often constants)
 			 */
 			void *address = ((TGlobal*)global)->GetAddress();
-			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(address, new GlobalInfo(((TGlobal*)global)), const_cast<TClass*>(Proxy::GLOBAL_SCOPE));
+			GlobalInfo *type = new GlobalInfo(((TGlobal*) global));
+
+			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(address, type, nullptr);
 			if(proxy != nullptr)
 			{
 				v8::Local<v8::String> name = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName());
