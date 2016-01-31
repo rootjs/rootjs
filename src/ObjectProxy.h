@@ -30,23 +30,11 @@ namespace rootJS {
 			 * @param scope
 			 *			the scope of the encapsulated object
 			 */
-			ObjectProxy(const TDataMember &type, TClassRef scope);
-
-			/**
-			 * Create a new ObjectProxy of a TGlobal.
-			 *
-			 * @param type
-			 * 			the type of the encapsulated object
-			 *
-			 * @param scope
-			 *			the scope of the encapsulated object
-			 */
-			ObjectProxy(const TGlobal &type, TClassRef scope);
+			ObjectProxy(ProxyMode &type, TClassRef scope);;
 
 			/*
 			 * Gets the address of the encapsulated object
 			 */
-			virtual void* getAddress();
 
 			virtual ~ObjectProxy();
 

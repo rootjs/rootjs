@@ -5,14 +5,8 @@
 
 namespace rootJS {
 
-	ObjectProxy::ObjectProxy(const TDataMember &type, TClassRef scope)
-		: Proxy(nullptr, type, scope) {
-		currentmode = new MemberMode(type, nullptr);
-	}
-
-	ObjectProxy::ObjectProxy(const TGlobal &type, TClassRef scope)
-		: Proxy(nullptr, type, scope) {
-		currentmode = new GlobalMode(type);
+	ObjectProxy::ObjectProxy(ProxyMode &type, TClassRef scope)
+		: Proxy(type, scope) {
 
 	}
 
@@ -22,24 +16,20 @@ namespace rootJS {
 	}
 
 	const char* ObjectProxy::getTypeName() {
-		return currentmode->getTypeName();
+		return type->getTypeName();
 	}
 
 	ProxyMode *ObjectProxy::getTypeInfo() {
-		return currentmode;
+		return type;
 	}
 
 	Long_t ObjectProxy::getOffset() {
-		return currentmode->getOffset();
+		return type->getOffset();
 	}
 
 	void ObjectProxy::set(ObjectProxy &value) {
 		// TODO: validate type equality
-		address = value.getAddress();
-	}
-
-	void *ObjectProxy::getAddress() {
-		return currentmode->getAddress();
+		//address = value.getAddress();
 	}
 
 	v8::Local<v8::Value> ObjectProxy::get() {
@@ -64,15 +54,15 @@ namespace rootJS {
 	}
 
 	bool ObjectProxy::isGlobal() {
-		return currentmode->isGlobal();
+		return type->isGlobal();
 	}
 
 	bool ObjectProxy::isConst() {
-		return currentmode->isConst();
+		return type->isConst();
 	}
 
 	bool ObjectProxy::isStatic() {
-		return currentmode->isStatic(); // TODO
+		return type->isStatic(); // TODO
 	}
 
 	void ObjectProxy::setValue(v8::Local<v8::Value> value) {

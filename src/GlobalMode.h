@@ -18,6 +18,10 @@ namespace rootJS {
 			virtual const char* getTypeName();
 
 			const TGlobal &currentObject;
+
+			virtual ProxyMode* clone() {
+				return new GlobalMode(currentObject);
+			};
 		protected:
 	};
 }

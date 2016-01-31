@@ -36,6 +36,8 @@ namespace rootJS {
 				return (void*)((char*)getBaseAddress() + getOffset());
 			}
 
+			virtual ProxyMode* clone() = 0;
+
 		protected:
 		private:
 	};

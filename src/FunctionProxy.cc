@@ -5,6 +5,7 @@
 #include "StringProxy.h"
 #include "Toolbox.h"
 #include "PointerMode.h"
+#include "FunctionMode.h"
 
 #include <map>
 #include <sstream>
@@ -97,24 +98,20 @@ namespace rootJS {
 		return methods;
 	}
 
-	FunctionProxy::FunctionProxy(void* address, TFunction* function, TClassRef scope)
-		: Proxy(address, *function, scope)
+	FunctionProxy::FunctionProxy(void* address, FunctionMode& mode, TFunction* function, TClassRef scope)
+		: Proxy(mode, scope)
 	{
-		function = function;
+		this->address = address;
+		this->function = (TFunction*)function->Clone();
 		argsReflection = function->GetListOfMethodArgs();
 		returnType = function->GetReturnTypeName();
-	}
-
-	const TFunction& FunctionProxy::getType()
-	{
-		return dynamic_cast<const TFunction&>(Proxy::getType());
 	}
 
 	std::vector<ObjectProxy*> FunctionProxy::validateArgs(v8::FunctionCallbackInfo<v8::Value> args)
 	{
 		std::vector<ObjectProxy*> validatedArgs;
 
-		TFunction method = this->getType();
+		TFunction method = *function;
 		if (method.GetNargs() <= args.Length() && args.Length() <= method.GetNargsOpt())
 		{
 			TList *expectedArgs = method.GetListOfMethodArgs();
@@ -238,7 +235,7 @@ namespace rootJS {
 
 	v8::Local<v8::Value> FunctionProxy::call(const v8::FunctionCallbackInfo<v8::Value>& args)
 	{
-		CallFunc_t* callFunc = (CallFunc_t*)address;
+		CallFunc_t* callFunc = (CallFunc_t*)getCallFunc(scope, function);
 		if(!callFunc) {
 			//TODO Handle this, should not segfault (maybe throw something...)
 		}
@@ -267,7 +264,6 @@ namespace rootJS {
 		PointerMode mode(result, returnType);
 
 
-		gROOT->GetListOfGlobals(kTRUE)->Dump();
 
 		return v8::Null(v8::Isolate::GetCurrent());
 	}

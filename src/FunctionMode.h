@@ -1,13 +1,17 @@
-#ifndef SRC_POINTER_MODE_H_
-#define SRC_POINTER_MODE_H_
+#ifndef SRC_FUNCTION_MODE_H_
+#define SRC_FUNCTION_MODE_H_
+#include <TFunction.h>
 #include "ProxyMode.h"
 
 namespace rootJS {
 
-	class PointerMode: public ProxyMode {
+	class FunctionMode: public ProxyMode {
 		public:
-			PointerMode(void* baseAddr, const char* typeName);
-			~PointerMode() {};
+			FunctionMode(TFunction* func) : ProxyMode(TObject(), nullptr) {
+				this->func = func;
+			};
+			~FunctionMode() {
+			};
 			virtual bool isGlobal() {
 				return true;
 			};
@@ -22,13 +26,13 @@ namespace rootJS {
 				return true;
 			};
 			virtual const char* getTypeName() {
-				return typeName;
+				return func->GetName();
 			};
 			virtual ProxyMode* clone() {
-				return new PointerMode(baseAddress, typeName);
+				return new FunctionMode(func);
 			};
 		protected:
-			const char *typeName;
+			TFunction* func;
 	};
 }
 

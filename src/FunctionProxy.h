@@ -3,6 +3,7 @@
 
 #include "Proxy.h"
 #include "ObjectProxy.h"
+#include "FunctionMode.h"
 
 #include <map>
 #include <string>
@@ -48,14 +49,7 @@ namespace rootJS {
 			 * @param function the function's reflection object
 			 * @param scope the class that the function belongs to
 			 */
-			FunctionProxy(void* address, TFunction* function, TClassRef scope);
-
-			/**
-			 * Get the wrapped function's TFunction object which contains the meta data of its corresponding function
-			 *
-			 * @return the TFunction object that contains the function's reflection data
-			 */
-			const TFunction& getType();
+			FunctionProxy(void* address, FunctionMode& mode, TFunction* function, TClassRef scope);
 
 			/**
 			 * Check whether the arguments encapsulated in the FunctionCallbackInfo
@@ -90,6 +84,7 @@ namespace rootJS {
 
 
 		private:
+			void *address;
 			TFunction* function;
 			TList* argsReflection;
 			const char* returnType;

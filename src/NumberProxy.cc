@@ -9,11 +9,7 @@ namespace rootJS {
 		return false;
 	}
 
-	NumberProxy::NumberProxy(const TDataMember& type, TClassRef scope): PrimitiveProxy(type, scope) {
-
-	}
-
-	NumberProxy::NumberProxy(const TGlobal & type, TClassRef scope): PrimitiveProxy(type, scope) {
+	NumberProxy::NumberProxy(ProxyMode& type, TClassRef scope): PrimitiveProxy(type, scope) {
 
 	}
 
@@ -59,15 +55,8 @@ namespace rootJS {
 	}
 
 #define ROOTJS_NUMBER_PROXY( datatype , numbertype )                   \
-    ObjectProxy* NumberProxy::datatype##Construct(const TDataMember& type, TClassRef scope) {   \
+    ObjectProxy* NumberProxy::datatype##Construct(ProxyMode& type, TClassRef scope) {   \
         NumberProxy* proxy = new NumberProxy(type, scope);                                 \
-        proxy->numberType = NumberType::numbertype;                                             \
-        return proxy;                                                                               \
-    }
-
-#define ROOTJS_NUMBER_PROXY_2( datatype , numbertype )                   \
-    ObjectProxy* NumberProxy::datatype##Construct(const TGlobal& type, TClassRef scope) {   \
-		NumberProxy* proxy = new NumberProxy(type, scope);                              	\
         proxy->numberType = NumberType::numbertype;                                             \
         return proxy;                                                                               \
     }
@@ -92,26 +81,6 @@ namespace rootJS {
 	ROOTJS_NUMBER_PROXY(_int64, LONG64_T )
 	ROOTJS_NUMBER_PROXY(u_int64, ULONG64_T )
 
-	//Constructor number 2
-	ROOTJS_NUMBER_PROXY_2(int, INT_T )
-	ROOTJS_NUMBER_PROXY_2(uint, UINT_T )
-
-	ROOTJS_NUMBER_PROXY_2(short, SHORT_T )
-	ROOTJS_NUMBER_PROXY_2(ushort, USHORT_T )
-
-	ROOTJS_NUMBER_PROXY_2(float, FLOAT_T )
-
-	ROOTJS_NUMBER_PROXY_2(double, DOUBLE_T)
-	ROOTJS_NUMBER_PROXY_2(ldouble, LONGDOUBLE_T )
-
-	ROOTJS_NUMBER_PROXY_2(long, LONG_T )
-	ROOTJS_NUMBER_PROXY_2(ulong, ULONG_T )
-
-	ROOTJS_NUMBER_PROXY_2(_int64, LONG64_T )
-	ROOTJS_NUMBER_PROXY_2(u_int64, ULONG64_T )
-
-	ROOTJS_NUMBER_PROXY_2(llong, LONG64_T )
-	ROOTJS_NUMBER_PROXY_2(ullong, ULONG64_T )
 
 	void NumberProxy::setValue(v8::Local<v8::Value> value) {
 		if(isConst()) {
