@@ -55,7 +55,7 @@ namespace rootJS
 			*
 			* @return
 			*/
-			MetaInfo *getMetaInfo();
+			MetaInfo* getMetaInfo();
 
 			/**
 			 * Assign the specified value to this ObjectProxy.

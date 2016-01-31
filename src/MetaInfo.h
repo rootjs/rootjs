@@ -15,7 +15,7 @@ namespace rootJS
 			virtual TObject* getInfo() = 0;
 
 			virtual Long_t getOffset() = 0;
-			virtual Long_t getProperty();
+			virtual Long_t getProperty() = 0;
 
 			virtual std::string getName() = 0;
 			virtual std::string getTypeName() = 0;
