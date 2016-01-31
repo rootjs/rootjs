@@ -94,9 +94,19 @@ namespace rootJS {
 		return memberProxy;
 	}
 
-	void ObjectProxyFactory::createObjectProxy(void* address, TClassRef &type, v8::Local<v8::Object> proxy) {
+
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClassRef &type, v8::Local<v8::Object> proxy)
+	{
 		// TODO
+		return nullptr;
 	}
+
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClassRef &type)
+	{
+		// TODO
+		return nullptr;
+	}
+
 
 	ObjectProxy* ObjectProxyFactory::determineProxy(ProxyMode& type, TClassRef ref) {
 		std::string typeString = std::string(type.getTypeName());

@@ -1,21 +1,29 @@
 #include "CallbackHandler.h"
 #include "Toolbox.h"
 
-#include <iostream>
+#include "Rtypes.h"
+#include "TClass.h"
+#include "TClassRef.h"
+#include "TClassTable.h"
+
 #include <TROOT.h>
 namespace rootJS
 {
 
-	std::map<std::string, ObjectProxy*> CallbackHandler::globalProxyMap;
+	std::map<std::string, ObjectProxy*> CallbackHandler::globalObjectMap;
+	std::map<std::string, ObjectProxy*> CallbackHandler::staticObjectMap;
 
-	void CallbackHandler::setGlobalProxy(const std::string &name, ObjectProxy* proxy)
+	std::map<std::string, FunctionProxy*> CallbackHandler::globalFunctionMap;
+	std::map<std::string, FunctionProxy*> CallbackHandler::staticFunctionMap;
+
+	void CallbackHandler::registerGlobalObject(const std::string &name, ObjectProxy* proxy)
 	{
-		globalProxyMap[name] = proxy;
+		globalObjectMap[name] = proxy;
 	}
 
 	void CallbackHandler::globalGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
 	{
-		ObjectProxy* proxy = globalProxyMap[std::string(*v8::String::Utf8Value(property->ToString()))];
+		ObjectProxy* proxy = globalObjectMap[std::string(*v8::String::Utf8Value(property->ToString()))];
 		if(proxy)
 		{
 			info.GetReturnValue().Set(proxy->get());
@@ -24,12 +32,55 @@ namespace rootJS
 
 	void CallbackHandler::globalSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
 	{
-		ObjectProxy* proxy = globalProxyMap[std::string(*v8::String::Utf8Value(property->ToString()))];
+		ObjectProxy* proxy = globalObjectMap[std::string(*v8::String::Utf8Value(property->ToString()))];
 		if(proxy)
 		{
 			proxy->setValue(value);
 		}
 	}
+
+
+	void CallbackHandler::registerGlobalFunction(const std::string &name, FunctionProxy* proxy)
+	{
+		globalFunctionMap[name] = proxy;
+	}
+
+	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
+		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(std::string(*str), TClassRef(), args);
+		if(proxy != nullptr) {
+			args.GetReturnValue().Set(proxy->call(args));
+		} else {
+			Toolbox::throwException(std::string("The method could not be determined."));
+		}
+	}
+
+
+	void CallbackHandler::registerStaticObject(const std::string &name, ObjectProxy* proxy)
+	{
+		staticObjectMap[name] = proxy;
+	}
+
+	void CallbackHandler::staticGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
+	{}
+
+	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
+	{}
+
+
+	void CallbackHandler::registerStaticFunction(const std::string &name, FunctionProxy* proxy)
+	{
+		staticFunctionMap[name] = proxy;
+	}
+
+	void CallbackHandler::staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
+	{
+		if(args.Callee()->InternalFieldCount() == 0) {
+			return globalFunctionCallback(args);
+		}
+		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
+	}
+
 
 	void CallbackHandler::ctorCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
 	{
@@ -132,13 +183,15 @@ namespace rootJS
 		info.GetReturnValue().Set(v8::Undefined(isolate)); // TODO remove this line
 	}
 
-	void CallbackHandler::getterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
-	{
-		// info.Holder()->Get(property) == info.This(); ????
-	}
+	void CallbackHandler::memberGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
+	{}
 
-	void CallbackHandler::setterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
-	{ }
+	void CallbackHandler::memberSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
+	{}
+
+	void CallbackHandler::memberFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
+	{}
+
 
 	v8::Local<v8::Array> CallbackHandler::getInfoArgs(int beginIndex, int endIndex, const v8::FunctionCallbackInfo<v8::Value>& info)
 	{
@@ -169,24 +222,5 @@ namespace rootJS
 		}
 
 		return args;
-	}
-
-	void CallbackHandler::staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
-		if(args.Callee()->InternalFieldCount() == 0) {
-			return globalFunctionCallback(args);
-		}
-		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
-
-		std::cout << *str << std::endl;
-	}
-
-	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
-		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
-		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(std::string(*str), TClassRef(), args);
-		if(proxy != nullptr) {
-			args.GetReturnValue().Set(proxy->call(args));
-		} else {
-			Toolbox::throwException(std::string("The method could not be determined."));
-		}
 	}
 }

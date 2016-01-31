@@ -6,7 +6,6 @@
 
 #include <TROOT.h>
 #include <string>
-#include <iostream>
 
 namespace rootJS {
 
@@ -47,7 +46,7 @@ namespace rootJS {
 			if(proxy != nullptr) {
 				v8::Local<v8::String> name = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName());
 
-				CallbackHandler::setGlobalProxy(std::string(global->GetName()), proxy);
+				CallbackHandler::registerGlobalObject(std::string(global->GetName()), proxy);
 
 				this->exports->Set(name, proxy->get());
 				this->exports->SetAccessor(

@@ -25,7 +25,6 @@ namespace rootJS {
 			static bool paramMatches(const char* type, v8::Local<v8::Value> object);
 
 			FunctionProxyFactory(void);
-
 		public:
 			static FunctionProxy* createFunctionProxy(TFunction *function, TClassRef scope);
 			static FunctionProxy* fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo<v8::Value> args);
