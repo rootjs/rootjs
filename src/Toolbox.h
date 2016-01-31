@@ -12,6 +12,11 @@ namespace rootJS
 	{
 		public:
 			/**
+			 * Enumerates the internal fields of v8::Objects.
+			 */
+			enum v8ObjectInternalField { ObjectProxyPtr };
+
+			/**
 			 * Throws a new v8 exception.
 			 *
 			 * @param message the exception message
