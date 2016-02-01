@@ -74,37 +74,38 @@ namespace rootJS {
 	}
 
 	bool FunctionProxyFactory::paramMatches(const char* type, v8::Local<v8::Value> arg) {
-		std::map<std::string, v8BasicTypes>::iterator it
-		    = basicTypeMap.find(std::string(type));
-		if(it != basicTypeMap.end()) {
-			switch(it->second) {
-			case v8BasicTypes::STRING:
-				return arg->IsString();
-			default:
-				v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
-				return false;
-			}
-		} else {
-			if (arg->IsObject())
+		if (arg->IsObject())
+		{
+			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
+			if (objectArg->InternalFieldCount() > 0)
 			{
-				v8::Object *objectArg = static_cast<v8::Object*>(*arg);
-				if (objectArg->InternalFieldCount() > 0)
-				{
-					ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::v8ObjectInternalField::ObjectProxyPtr));
-					return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
-				}
-				else
-				{
-					Toolbox::throwException(std::string("v8::Object contains no InternalField entries"));
+				ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::v8ObjectInternalField::ObjectProxyPtr));
+				return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
+			}
+			else
+			{
+				Toolbox::throwException(std::string("v8::Object contains no InternalField entries"));
+			}
+		}
+		else
+		{
+			std::map<std::string, v8BasicTypes>::iterator it = basicTypeMap.find(std::string(type));
+			if(it != basicTypeMap.end())
+			{
+				switch(it->second) {
+				case v8BasicTypes::STRING:
+					return arg->IsString();
+				default:
+					v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
+					return false;
 				}
 			}
 			else
 			{
-				Toolbox::throwException(std::string("FAIL! v8::Value is neither a v8::Primitive nor a v8::Object"));
+				Toolbox::throwException(std::string("Christoph was too lazy to implement this"));
 			}
-
-			return false;
 		}
-	}
 
+		return false;
+	}
 }
