@@ -18,7 +18,7 @@ namespace rootJS {
 			 * @param scope
 			 *			the scope of the encapsulated object
 			 */
-			PrimitiveProxy(ProxyMode& type, TClassRef scope);
+			PrimitiveProxy(MetaInfo& type, TClassRef scope);
 
 			/**
 			 * Check if this proxy encapsulates a primitive type.

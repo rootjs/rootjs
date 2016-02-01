@@ -5,9 +5,6 @@
 #include "ObjectProxyFactory.h"
 #include "StringProxy.h"
 #include "Toolbox.h"
-#include "PointerMode.h"
-#include "FunctionMode.h"
-
 #include <map>
 #include <sstream>
 #include <string>
@@ -24,6 +21,8 @@
 #include <TIterator.h>
 #include <TList.h>
 #include <TMethodArg.h>
+#include "FunctionInfo.h"
+#include "PointerInfo.h"
 
 namespace rootJS {
 	std::map<TFunction*, CallFunc_t*> FunctionProxy::functions;
@@ -99,7 +98,7 @@ namespace rootJS {
 		return methods;
 	}
 
-	FunctionProxy::FunctionProxy(void* address, FunctionMode& mode, TFunction* function, TClassRef scope)
+	FunctionProxy::FunctionProxy(void* address, FunctionInfo& mode, TFunction* function, TClassRef scope)
 		: Proxy(mode, scope)
 	{
 		this->address = address;
@@ -262,7 +261,7 @@ namespace rootJS {
 			free(*((void**)buf[i]));
 		}
 
-		PointerMode mode((void*)&result, function->GetReturnTypeName());
+		PointerInfo mode((void*)&result, function->GetReturnTypeName());
 		ObjectProxy* proxy = ObjectProxyFactory::determineProxy(mode, TClassRef());
 
 		if(proxy) {

@@ -23,7 +23,7 @@ namespace rootJS {
 	}
 
 	FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction *function, TClassRef scope) {
-		FunctionMode mode(function);
+		FunctionInfo mode(function);
 		return new FunctionProxy(FunctionProxy::getCallFunc(scope, function), mode, function, scope);
 	}
 

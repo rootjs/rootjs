@@ -1,16 +1,17 @@
-#ifndef SRC_FUNCTION_MODE_H_
-#define SRC_FUNCTION_MODE_H_
+#ifndef SRC_FUNCTION_INFO_H_
+#define SRC_FUNCTION_INFO_H_
 #include <TFunction.h>
-#include "ProxyMode.h"
+
+#include "MetaInfo.h"
 
 namespace rootJS {
 
-	class FunctionMode: public ProxyMode {
+	class FunctionInfo: public MetaInfo {
 		public:
-			FunctionMode(TFunction* func) : ProxyMode(TObject(), nullptr) {
+			FunctionInfo(TFunction* func) : MetaInfo(TObject(), nullptr) {
 				this->func = func;
 			};
-			~FunctionMode() {
+			~FunctionInfo() {
 			};
 			virtual bool isGlobal() {
 				return true;
@@ -28,8 +29,8 @@ namespace rootJS {
 			virtual const char* getTypeName() {
 				return func->GetName();
 			};
-			virtual ProxyMode* clone() {
-				return new FunctionMode(func);
+			virtual MetaInfo* clone() {
+				return new FunctionInfo(func);
 			};
 		protected:
 			TFunction* func;

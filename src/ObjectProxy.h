@@ -2,15 +2,16 @@
 #define SRC_OBJECTPROXY_H_
 
 #include "Proxy.h"
-#include "ProxyMode.h"
-#include "MemberMode.h"
-#include "GlobalMode.h"
 #include <v8.h>
 
 #include <TDataMember.h>
 #include <TClassRef.h>
 #include <TGlobal.h>
 #include <RConfig.h>
+
+#include "GlobalInfo.h"
+#include "MemberInfo.h"
+#include "MetaInfo.h"
 
 namespace rootJS {
 
@@ -30,7 +31,7 @@ namespace rootJS {
 			 * @param scope
 			 *			the scope of the encapsulated object
 			 */
-			ObjectProxy(ProxyMode &type, TClassRef scope);;
+			ObjectProxy(MetaInfo &type, TClassRef scope);;
 
 			/*
 			 * Gets the address of the encapsulated object
@@ -47,7 +48,7 @@ namespace rootJS {
 			/*
 			*Returns an object encapsulating meta
 			*/
-			ProxyMode *getTypeInfo();
+			MetaInfo *getTypeInfo();
 
 			/*
 			*get the offset
@@ -103,7 +104,7 @@ namespace rootJS {
 		protected:
 			v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
 		private:
-			ProxyMode *currentmode;
+			MetaInfo *currentmode;
 	};
 }
 

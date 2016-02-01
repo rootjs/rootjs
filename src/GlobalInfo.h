@@ -1,33 +1,29 @@
-#ifndef GLOBALINFO_H_
-#define GLOBALINFO_H_
-
-#include "TGlobal.h"
+#ifndef SRC_GLOBALINFO_H_
+#define SRC_GLOBALINFO_H_
 #include "MetaInfo.h"
 
-namespace rootJS
-{
+namespace rootJS {
 
-	class GlobalInfo : public MetaInfo
-	{
+	class GlobalInfo: public MetaInfo {
 		public:
-			GlobalInfo(TGlobal *global);
-			virtual ~GlobalInfo();
+			GlobalInfo(const TGlobal & type);
+			~GlobalInfo();
+			virtual bool isGlobal();
+			virtual Long_t GetOffset();
 
-			virtual TGlobal* getInfo();
+			virtual bool isConst();
+			virtual bool isStatic() {
+				return true;
+			};
+			virtual const char* getTypeName();
 
-			virtual Long_t getOffset();
-			virtual Long_t getProperty();
+			const TGlobal &currentObject;
 
-			virtual std::string getName();
-			virtual std::string getTypeName();
-			virtual std::string getFullTypeName();
-
-			virtual TClass* getClass();
-
-		private:
-			TGlobal *global;
+			virtual MetaInfo* clone() {
+				return new GlobalInfo(currentObject);
+			};
+		protected:
 	};
-
 }
 
-#endif
+#endif /* SRC_GLOBALINFO_H_ */

@@ -1,70 +1,34 @@
 #include "MemberInfo.h"
+namespace rootJS {
 
-#include "TClass.h"
-#include "TClassTable.h"
-#include "Rtypes.h"
+	MemberInfo::MemberInfo(const TDataMember& type, void* baseAddress)
+		: MetaInfo(type, baseAddress), currentObject(type)  {
 
-namespace rootJS
-{
-
-	MemberInfo::MemberInfo(TDataMember *member) : member(member)
-	{}
-
-	MemberInfo::~MemberInfo()
-	{}
-
-	TDataMember* MemberInfo::getInfo()
-	{
-		return member;
+	}
+	MemberInfo::~MemberInfo() {
+	}
+	bool MemberInfo::isGlobal() {
+		return false;
+	}
+	Long_t MemberInfo::getOffset() {
+		return currentObject.GetOffset();
 	}
 
-	Long_t MemberInfo::getOffset()
-	{
-		if(getProperty() & kIsStatic)
-		{
-			return 0;
-			// return member->GetOffsetCint();
-		}
-		else
-		{
-			// return member->GetOffset();
-			return member->GetOffsetCint();
+	bool MemberInfo::isConst() {
+		if(currentObject.Property() & kIsConstant) {
+			return true;
+		} else {
+			return false;
 		}
 	}
-
-	Long_t MemberInfo::getProperty()
-	{
-		return member->Property();
-	}
-
-	std::string MemberInfo::getName()
-	{
-		return std::string(member->GetName());
-	}
-
-	std::string MemberInfo::getTypeName()
-	{
-		return std::string(member->GetTypeName());
-	}
-
-	std::string MemberInfo::getFullTypeName()
-	{
-		return std::string(member->GetFullTypeName());
-	}
-
-	TClass* MemberInfo::getClass()
-	{
-		/* if(!(getProperty() & kIsClass)) return nullptr; */
-
-		DictFuncPtr_t classPtr = gClassTable->GetDict(member->GetTypeName());
-		TClass *clazz = nullptr;
-
-		if(classPtr == nullptr || (clazz = classPtr()) == nullptr /* || !clazz->IsLoaded() */)
-		{
-			return nullptr;
+	bool MemberInfo::isStatic() {
+		if(currentObject.Property() & kIsStatic) {
+			return true;
+		} else {
+			return false;
 		}
-
-		return clazz;
+	};
+	const char* MemberInfo::getTypeName() {
+		return currentObject.GetTypeName();
 	}
-
 }

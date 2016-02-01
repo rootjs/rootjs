@@ -5,7 +5,7 @@
 
 namespace rootJS {
 
-	ObjectProxy::ObjectProxy(ProxyMode &type, TClassRef scope)
+	ObjectProxy::ObjectProxy(MetaInfo &type, TClassRef scope)
 		: Proxy(type, scope) {
 
 	}
@@ -19,7 +19,7 @@ namespace rootJS {
 		return type->getTypeName();
 	}
 
-	ProxyMode *ObjectProxy::getTypeInfo() {
+	MetaInfo *ObjectProxy::getTypeInfo() {
 		return type;
 	}
 

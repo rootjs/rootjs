@@ -3,8 +3,6 @@
 
 #include "Proxy.h"
 #include "ObjectProxy.h"
-#include "FunctionMode.h"
-
 #include <map>
 #include <string>
 #include <vector>
@@ -14,6 +12,7 @@
 #include <TClassRef.h>
 #include <TFunction.h>
 #include <TMethodArg.h>
+#include "FunctionInfo.h"
 
 namespace rootJS {
 	enum class mappedTypes {
@@ -49,7 +48,7 @@ namespace rootJS {
 			 * @param function the function's reflection object
 			 * @param scope the class that the function belongs to
 			 */
-			FunctionProxy(void* address, FunctionMode& mode, TFunction* function, TClassRef scope);
+			FunctionProxy(void* address, FunctionInfo& mode, TFunction* function, TClassRef scope);
 
 			/**
 			 * Check whether the arguments encapsulated in the FunctionCallbackInfo

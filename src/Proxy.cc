@@ -1,6 +1,6 @@
 #include "Proxy.h"
 
-rootJS::Proxy::Proxy(rootJS::ProxyMode& type, TClassRef & scope) :
+rootJS::Proxy::Proxy(rootJS::MetaInfo& type, TClassRef & scope) :
 	type(type.clone()), scope(TClassRef(scope)) {
 
 }
@@ -21,6 +21,6 @@ TClassRef& rootJS::Proxy::getScope() {
 	return scope;
 }
 
-rootJS::ProxyMode* rootJS::Proxy::getType() {
+rootJS::MetaInfo* rootJS::Proxy::getType() {
 	return type;
 }

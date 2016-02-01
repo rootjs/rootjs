@@ -14,8 +14,8 @@
 				'src/FunctionProxy.cc',
 				'src/NodeHandler.cc',
 				'src/Proxy.cc',
-				'src/GlobalMode.cc',
-				'src/MemberMode.cc',
+				'src/GlobalInfo.cc',
+				'src/MemberInfo.cc',
 				'src/ObjectProxyFactory.cc',
 				'src/ObjectProxy.cc',
 				'src/PrimitiveProxy.cc',
@@ -28,7 +28,7 @@
 				'src/CallbackHandler.cc',
 				'src/TemplateFactory.cc',
 				'src/Toolbox.cc',
-				'src/PointerMode.cc'
+				'src/PointerInfo.cc'
 			],
 
 			'cflags_cc!'  : [ '-fno-rtti' ],       			# exclude rtti flag

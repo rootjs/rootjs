@@ -2,13 +2,12 @@
 #define BOOLEAN_PROXY_H
 
 #include "PrimitiveProxy.h"
-#include "ProxyMode.h"
-
 #include <string>
 #include <regex>
 
 #include <TClassRef.h>
 #include <TDataMember.h>
+#include "MetaInfo.h"
 
 namespace rootJS
 {
@@ -32,7 +31,7 @@ namespace rootJS
 			 * @param type the type of the excapsulated object
 			 * @param scope the scope of the encapsulated object
 			 */
-			BooleanProxy(ProxyMode& type, TClassRef scope);
+			BooleanProxy(MetaInfo& type, TClassRef scope);
 	};
 }
 
