@@ -50,6 +50,7 @@ namespace rootJS
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(std::string(*str), TClassRef(), args);
 		if(proxy != nullptr) {
 			args.GetReturnValue().Set(proxy->call(args));
+			delete proxy;
 		} else {
 			Toolbox::throwException(std::string("The method could not be determined."));
 		}

@@ -10,11 +10,6 @@ namespace rootJS {
 
 	}
 
-	ObjectProxy::~ObjectProxy() {
-		delete currentmode;
-		currentmode = nullptr;
-	}
-
 	const char* ObjectProxy::getTypeName() {
 		return type->getTypeName();
 	}

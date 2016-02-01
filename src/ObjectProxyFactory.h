@@ -19,7 +19,7 @@ namespace rootJS {
 	class ObjectProxyFactory {
 		private:
 			ObjectProxyFactory(void);
-			static const char* getClassNameFromType(const char*);
+			static std::string getClassNameFromType(const char*);
 			static void traverseClass(TClassRef&, ObjectProxy&);
 			static std::map<std::string, ProxyInitializator> proxyMap;
 

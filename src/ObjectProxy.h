@@ -33,11 +33,6 @@ namespace rootJS {
 			 */
 			ObjectProxy(MetaInfo &type, TClassRef scope);;
 
-			/*
-			 * Gets the address of the encapsulated object
-			 */
-
-			virtual ~ObjectProxy();
 
 			/**
 			 * Return the name of the type

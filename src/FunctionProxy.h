@@ -50,6 +50,7 @@ namespace rootJS {
 			 */
 			FunctionProxy(void* address, FunctionInfo& mode, TFunction* function, TClassRef scope);
 
+
 			/**
 			 * Check whether the arguments encapsulated in the FunctionCallbackInfo
 			 * are valid arguments to the function. The parameters are then wrapped

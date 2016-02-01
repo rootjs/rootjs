@@ -45,8 +45,8 @@ namespace rootJS {
 		}
 
 
-		const char *className = getClassNameFromType(object.GetTypeName());
-		DictFuncPtr_t dictFunc = gClassTable->GetDict(className);
+		std::string className = getClassNameFromType(object.GetTypeName());
+		DictFuncPtr_t dictFunc = gClassTable->GetDict(className.c_str());
 		if(dictFunc == nullptr) {
 			return nullptr;
 		}
@@ -63,10 +63,10 @@ namespace rootJS {
 		return proxy;
 	}
 
-	const char* ObjectProxyFactory::getClassNameFromType(const char* type) {
+	std::string ObjectProxyFactory::getClassNameFromType(const char* type) {
 		std::string typeString = std::string(type);
 		std::string className = typeString.substr(0, typeString.length()-1);
-		return className.c_str();
+		return className;
 	}
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(const TDataMember & type, TClassRef scope, ObjectProxy & holder) {
