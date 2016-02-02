@@ -14,8 +14,8 @@
 				'src/FunctionProxy.cc',
 				'src/NodeHandler.cc',
 				'src/Proxy.cc',
-				'src/GlobalMode.cc',
-				'src/MemberMode.cc',
+				'src/GlobalInfo.cc',
+				'src/MemberInfo.cc',
 				'src/ObjectProxyFactory.cc',
 				'src/ObjectProxy.cc',
 				'src/PrimitiveProxy.cc',
@@ -28,11 +28,11 @@
 				'src/CallbackHandler.cc',
 				'src/TemplateFactory.cc',
 				'src/Toolbox.cc',
-				'src/PointerMode.cc'
+				'src/PointerInfo.cc'
 			],
 
-			'cflags_cc!'  : [ '-fno-rtti' ],       			# exclude rtti flag
-			'cflags_cc'   : [ '<@(root_cflags)' ],
+			'cflags_cc!'  : [ '-fno-rtti', '-fno-exceptions'],
+			'cflags_cc'   : [ '<@(root_cflags)'],
 			'ldflags_cc'  : [ '<@(root_ldflags)' ],
 			'include_dirs': [ '<@(root_incdir)' ], 			# using variable instead of '/usr/include/root'
 			'libraries'   : [ '<@(root_glibs)' ],   		# using variable instead of '/usr/lib/root/libXXX.so'
@@ -44,7 +44,8 @@
 							"OTHER_CPLUSPLUSFLAGS" : [ "-std=c++11", "-stdlib=libc++" ],
 							"OTHER_LDFLAGS": [ "-stdlib=libc++" ],
 							"MACOSX_DEPLOYMENT_TARGET": "10.7",
-							"GCC_ENABLE_CPP_RTTI": "YES"
+							"GCC_ENABLE_CPP_RTTI": "YES",
+							"GCC_ENABLE_CPP_EXCEPTIONS": "YES"
 						}
 					}
 				]

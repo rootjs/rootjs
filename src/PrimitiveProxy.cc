@@ -2,7 +2,7 @@
 
 namespace rootJS {
 
-	PrimitiveProxy::PrimitiveProxy(ProxyMode& type, TClassRef scope): ObjectProxy(type, scope) {
+	PrimitiveProxy::PrimitiveProxy(MetaInfo& type, TClassRef scope): ObjectProxy(type, scope) {
 
 	}
 

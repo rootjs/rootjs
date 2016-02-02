@@ -3,7 +3,8 @@
 
 #include "TObject.h"
 #include "TClassRef.h"
-#include "ProxyMode.h"
+
+#include "MetaInfo.h"
 
 namespace rootJS {
 	/**
@@ -14,11 +15,11 @@ namespace rootJS {
 		private:
 
 		protected:
-			Proxy(ProxyMode & type, TClassRef & scope);
+			Proxy(MetaInfo & type, TClassRef & scope);
 			virtual ~Proxy();
 
 
-			ProxyMode *type; /**<type meta information of encapsulated object */
+			MetaInfo *type; /**<type meta information of encapsulated object */
 			TClassRef scope; /**<scope meta information of encapsulated object*/
 
 		public:
@@ -45,7 +46,7 @@ namespace rootJS {
 			 * get meta information about the encapsulated objcet's type
 			 * @return meta information about the type
 			 */
-			virtual ProxyMode* getType();
+			virtual MetaInfo* getType();
 
 			/**
 			 * check if the encapsulated object is a template

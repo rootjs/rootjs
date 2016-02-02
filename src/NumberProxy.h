@@ -41,7 +41,7 @@ namespace rootJS {
 			 * @param scope
 			 *			the scope of the encapsulated object
 			 */
-			NumberProxy(ProxyMode& type, TClassRef scope);
+			NumberProxy(MetaInfo& type, TClassRef scope);
 
 			/**
 			 * This calls the constructor.
@@ -57,7 +57,7 @@ namespace rootJS {
 			 *			the scope of the encapsulated object
 			 */
 #define ROOTJS_NUMBER_PROXY_DECLARE( datatype )                   \
-        static ObjectProxy* datatype##Construct(ProxyMode& type, TClassRef scope);
+        static ObjectProxy* datatype##Construct(MetaInfo& type, TClassRef scope);
 
 			ROOTJS_NUMBER_PROXY_DECLARE(int);
 			ROOTJS_NUMBER_PROXY_DECLARE(uint);

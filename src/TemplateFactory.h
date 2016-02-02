@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <stdexcept>
 
 #include "CallbackHandler.h"
 
@@ -29,7 +30,7 @@ namespace rootJS
 			 *
 			 * @return the generated FunctionTemplate
 			 */
-			static v8::Local<v8::FunctionTemplate> createTemplate(TClassRef const& classRef);
+			static v8::Local<v8::FunctionTemplate> createTemplate(TClass *clazz) throw(std::invalid_argument);
 
 			// static v8::Local<v8::FunctionTemplate> createTemplate(std::string const& name);
 

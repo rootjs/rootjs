@@ -2,8 +2,6 @@
 #define OBJECT_PROXY_FACTORY_H
 
 #include "ObjectProxy.h"
-#include "ProxyMode.h"
-
 #include <string>
 #include <map>
 #include <v8.h>
@@ -13,14 +11,15 @@
 #include <TClassRef.h>
 #include <TClass.h>
 #include <TMap.h>
+#include "MetaInfo.h"
 
 namespace rootJS {
-	typedef ObjectProxy* (*ProxyInitializator)(ProxyMode&, TClassRef);
+	typedef ObjectProxy* (*ProxyInitializator)(MetaInfo&, TClassRef);
 
 	class ObjectProxyFactory {
 		private:
 			ObjectProxyFactory(void);
-			static const char* getClassNameFromType(const char*);
+			static std::string getClassNameFromType(const char*);
 			static void traverseClass(TClassRef&, ObjectProxy&);
 			static std::map<std::string, ProxyInitializator> proxyMap;
 
@@ -57,7 +56,7 @@ namespace rootJS {
 			 */
 			static ObjectProxy* createObjectProxy(void* address, TClassRef &type);
 
-			static ObjectProxy* determineProxy(ProxyMode&, TClassRef);
+			static ObjectProxy* determineProxy(MetaInfo&, TClassRef);
 
 			static void initializeProxyMap(void);
 	};

@@ -3,11 +3,12 @@
 
 #include <v8.h>
 #include <node.h>
-#include <TClassRef.h>
 
-namespace rootJS {
+namespace rootJS
+{
 
-	class NodeHandler {
+	class NodeHandler
+	{
 		private:
 			/**
 			 * Has the NodeHandler been initialized yet?
@@ -31,7 +32,6 @@ namespace rootJS {
 			void exposeGlobals();
 			void exposeMacros();
 			void exposeClasses();
-			void exposeClass(TClassRef klass);
 
 		public:
 			static void initialize(v8::Local<v8::Object>, v8::Local<v8::Object>);

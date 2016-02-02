@@ -1,18 +1,18 @@
-#ifndef SRC_MEMBERMODE_H_
-#define SRC_MEMBERMODE_H_
+#ifndef SRC_MEMBERINFO_H_
+#define SRC_MEMBERINFO_H_
 
 #include <v8.h>
-#include "ProxyMode.h"
 #include <TDataMember.h>
 #include <TClassRef.h>
 #include <TGlobal.h>
+#include "MetaInfo.h"
 
 namespace rootJS {
 
-	class MemberMode : public ProxyMode {
+	class MemberInfo : public MetaInfo {
 		public:
-			MemberMode(const TDataMember &, void* baseAddress);
-			~MemberMode();
+			MemberInfo(const TDataMember &, void* baseAddress);
+			~MemberInfo();
 
 			virtual bool isGlobal();
 			virtual Long_t getOffset();
@@ -22,8 +22,8 @@ namespace rootJS {
 			virtual const char* getTypeName();
 
 			const TDataMember &currentObject;
-			virtual ProxyMode* clone() {
-				return new MemberMode(currentObject, baseAddress);
+			virtual MetaInfo* clone() {
+				return new MemberInfo(currentObject, baseAddress);
 			};
 		protected:
 	};

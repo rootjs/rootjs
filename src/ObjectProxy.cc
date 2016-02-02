@@ -5,21 +5,16 @@
 
 namespace rootJS {
 
-	ObjectProxy::ObjectProxy(ProxyMode &type, TClassRef scope)
+	ObjectProxy::ObjectProxy(MetaInfo &type, TClassRef scope)
 		: Proxy(type, scope) {
 
-	}
-
-	ObjectProxy::~ObjectProxy() {
-		delete currentmode;
-		currentmode = nullptr;
 	}
 
 	const char* ObjectProxy::getTypeName() {
 		return type->getTypeName();
 	}
 
-	ProxyMode *ObjectProxy::getTypeInfo() {
+	MetaInfo *ObjectProxy::getTypeInfo() {
 		return type;
 	}
 

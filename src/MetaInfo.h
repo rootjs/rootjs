@@ -1,5 +1,5 @@
-#ifndef SRC_PROXYMODE_H_
-#define SRC_PROXYMODE_H_
+#ifndef SRC_METAINFO_H_
+#define SRC_METAINFO_H_
 #include <RConfig.h>
 #include <TDataMember.h>
 #include <TClassRef.h>
@@ -11,14 +11,14 @@ namespace rootJS {
 	 * This class encapsulates the differences in behaviour between TMember and
 	 * TGlobal
 	 * */
-	class ProxyMode {
+	class MetaInfo {
 		protected:
 			void* baseAddress;
 		public:
-			ProxyMode(const TObject &foo, void *baseAddress) {
+			MetaInfo(const TObject &foo, void *baseAddress) {
 				this->baseAddress = baseAddress;
 			};
-			virtual ~ProxyMode() {};
+			virtual ~MetaInfo() {};
 
 			virtual bool isGlobal() {
 				return false;
@@ -36,11 +36,11 @@ namespace rootJS {
 				return (void*)((char*)getBaseAddress() + getOffset());
 			}
 
-			virtual ProxyMode* clone() = 0;
+			virtual MetaInfo* clone() = 0;
 
 		protected:
 		private:
 	};
 }
 
-#endif /* SRC_PROXYMODE_H_ */
+#endif /* SRC_METAINFO_H_ */

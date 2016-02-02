@@ -1,7 +1,4 @@
 #include "ObjectProxyFactory.h"
-#include "GlobalMode.h"
-#include "MemberMode.h"
-
 #include "Proxy.h"
 #include <iostream>
 #include <map>
@@ -13,6 +10,8 @@
 #include <TDataType.h>
 #include <TList.h>
 
+#include "GlobalInfo.h"
+#include "MemberInfo.h"
 /* Includes for proxyMap */
 #include "NumberProxy.h"
 
@@ -38,7 +37,7 @@ namespace rootJS {
 		if(!object.IsValid() || !object.GetAddress()) {
 			return nullptr;
 		}
-		GlobalMode gMode(object);
+		GlobalInfo gMode(object);
 		ObjectProxy* nonObjectProxy = determineProxy(gMode, TClassRef());
 
 		if(nonObjectProxy) {
@@ -46,15 +45,15 @@ namespace rootJS {
 		}
 
 
-		const char *className = getClassNameFromType(object.GetTypeName());
-		DictFuncPtr_t dictFunc = gClassTable->GetDict(className);
+		std::string className = getClassNameFromType(object.GetTypeName());
+		DictFuncPtr_t dictFunc = gClassTable->GetDict(className.c_str());
 		if(dictFunc == nullptr) {
 			return nullptr;
 		}
 		TClass *klass = dictFunc();
 
 		TClassRef classRef = TClassRef(klass);
-		GlobalMode mode(object);
+		GlobalInfo mode(object);
 		ObjectProxy *proxy = new ObjectProxy(mode, classRef);
 		//Set an empty proxy and fill iit in the following loops
 		proxy->setProxy(v8::Object::New(v8::Isolate::GetCurrent()));
@@ -64,10 +63,10 @@ namespace rootJS {
 		return proxy;
 	}
 
-	const char* ObjectProxyFactory::getClassNameFromType(const char* type) {
+	std::string ObjectProxyFactory::getClassNameFromType(const char* type) {
 		std::string typeString = std::string(type);
 		std::string className = typeString.substr(0, typeString.length()-1);
-		return className.c_str();
+		return className;
 	}
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(const TDataMember & type, TClassRef scope, ObjectProxy & holder) {
@@ -79,14 +78,14 @@ namespace rootJS {
 		                   (static_cast<char*>(holder.getAddress()) + type.GetOffsetCint())
 		               );
 
-		MemberMode mode(type, object);
+		MemberInfo mode(type, object);
 
 		ObjectProxy *memberProxy = determineProxy(mode, scope);
 		if(memberProxy) {
 			memberProxy->setAddress(object);
 		} else {
 			//TODO object?
-			MemberMode mode(type, object);
+			MemberInfo mode(type, object);
 			memberProxy = new ObjectProxy(mode, scope);
 			memberProxy->setProxy(v8::Object::New(v8::Isolate::GetCurrent()));
 		}
@@ -108,7 +107,7 @@ namespace rootJS {
 	}
 
 
-	ObjectProxy* ObjectProxyFactory::determineProxy(ProxyMode& type, TClassRef ref) {
+	ObjectProxy* ObjectProxyFactory::determineProxy(MetaInfo& type, TClassRef ref) {
 		std::string typeString = std::string(type.getTypeName());
 		if(proxyMap.find(typeString) == proxyMap.end()) {
 			return nullptr;

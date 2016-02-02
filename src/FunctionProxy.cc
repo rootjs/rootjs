@@ -5,9 +5,6 @@
 #include "ObjectProxyFactory.h"
 #include "StringProxy.h"
 #include "Toolbox.h"
-#include "PointerMode.h"
-#include "FunctionMode.h"
-
 #include <map>
 #include <sstream>
 #include <string>
@@ -24,6 +21,8 @@
 #include <TIterator.h>
 #include <TList.h>
 #include <TMethodArg.h>
+#include "FunctionInfo.h"
+#include "PointerInfo.h"
 
 namespace rootJS {
 	std::map<TFunction*, CallFunc_t*> FunctionProxy::functions;
@@ -74,6 +73,15 @@ namespace rootJS {
 			    &offset,
 			    ROOT::kExactMatch );
 
+			/*
+			 * delete gcl;
+			 *
+			 * TODO? gcl should be deleted, however ClassInfo_t is an,
+			 * incomplete type. I didn't find its definition (even the ROOT
+			 * docs do not link this type). :(
+			 */
+
+
 			if ( ! gInterpreter->CallFunc_IsValid( callf ) ) {
 				v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Cling sucks"));
 			} else {
@@ -99,11 +107,11 @@ namespace rootJS {
 		return methods;
 	}
 
-	FunctionProxy::FunctionProxy(void* address, FunctionMode& mode, TFunction* function, TClassRef scope)
+	FunctionProxy::FunctionProxy(void* address, FunctionInfo& mode, TFunction* function, TClassRef scope)
 		: Proxy(mode, scope)
 	{
 		this->address = address;
-		this->function = (TFunction*)function->Clone();
+		this->function = function;
 		argsReflection = function->GetListOfMethodArgs();
 		returnType = function->GetReturnTypeName();
 	}
@@ -262,11 +270,13 @@ namespace rootJS {
 			free(*((void**)buf[i]));
 		}
 
-		PointerMode mode((void*)&result, function->GetReturnTypeName());
+		PointerInfo mode((void*)&result, function->GetReturnTypeName());
 		ObjectProxy* proxy = ObjectProxyFactory::determineProxy(mode, TClassRef());
 
 		if(proxy) {
-			return proxy->get();
+			v8::Local<v8::Value> result = proxy->get();
+			delete proxy;
+			return result;
 		}
 
 
