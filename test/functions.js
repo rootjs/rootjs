@@ -15,7 +15,7 @@ describe('Functions', function() {
 			  root.Printf("test");
 		  }).should.not.throw();
 	  });
-	  xit('should return a number when calling Hash on a string', function() {
+	  it('should return a number when calling Hash on a string', function() {
 		  root.Hash("TestString").should.be.type('number');
 	  });
   });

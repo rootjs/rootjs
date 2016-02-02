@@ -100,10 +100,6 @@ namespace rootJS {
 					return false;
 				}
 			}
-			else
-			{
-				Toolbox::throwException(std::string("Christoph was too lazy to implement this"));
-			}
 		}
 
 		return false;
