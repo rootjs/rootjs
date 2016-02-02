@@ -22,15 +22,15 @@ namespace rootJS {
 		//TODO
 	}
 
-	FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction *function, TClassRef scope) {
+	FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction *function, TClass *scope) {
 		FunctionInfo mode(function);
 		return new FunctionProxy(FunctionProxy::getCallFunc(scope, function), mode, function, scope);
 	}
 
-	FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClassRef scope, v8::FunctionCallbackInfo<v8::Value> args) {
+	FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClass *scope, v8::FunctionCallbackInfo<v8::Value> args) {
 		std::vector<TFunction*> validFuncs;
 		TFunction *callableFunction = nullptr;
-		if(scope.GetClass() == nullptr) { // Global function has been called
+		if(scope == nullptr) { // Global function has been called
 			TCollection *globals = gROOT->GetListOfGlobalFunctions(kTRUE);
 			TFunction *func;
 
@@ -68,7 +68,7 @@ namespace rootJS {
 		return nullptr;
 	}
 
-	void* FunctionProxyFactory::createInstance(TClassRef &type, v8::Local<v8::Array> args) {
+	void* FunctionProxyFactory::createInstance(TClass *type, v8::Local<v8::Array> args) {
 		// TODO
 		return nullptr;
 	}

@@ -26,17 +26,14 @@ namespace rootJS
 	TemplateFactory::~TemplateFactory()
 	{}
 
-	v8::Local<v8::FunctionTemplate> TemplateFactory::createTemplate(TClassRef const& classRef)
+	v8::Local<v8::FunctionTemplate> TemplateFactory::createTemplate(TClass *clazz)
 	{
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-
-		TClass *clazz = classRef.GetClass();
 		std::string className(clazz->GetName());
 
 		// Check if template has been already created
 		if (templates.count(className) && !templates[className].IsEmpty())
 		{
-			// std::cout << "using cache to create: " << name << std::endl;
 			return v8::Local<v8::FunctionTemplate>::New(isolate, templates[className]);
 		}
 
@@ -71,7 +68,6 @@ namespace rootJS
 			/*
 			 * TODO: make overridden or overloaded methods only occur once
 			 */
-
 			switch (method->ExtraProperty())
 			{
 			case kIsConstructor:
@@ -89,7 +85,7 @@ namespace rootJS
 					methodName.append("::");
 					methodName.append(method->GetName());
 
-					FunctionProxy *proxy = FunctionProxyFactory::createFunctionProxy(method, classRef);
+					FunctionProxy *proxy = FunctionProxyFactory::createFunctionProxy(method, clazz);
 					CallbackHandler::registerStaticFunction(methodName, proxy);
 
 					prototype->Set(v8::String::NewFromUtf8(isolate, method->GetName()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, v8::String::NewFromUtf8(isolate, className.c_str())));
@@ -148,7 +144,6 @@ namespace rootJS
 
 		return tmp;
 	}
-
 
 
 	TClass* TemplateFactory::classFromName(const char *className)
