@@ -104,7 +104,6 @@ namespace rootJS {
 
 			static std::map<TFunction*, CallFunc_t*> functions;
 			static std::map<std::string, mappedTypes> typeMap;
-			//TODO: feel free to remove this line
 	};
 }
 
