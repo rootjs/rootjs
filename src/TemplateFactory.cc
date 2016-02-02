@@ -26,8 +26,20 @@ namespace rootJS
 	TemplateFactory::~TemplateFactory()
 	{}
 
-	v8::Local<v8::FunctionTemplate> TemplateFactory::createTemplate(TClass *clazz)
+	v8::Local<v8::FunctionTemplate> TemplateFactory::createTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
+		if(clazz == nullptr)
+		{
+			// Toolbox::throwException(std::string("Specified TClass is null."));
+			throw std::invalid_argument(std::string("Specified TClass is null."));
+		}
+
+		if(!clazz->IsLoaded())
+		{
+			// Toolbox::throwException(std::string("Specified TClass is not loaded."));
+			throw std::invalid_argument(std::string("Specified TClass is not loaded."));
+		}
+
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		std::string className(clazz->GetName());
 
