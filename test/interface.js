@@ -80,6 +80,16 @@ describe('Interface', function() {
 			  }).should.throw();
 		  });
       });
+	  describe('strings', function() {
+		  it('should have the gProgName "node"', function() {
+			  root.gProgName.should.equal('node');
+		  });
+		  it('should consider char pointers to be immutable', function() {
+			  (function(){
+				  root.gProgName = 'testImmutable';
+			  }).should.throw();
+		  })
+	  });
 	  describe('functions', function() {
 		  it('should not be possible to call Printf without the corect args', function() {
 			  (function() {

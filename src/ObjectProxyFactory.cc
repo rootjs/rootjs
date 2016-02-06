@@ -14,6 +14,7 @@
 #include "MemberInfo.h"
 /* Includes for proxyMap */
 #include "NumberProxy.h"
+#include "StringProxy.h"
 
 namespace rootJS {
 
@@ -117,14 +118,34 @@ namespace rootJS {
 	}
 
 	void ObjectProxyFactory::initializeProxyMap() {
-		//Int_t
 		proxyMap["Int_t"] = &NumberProxy::intConstruct;
-
-		//Int_t
 		proxyMap["UInt_t"] = &NumberProxy::uintConstruct;
 
-		//Double_t
 		proxyMap["Double_t"] = &NumberProxy::doubleConstruct;
+		proxyMap["LongDouble_t"] = &NumberProxy::ldoubleConstruct;
+
+		proxyMap["Short_t"] = &NumberProxy::shortConstruct;
+		proxyMap["UShort_t"] = &NumberProxy::ushortConstruct;
+
+		proxyMap["Long_t"] = &NumberProxy::longConstruct;
+		proxyMap["ULong_t"] = &NumberProxy::ulongConstruct;
+
+		proxyMap["Long64_t"] = &NumberProxy::llongConstruct;
+		proxyMap["long long"] = &NumberProxy::llongConstruct;
+		proxyMap["ULong64_t"] = &NumberProxy::ullongConstruct;
+		proxyMap["unsigned long long"] = &NumberProxy::ullongConstruct;
+		proxyMap["__int64"] = &NumberProxy::llongConstruct;
+		proxyMap["unsigned __int64"] = &NumberProxy::ullongConstruct;
+
+		proxyMap["Float_t"] = &NumberProxy::floatConstruct;
+
+		proxyMap["Short_t"] = &NumberProxy::shortConstruct;
+		proxyMap["UShort_t"] = &NumberProxy::ushortConstruct;
+
+		proxyMap["char"] = &StringProxy::charConstruct;
+		proxyMap["char*"] = &StringProxy::charConstruct;
+		proxyMap["std::string"] = &StringProxy::stringConstruct;
+		proxyMap["TString"] = &StringProxy::tStringConstruct;
 	}
 
 }

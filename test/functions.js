@@ -18,5 +18,8 @@ describe('Functions', function() {
 	  it('should return a number when calling Hash on a string', function() {
 		  root.Hash("TestString").should.be.type('number');
 	  });
+	  it('should be possible to call a function that returns a char*', function() {
+		  root.Compress('these are multiple words').should.equal('thesearemultiplewords');
+	  });
   });
 });
