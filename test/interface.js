@@ -97,6 +97,11 @@ describe('Interface', function() {
 		  it('should have kFALSE which should be false', function() {
 			  root.kFALSE.should.equal(false);
 		  });
+		  it('should fail to change the value of kFALSE', function() {
+			  (function() {
+				  root.kFALSE = true;
+			  }).should.throw();
+		  });
 	  });
 	  describe('functions', function() {
 		  it('should not be possible to call Printf without the corect args', function() {

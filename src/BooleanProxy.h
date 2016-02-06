@@ -47,6 +47,11 @@ namespace rootJS
 			 * @return boolean depending on MetaInfo
 			 */
 			virtual v8::Local<v8::Value> get();
+
+			/**
+			 * Sets the boolen in memory, using the data passed via JS
+			 */
+			virtual void setValue(v8::Local<v8::Value> value);
 	};
 }
 

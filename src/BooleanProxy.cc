@@ -1,4 +1,5 @@
 #include "BooleanProxy.h"
+#include "Toolbox.h"
 
 namespace rootJS
 {
@@ -28,5 +29,19 @@ namespace rootJS
 	v8::Local<v8::Value> BooleanProxy::get() {
 		bool* b = (bool*)getAddress();
 		return v8::Boolean::New(v8::Isolate::GetCurrent(), *b);
+	}
+
+	void BooleanProxy::setValue(v8::Local<v8::Value> value) {
+		if(isConst()) {
+			Toolbox::throwException("This value cannot be overwritten, it's constant.");
+		}
+		bool* b = (bool*)getAddress();
+		if(value->IsBoolean()) {
+			*b = v8::Local<v8::Boolean>::Cast(value)->Value();
+		} else if(value->IsBooleanObject()) {
+			*b = v8::Local<v8::BooleanObject>::Cast(value)->ValueOf();
+		} else {
+			Toolbox::throwException("This element can only store a bool value.");
+		}
 	}
 }
