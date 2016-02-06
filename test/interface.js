@@ -88,7 +88,7 @@ describe('Interface', function() {
 			  (function(){
 				  root.gProgName = 'testImmutable';
 			  }).should.throw();
-		  })
+		  });
 	  });
 	  describe('functions', function() {
 		  it('should not be possible to call Printf without the corect args', function() {
@@ -101,7 +101,7 @@ describe('Interface', function() {
 			  (function() {
 				  root.Printf("test");
 			  }).should.not.throw();
-		  })
+		  });
 	  });
   });
 });
