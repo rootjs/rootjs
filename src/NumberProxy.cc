@@ -1,5 +1,4 @@
 #include "NumberProxy.h"
-#include <iostream>
 #include <v8.h>
 
 namespace rootJS {

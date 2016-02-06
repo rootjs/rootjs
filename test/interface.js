@@ -80,6 +80,11 @@ describe('Interface', function() {
 			  }).should.throw();
 		  });
       });
+	  describe('strings', function() {
+		  it('should have the gProgName "node"', function() {
+			  root.gProgName.should.equal('node');
+		  });
+	  });
 	  describe('functions', function() {
 		  it('should not be possible to call Printf without the corect args', function() {
 			  (function() {
