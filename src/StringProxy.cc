@@ -1,5 +1,5 @@
 #include "StringProxy.h"
-
+#include "Toolbox.h"
 namespace rootJS
 {
 	bool StringProxy::isString(std::string type)
@@ -25,13 +25,13 @@ namespace rootJS
 
 	const char* StringProxy::c_str() {
 		switch(strType) {
-			case StringType::CHAR:
+		case StringType::CHAR:
 			return *(char**)getAddress();
-			case StringType::STRING: {
+		case StringType::STRING: {
 			std::string *str = (std::string*)getAddress();
 			return str->c_str();
 		}
-			case StringType::TSTRING: {
+		case StringType::TSTRING: {
 			TString *tstr = (TString*)getAddress();
 			return tstr->Data();
 		}
@@ -55,5 +55,31 @@ namespace rootJS
 		StringProxy *proxy = new StringProxy(info, scope);
 		proxy->strType = StringType::TSTRING;
 		return proxy;
+	}
+
+	void StringProxy::setValue(v8::Local<v8::Value> value) {
+		if(isConst()) {
+			Toolbox::throwException("This value cannot be overwritten, it's constant.");
+		}
+		if(!value->IsString() && !value->IsStringObject()) {
+			Toolbox::throwException("This element can only store strings.");
+		}
+		v8::String::Utf8Value str(value->ToString());
+		std::string charValue(*str);
+		switch(strType) {
+		case StringType::CHAR:
+			Toolbox::throwException("This value cannot be overwritten, it's a char pointer.");
+			break;
+		case StringType::STRING: {
+			std::string *strObj = (std::string*)getAddress();
+			*strObj = charValue.c_str();
+			break;
+		}
+		case StringType::TSTRING: {
+			TString *strObj = (TString*)getAddress();
+			*strObj = charValue.c_str();
+		}
+
+		}
 	}
 }

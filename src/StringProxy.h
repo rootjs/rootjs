@@ -17,20 +17,20 @@ namespace rootJS
 	 */
 	class StringProxy: public PrimitiveProxy
 	{
-	private:
-		enum class StringType {
-			CHAR, STRING, TSTRING
-		};
-		/**
-		 * Returns a c_string
-		 * If this is based on a char ptr, this ptr will be returned
-		 * If this is based on a std::string it's c_str will be returned
-		 */
-		const char* c_str();
-		/**
-		 * Enum value representing the type
-		 */
-		StringType strType;
+		private:
+			enum class StringType {
+			    CHAR, STRING, TSTRING
+			};
+			/**
+			 * Returns a c_string
+			 * If this is based on a char ptr, this ptr will be returned
+			 * If this is based on a std::string it's c_str will be returned
+			 */
+			const char* c_str();
+			/**
+			 * Enum value representing the type
+			 */
+			StringType strType;
 		public:
 			/**
 			 * Check if the type is a boolean type.
@@ -79,6 +79,12 @@ namespace rootJS
 			 * represented by the MetaInfo object
 			 */
 			virtual v8::Local<v8::Value> get();
+
+			/**
+			 * When the base is an immutable string (std::String, TString) this
+			 * will set a new value
+			 */
+			virtual void setValue(v8::Local<v8::Value> value);
 	};
 }
 

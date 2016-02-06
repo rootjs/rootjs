@@ -111,7 +111,6 @@ namespace rootJS {
 	ObjectProxy* ObjectProxyFactory::determineProxy(MetaInfo& type, TClassRef ref) {
 		std::string typeString = std::string(type.getTypeName());
 		if(proxyMap.find(typeString) == proxyMap.end()) {
-			Printf("Unknown type %s", type.getTypeName());
 			return nullptr;
 		}
 
