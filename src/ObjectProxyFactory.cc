@@ -15,6 +15,7 @@
 /* Includes for proxyMap */
 #include "NumberProxy.h"
 #include "StringProxy.h"
+#include "BooleanProxy.h"
 
 namespace rootJS {
 
@@ -146,6 +147,9 @@ namespace rootJS {
 		proxyMap["char*"] = &StringProxy::charConstruct;
 		proxyMap["std::string"] = &StringProxy::stringConstruct;
 		proxyMap["TString"] = &StringProxy::tStringConstruct;
+
+		proxyMap["bool"] = &BooleanProxy::boolConstruct;
+		proxyMap["Bool_t"] = &BooleanProxy::boolConstruct;
 	}
 
 }

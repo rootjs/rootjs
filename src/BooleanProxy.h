@@ -32,6 +32,26 @@ namespace rootJS
 			 * @param scope the scope of the encapsulated object
 			 */
 			BooleanProxy(MetaInfo& type, TClassRef scope);
+
+			/**
+			 * Creates a BooleanProxy, can be derefered to be added to a map
+			 *
+			 * @param info the type of the encapsulated object
+			 * @param scope the scope of the encapsulated object
+			 */
+			static ObjectProxy *boolConstruct(MetaInfo& info, TClassRef scope);
+
+			/**
+			 * Returns a v8 Boolean depending on MetaInfo
+			 *
+			 * @return boolean depending on MetaInfo
+			 */
+			virtual v8::Local<v8::Value> get();
+
+			/**
+			 * Sets the boolen in memory, using the data passed via JS
+			 */
+			virtual void setValue(v8::Local<v8::Value> value);
 	};
 }
 
