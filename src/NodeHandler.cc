@@ -81,7 +81,8 @@ namespace rootJS
 		TIter next(globals);
 		while(TObject *global = next())
 		{
-			NODE_SET_METHOD(this->exports, global->GetName(), CallbackHandler::staticFunctionCallback);
+			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(global->GetName(), nullptr);
+			exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()), v8::Function::New(v8::Isolate::GetCurrent(), CallbackHandler::globalFunctionCallback, data));
 		}
 	}
 
