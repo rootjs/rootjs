@@ -57,6 +57,12 @@ namespace rootJS
 			return;
 		}
 
+		/*
+		 * TODO:
+		 * v8::Local<v8::Function> *callback = nullptr;
+		 *v8::Local<v8::Array> argss = getInfoArgs(callback, args);
+		*/
+
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
 		if(proxy != nullptr)
 		{
@@ -98,7 +104,7 @@ namespace rootJS
 		try
 		{
 			name  = resolveCallbackName(args.Data());
-			scope = resolveCallbackScope(args.Data(), true);
+			scope = resolveCallbackScope(args.Data(), false);
 		}
 		catch(const std::invalid_argument& e)
 		{
@@ -239,12 +245,21 @@ namespace rootJS
 		std::string scopeName = toString(data);
 		std::size_t idx = scopeName.find_last_of(CALLBACK_DATA_DELIMITER);
 
+		DictFuncPtr_t dictPtr = nullptr;
 		if(idx != std::string::npos)
 		{
 			scopeName = scopeName.substr(0, idx);
+			DictFuncPtr_t dictPtr = gClassTable->GetDict(scopeName.c_str());
+		}
+		else if (allowNull) // global found
+		{
+			return nullptr;
+		}
+		else
+		{
+			throw std::invalid_argument(std::string("No Delimiter in '" + scopeName + "' was found."));
 		}
 
-		DictFuncPtr_t dictPtr = gClassTable->GetDict(scopeName.c_str());
 		if(dictPtr == nullptr)
 		{
 			throw std::invalid_argument(std::string("No scope named '" + scopeName + "' was found."));
