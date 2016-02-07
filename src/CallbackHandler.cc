@@ -1,4 +1,5 @@
 #include "CallbackHandler.h"
+
 #include "Toolbox.h"
 
 #include "Rtypes.h"
@@ -7,6 +8,7 @@
 #include "TClassTable.h"
 
 #include <TROOT.h>
+
 namespace rootJS
 {
 
@@ -60,8 +62,10 @@ namespace rootJS
 		/*
 		 * TODO:
 		 * v8::Local<v8::Function> *callback = nullptr;
-		 *v8::Local<v8::Array> argss = getInfoArgs(callback, args);
+		 * v8::Local<v8::Array> argss = getInfoArgs(callback, args);
 		*/
+
+		// std::cout << "global function name:" << name << std::endl;
 
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
 		if(proxy != nullptr)
@@ -104,7 +108,7 @@ namespace rootJS
 		try
 		{
 			name  = resolveCallbackName(args.Data());
-			scope = resolveCallbackScope(args.Data(), true);
+			scope = resolveCallbackScope(args.Data(), false);
 		}
 		catch(const std::invalid_argument& e)
 		{
@@ -209,12 +213,16 @@ namespace rootJS
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		v8::EscapableHandleScope handle_scope(isolate);
 
+		// std::cout << "function name: "<< functionName.c_str() << std::endl;
+
 		if(scope != nullptr && scope->IsLoaded())
 		{
+			// return v8::String::NewFromUtf8(isolate, std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + functionName).c_str());
 			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + functionName).c_str()));
 		}
 		else
 		{
+			// return v8::String::NewFromUtf8(isolate, functionName.c_str());
 			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, functionName.c_str()));
 		}
 	}
@@ -249,7 +257,7 @@ namespace rootJS
 		if(idx != std::string::npos)
 		{
 			scopeName = scopeName.substr(0, idx);
-			DictFuncPtr_t dictPtr = gClassTable->GetDict(scopeName.c_str());
+			dictPtr = gClassTable->GetDict(scopeName.c_str());
 		}
 		else if (allowNull) // global found
 		{
@@ -257,12 +265,12 @@ namespace rootJS
 		}
 		else
 		{
-			throw std::invalid_argument(std::string("No Delimiter in '" + scopeName + "' was found."));
+			throw std::invalid_argument(std::string("No Delimiter in " + scopeName + " was found."));
 		}
 
 		if(dictPtr == nullptr)
 		{
-			throw std::invalid_argument(std::string("No scope named '" + scopeName + "' was found."));
+			throw std::invalid_argument(std::string("No scope named " + scopeName + " was found."));
 		}
 
 		TClass *scope = dictPtr();
@@ -271,11 +279,11 @@ namespace rootJS
 		{
 			if(scope == nullptr)
 			{
-				throw std::invalid_argument(std::string("The scope named '" + scopeName + "' is null."));
+				throw std::invalid_argument(std::string("The scope named " + scopeName + " is null."));
 			}
 			else if(scope->IsLoaded())
 			{
-				throw std::invalid_argument(std::string("The scope named '" + scopeName + "' is not loaded."));
+				throw std::invalid_argument(std::string("The scope named " + scopeName + " is not loaded."));
 			}
 		}
 
@@ -297,14 +305,7 @@ namespace rootJS
 
 	std::string CallbackHandler::toString(v8::Local<v8::Value> data) throw(std::invalid_argument)
 	{
-		const char *str = *v8::String::Utf8Value(data);
-
-		if(str == nullptr)
-		{
-			throw std::invalid_argument(std::string("String conversion failed."));
-		}
-
-		return std::string(str);
+		return std::string(*v8::String::Utf8Value(data->ToString()));
 	}
 
 	v8::Local<v8::Array> CallbackHandler::getInfoArgs(v8::Local<v8::Function> *callback, v8::FunctionCallbackInfo<v8::Value> const& info)
