@@ -10,11 +10,10 @@
 namespace rootJS
 {
 
+	const std::string CallbackHandler::CALLBACK_DATA_DELIMITER = "#";
+
 	std::map<std::string, ObjectProxy*> CallbackHandler::globalObjectMap;
 	std::map<std::string, ObjectProxy*> CallbackHandler::staticObjectMap;
-
-	std::map<std::string, FunctionProxy*> CallbackHandler::globalFunctionMap;
-	std::map<std::string, FunctionProxy*> CallbackHandler::staticFunctionMap;
 
 	void CallbackHandler::registerGlobalObject(const std::string &name, ObjectProxy* proxy)
 	{
@@ -39,27 +38,48 @@ namespace rootJS
 		}
 	}
 
-
-	void CallbackHandler::registerGlobalFunction(const std::string &name, FunctionProxy* proxy)
+	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
 	{
-		globalFunctionMap[name] = proxy;
-	}
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
-	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
-		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
-		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(std::string(*str), TClassRef(), args);
-		if(proxy != nullptr) {
+		std::string name;			// function name
+		TClass *scope = nullptr;	// function scope
+
+		try
+		{
+			name  = resolveCallbackName(args.Data());
+			scope = resolveCallbackScope(args.Data(), true);
+		}
+		catch(const std::invalid_argument& e)
+		{
+			Toolbox::throwException(e.what());
+			args.GetReturnValue().Set(v8::Undefined(isolate));
+			return;
+		}
+
+		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
+		if(proxy != nullptr)
+		{
 			args.GetReturnValue().Set(proxy->call(args));
 			delete proxy;
-		} else {
-			Toolbox::throwException(std::string("The method could not be determined."));
+		}
+		else
+		{
+			Toolbox::throwException("The method could not be determined.");
 		}
 	}
 
 
-	void CallbackHandler::registerStaticObject(const std::string &name, ObjectProxy* proxy)
+	void CallbackHandler::registerStaticObject(const std::string &name, TClass *scope, ObjectProxy* proxy)
 	{
-		staticObjectMap[name] = proxy;
+		if(scope == nullptr || !scope->IsLoaded())
+		{
+			staticObjectMap[name] = proxy;
+		}
+		else
+		{
+			staticObjectMap[std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + name)] = proxy;
+		}
 	}
 
 	void CallbackHandler::staticGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
@@ -68,18 +88,35 @@ namespace rootJS
 	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
 	{}
 
-
-	void CallbackHandler::registerStaticFunction(const std::string &name, FunctionProxy* proxy)
-	{
-		staticFunctionMap[name] = proxy;
-	}
-
 	void CallbackHandler::staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
 	{
-		if(args.Callee()->InternalFieldCount() == 0) {
-			return globalFunctionCallback(args);
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+
+		std::string name;			// function name
+		TClass *scope = nullptr;	// function scope
+
+		try
+		{
+			name  = resolveCallbackName(args.Data());
+			scope = resolveCallbackScope(args.Data(), true);
 		}
-		v8::String::Utf8Value str(args.Callee()->GetName()->ToString());
+		catch(const std::invalid_argument& e)
+		{
+			Toolbox::throwException(e.what());
+			args.GetReturnValue().Set(v8::Undefined(isolate));
+			return;
+		}
+
+		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
+		if(proxy != nullptr)
+		{
+			args.GetReturnValue().Set(proxy->call(args));
+			delete proxy;
+		}
+		else
+		{
+			Toolbox::throwException("The method could not be determined.");
+		}
 	}
 
 
@@ -90,71 +127,39 @@ namespace rootJS
 
 		if(instance->InternalFieldCount() < 1)
 		{
-			isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Unexpected internal field count.")));
-
+			Toolbox::throwException("Unexpected internal field count.");
 			info.GetReturnValue().Set(v8::Undefined(isolate));
 			return;
 		}
 
 		if (!info.IsConstructCall())
 		{
-			/*
-			// Invoked as plain function `MyObject(...)`, turn into constructor call
-			const int argc = args.Length();
-			v8::Local<v8::Value> argv[argc];
-
-			for (int i = 0; i < argc; i++)
-				argv[i] = args[i];
-
-			v8::Local<v8::Function> ctor = args.Callee();
-			args.GetReturnValue().Set(ctor->NewInstance(argc, argv));
-			*/
-
-			isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Can not call this constructor as plain function. Use the new operator.")));
-
+			Toolbox::throwException("Can not call this constructor as plain function. Use the new operator.");
 			info.GetReturnValue().Set(v8::Undefined(isolate));
 			return;
 		}
 
-		// retrieve TClass
-		DictFuncPtr_t dictPtr = gClassTable->GetDict(*v8::String::Utf8Value(info.Data()));
-		if(dictPtr == nullptr)
+		std::string name;
+		TClass *clazz = nullptr;
+		try
 		{
-			isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Could not retrieve TClass name.")));
-
-			info.GetReturnValue().Set(v8::Undefined(isolate));
-			return;
+			name  = resolveCallbackName(info.Data());
+			clazz = resolveCallbackScope(info.Data(), false);
 		}
-
-		TClass *clazz = dictPtr();
-		if(clazz == nullptr)
+		catch(const std::invalid_argument& e)
 		{
-			isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "TClass pointer is null.")));
-
+			Toolbox::throwException(e.what());
 			info.GetReturnValue().Set(v8::Undefined(isolate));
 			return;
 		}
 
 		v8::Local<v8::Function> *callback = nullptr;
-		int endIndex = info.Length() - 1;
-
-		if(info.Length() > 0)
-		{
-			if(info[info.Length() - 1]->IsFunction())
-			{
-				*callback = v8::Local<v8::Function>::Cast(info[info.Length() - 1]);
-				endIndex--;
-			}
-		}
-
-		TClassRef classRef(clazz);
-		v8::Local<v8::Array> args = getInfoArgs(0, endIndex, info);
+		v8::Local<v8::Array> args = getInfoArgs(callback, info);
 
 		if(callback == nullptr)	// create object on current thread
 		{
-
 			// try
-			void *address = FunctionProxyFactory::createInstance(classRef, args);
+			void *address = FunctionProxyFactory::createInstance(name, clazz, args);
 			// catch
 
 			if(address == nullptr)
@@ -163,18 +168,17 @@ namespace rootJS
 				msg.append(clazz->GetName());
 				msg.append(".");
 
-				isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, msg.c_str())));
-
+				Toolbox::throwException(msg);
 				info.GetReturnValue().Set(v8::Undefined(isolate));
 				return;
 			}
 
 			//try
-			/* ObjectProxy proxy* = */ ObjectProxyFactory::createObjectProxy(address, classRef, instance); /*address, type, holder*/
-			//catch
-			/* instance->SetAlignedPointerInInternalField(0, proxy); */
+			/* ObjectProxy proxy* = */ ObjectProxyFactory::createObjectProxy(address, clazz, instance); /*address, type, holder*/
+			//catc
 
 			info.GetReturnValue().Set(instance);
+			return;
 		}
 
 		// create object asynchronously
@@ -194,34 +198,124 @@ namespace rootJS
 	{}
 
 
-	v8::Local<v8::Array> CallbackHandler::getInfoArgs(int beginIndex, int endIndex, const v8::FunctionCallbackInfo<v8::Value>& info)
+	v8::Local<v8::Value> CallbackHandler::createFunctionCallbackData(std::string functionName, TClass *scope)
 	{
-		v8::Local<v8::Array> args;
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::EscapableHandleScope handle_scope(isolate);
 
-		if(info.Length() < 1 || beginIndex >= info.Length() || beginIndex < 0 || endIndex >= info.Length() || endIndex < 0)
+		if(scope != nullptr && scope->IsLoaded())
 		{
-			return v8::Array::New(info.GetIsolate(), 0);
-		}
-
-		if(endIndex >= beginIndex)
-		{
-			args = v8::Array::New(info.GetIsolate(), endIndex - beginIndex + 1);
-
-			for(int i = beginIndex; i <= endIndex; i++)
-			{
-				args->Set(i - beginIndex, info[i]);
-			}
+			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + functionName).c_str()));
 		}
 		else
 		{
-			args = v8::Array::New(info.GetIsolate(), beginIndex - endIndex + 1);
+			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, functionName.c_str()));
+		}
+	}
 
-			for(int i = beginIndex; i <= endIndex; i--)
+	v8::Local<v8::Value> CallbackHandler::createFunctionCallbackData(TClass *scope)
+	{
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::EscapableHandleScope handle_scope(isolate);
+
+		if(scope == nullptr || !scope->IsLoaded())
+		{
+			return handle_scope.Escape(v8::Undefined(isolate));
+		}
+
+		std::string className(scope->GetName());
+		std::size_t idx = className.find_last_of("::");
+
+		if(idx != std::string::npos)
+		{
+			className = className.substr(idx+1);
+		}
+
+		return handle_scope.Escape(v8::String::NewFromUtf8(isolate, std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + className).c_str()));
+	}
+
+	TClass* CallbackHandler::resolveCallbackScope(v8::Local<v8::Value> data, bool allowNull) throw(std::invalid_argument)
+	{
+		std::string scopeName = toString(data);
+		std::size_t idx = scopeName.find_last_of(CALLBACK_DATA_DELIMITER);
+
+		if(idx != std::string::npos)
+		{
+			scopeName = scopeName.substr(0, idx);
+		}
+
+		DictFuncPtr_t dictPtr = gClassTable->GetDict(scopeName.c_str());
+		if(dictPtr == nullptr)
+		{
+			throw std::invalid_argument(std::string("No scope named '" + scopeName + "' was found."));
+		}
+
+		TClass *scope = dictPtr();
+
+		if(!allowNull)
+		{
+			if(scope == nullptr)
 			{
-				args->Set(beginIndex - i, info[i]);
+				throw std::invalid_argument(std::string("The scope named '" + scopeName + "' is null."));
+			}
+			else if(scope->IsLoaded())
+			{
+				throw std::invalid_argument(std::string("The scope named '" + scopeName + "' is not loaded."));
 			}
 		}
 
-		return args;
+		return scope;
+	}
+
+	std::string CallbackHandler::resolveCallbackName(v8::Local<v8::Value> data) throw(std::invalid_argument)
+	{
+		std::string functionName = toString(data);
+		std::size_t idx = functionName.find_last_of(CALLBACK_DATA_DELIMITER);
+
+		if(idx != std::string::npos)
+		{
+			functionName = functionName.substr(idx+1);
+		}
+
+		return functionName;
+	}
+
+	std::string CallbackHandler::toString(v8::Local<v8::Value> data) throw(std::invalid_argument)
+	{
+		const char *str = *v8::String::Utf8Value(data);
+
+		if(str == nullptr)
+		{
+			throw std::invalid_argument(std::string("String conversion failed."));
+		}
+
+		return std::string(str);
+	}
+
+	v8::Local<v8::Array> CallbackHandler::getInfoArgs(v8::Local<v8::Function> *callback, v8::FunctionCallbackInfo<v8::Value> const& info)
+	{
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::EscapableHandleScope handle_scope(isolate);
+
+		if(info.Length() < 1)
+		{
+			return handle_scope.Escape(v8::Array::New(isolate, 0));
+		}
+
+		int endIndex = info.Length() - 1;
+		if(info[endIndex]->IsFunction())
+		{
+			*callback = v8::Local<v8::Function>::Cast(info[endIndex]);
+			endIndex--;
+		}
+
+		v8::Local<v8::Array> args = v8::Array::New(isolate, endIndex + 1);
+
+		for(int i = 0; i <= endIndex; i++)
+		{
+			args->Set(i, info[i]);
+		}
+
+		return handle_scope.Escape(args);
 	}
 }

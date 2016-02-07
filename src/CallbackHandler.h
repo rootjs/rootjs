@@ -15,6 +15,7 @@ namespace rootJS
 	class CallbackHandler
 	{
 		public:
+			static const std::string CALLBACK_DATA_DELIMITER;
 
 			/**
 			 * 	TODO: fill in description
@@ -55,17 +56,6 @@ namespace rootJS
 			 */
 			static void globalSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
 
-			/**
-			 * 	TODO: fill in description
-			 *
-			 *	@param name
-			 *
-			 *
-			 *	@param proxy
-			 *
-			 *
-			 */
-			static void registerGlobalFunction(const std::string &name, FunctionProxy* proxy);
 
 			/**
 			 * TODO: fill in description
@@ -86,7 +76,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void registerStaticObject(const std::string &name, ObjectProxy* proxy);
+			static void registerStaticObject(const std::string &name, TClass *scope, ObjectProxy* proxy);
 
 
 			/**
@@ -115,18 +105,6 @@ namespace rootJS
 			 *
 			 */
 			static void staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-
-			/**
-			 * 	TODO: fill in description
-			 *
-			 *	@param name
-			 *
-			 *
-			 *	@param proxy
-			 *
-			 *
-			 */
-			static void registerStaticFunction(const std::string &name, FunctionProxy* proxy);
 
 			/**
 			 * 	TODO: fill in description
@@ -189,16 +167,41 @@ namespace rootJS
 			 */
 			static void memberFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info);
 
+			/*
+			 * Encapsulate the callback data for a function.
+			 *
+			 * @param fucntionName
+			 *			the function name
+			 *
+			 * @param scope
+			 *			the scope which contains the function named as specified
+			 *
+			 * @return the encapsulated data for usage in callbacks
+			 *
+			 */
+			static v8::Local<v8::Value> createFunctionCallbackData(std::string functionName, TClass *scope);
 
+			/*
+			 * Encapsulate the callback data for a constructor function.
+			 *
+			 * @param scope
+			 *			the scope which contains the function named as specified
+			 *
+			 * @return the encapsulated data for usage in callbacks
+			 *
+			 */
+			static v8::Local<v8::Value> createFunctionCallbackData(TClass *scope);
 
 		private:
 			static std::map<std::string, ObjectProxy*> globalObjectMap;
 			static std::map<std::string, ObjectProxy*> staticObjectMap;
 
-			static std::map<std::string, FunctionProxy*> globalFunctionMap;
-			static std::map<std::string, FunctionProxy*> staticFunctionMap;
+			static v8::Local<v8::Array> getInfoArgs(v8::Local<v8::Function> *callback, v8::FunctionCallbackInfo<v8::Value> const& info);
 
-			static v8::Local<v8::Array> getInfoArgs(int beginIndex, int endIndex, const v8::FunctionCallbackInfo<v8::Value>& info);
+			static TClass* resolveCallbackScope(v8::Local<v8::Value> data, bool allowNull) throw(std::invalid_argument);
+			static std::string resolveCallbackName(v8::Local<v8::Value> data) throw(std::invalid_argument);
+
+			static std::string toString(v8::Local<v8::Value> data) throw(std::invalid_argument);
 	};
 }
 
