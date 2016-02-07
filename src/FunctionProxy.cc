@@ -84,13 +84,13 @@ namespace rootJS {
 
 			if ( ! gInterpreter->CallFunc_IsValid( callf ) ) {
 				gInterpreter->CallFunc_SetFuncProto(
-				   callf,
-				   gcl,
-				   func ? func->GetName() : classRef->GetName(),
-				   callString.c_str(),
-				   func ? (func->Property() & kIsConstMethod) : kFALSE,
-				   &offset );
-			   return callf;
+				    callf,
+				    gcl,
+				    func ? func->GetName() : classRef->GetName(),
+				    callString.c_str(),
+				    func ? (func->Property() & kIsConstMethod) : kFALSE,
+				    &offset );
+				return callf;
 			} else {
 				return callf;
 			}

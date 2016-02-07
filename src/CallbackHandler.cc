@@ -209,9 +209,9 @@ namespace rootJS
 		v8::Local<v8::Object> instance = info.This();
 		v8::String::Utf8Value callStr(info.Callee()->GetName()->ToString());
 		std::map<std::string, Proxy*> map =
-			*((std::map<std::string, Proxy*>*)instance->GetAlignedPointerFromInternalField(0));
+		    *((std::map<std::string, Proxy*>*)instance->GetAlignedPointerFromInternalField(0));
 		std::map<std::string, Proxy*>::const_iterator proxySearch
-			= map.find(std::string(*callStr));
+		    = map.find(std::string(*callStr));
 
 		FunctionProxy *proxy = nullptr;
 		if(proxySearch != map.end()) {

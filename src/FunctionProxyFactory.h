@@ -13,11 +13,11 @@ namespace rootJS
 {
 	enum class v8BasicTypes
 	{
-			BOOLEAN,
-			STRING,
-			NUMBER,
-			ARRAY,
-			OBJECT
+	    BOOLEAN,
+	    STRING,
+	    NUMBER,
+	    ARRAY,
+	    OBJECT
 	};
 
 	class FunctionProxyFactory

@@ -16,8 +16,8 @@ namespace rootJS
 {
 
 	std::map<std::string, v8BasicTypes> FunctionProxyFactory::basicTypeMap = {
-	            {"char", v8BasicTypes::STRING}
-	        };
+		{"char", v8BasicTypes::STRING}
+	};
 
 	FunctionProxyFactory::FunctionProxyFactory()
 	{
@@ -35,7 +35,7 @@ namespace rootJS
 		std::vector<TFunction*> validFuncs;
 		TFunction *callableFunction = nullptr;
 		if(scope == nullptr)
-		{ // Global function has been called
+		{	// Global function has been called
 			TCollection *globals = gROOT->GetListOfGlobalFunctions(kTRUE);
 			TFunction *func;
 
@@ -88,7 +88,7 @@ namespace rootJS
 		std::vector<TFunction*> validFuncs;
 		TFunction *callableFunction = nullptr;
 		if(scope == nullptr)
-		{ // Global function has been called
+		{	// Global function has been called
 			TCollection *globals = gROOT->GetListOfGlobalFunctions(kTRUE);
 			TFunction *func;
 
