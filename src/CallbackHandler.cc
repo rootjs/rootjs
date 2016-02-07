@@ -104,7 +104,7 @@ namespace rootJS
 		try
 		{
 			name  = resolveCallbackName(args.Data());
-			scope = resolveCallbackScope(args.Data(), false);
+			scope = resolveCallbackScope(args.Data(), true);
 		}
 		catch(const std::invalid_argument& e)
 		{
