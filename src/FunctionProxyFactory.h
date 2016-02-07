@@ -9,16 +9,19 @@
 #include <TClass.h>
 #include <TClassRef.h>
 
-namespace rootJS {
-	enum class v8BasicTypes {
-	    BOOLEAN,
-	    STRING,
-	    NUMBER,
-	    ARRAY,
-	    OBJECT
+namespace rootJS
+{
+	enum class v8BasicTypes
+	{
+			BOOLEAN,
+			STRING,
+			NUMBER,
+			ARRAY,
+			OBJECT
 	};
 
-	class FunctionProxyFactory {
+	class FunctionProxyFactory
+	{
 		private:
 			static std::map<std::string, v8BasicTypes> basicTypeMap;
 
@@ -29,10 +32,15 @@ namespace rootJS {
 			static FunctionProxy* createFunctionProxy(TFunction *function, TClass *scope);
 			static FunctionProxy* fromArgs(std::string name, TClass *scope, v8::FunctionCallbackInfo<v8::Value> args);
 
+			static FunctionProxy* fromArgs(std::string name, TClass *scope, v8::Local<v8::Array> args);
+
 			/**
 			 * Create a new instance of the specified type using the constructor suitable to the supplied arguments.
 			 *
-			 * @param type
+			 * @param name
+			 * 			the name of the constructor function
+			 *
+			 * @param scope
 			 * 			the type of the instance that will be created
 			 *
 			 * @param args
@@ -40,7 +48,7 @@ namespace rootJS {
 			 *
 			 * @return the address to the newly created instance of the specified type or nullptr if no suitable constructor was found
 			 */
-			static void* createInstance(TClass *type, v8::Local<v8::Array> args);
+			static void* createInstance(std::string name, TClass *scope, v8::Local<v8::Array> args);
 	};
 }
 
