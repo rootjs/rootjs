@@ -83,7 +83,14 @@ namespace rootJS {
 
 
 			if ( ! gInterpreter->CallFunc_IsValid( callf ) ) {
-				v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Cling sucks"));
+				gInterpreter->CallFunc_SetFuncProto(
+				   callf,
+				   gcl,
+				   func ? func->GetName() : classRef->GetName(),
+				   callString.c_str(),
+				   func ? (func->Property() & kIsConstMethod) : kFALSE,
+				   &offset );
+			   return callf;
 			} else {
 				return callf;
 			}
@@ -260,7 +267,7 @@ namespace rootJS {
 		switch(facePtr.fKind) {
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
 
-			facePtr.fGeneric(&self, args.Length(), buf.data(), &result);
+			facePtr.fGeneric(*(void**)selfAddress, args.Length(), buf.data(), &result);
 			break;
 		default:
 			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
@@ -282,6 +289,8 @@ namespace rootJS {
 
 		return v8::Null(v8::Isolate::GetCurrent());
 	}
+
+
 	/*
 	// TODO
 	bool FunctionProxy::processCall(TFunction* method, void* args, void* self, void* result)

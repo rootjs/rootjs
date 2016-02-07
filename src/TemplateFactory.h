@@ -7,7 +7,7 @@
 
 #include "CallbackHandler.h"
 
-#include "v8.h"
+#include "node.h"
 
 #include "TClassRef.h"
 #include "TClass.h"

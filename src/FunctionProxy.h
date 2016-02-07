@@ -82,11 +82,16 @@ namespace rootJS {
 				return false; /*TODO*/
 			};
 
+			void setSelfAddress(void* addr) {
+				selfAddress = addr;
+			}
+
 
 		private:
 			void *address;
 			TFunction* function;
 			TList* argsReflection;
+			void* selfAddress = 0;
 			const char* returnType;
 
 			static bool processCall(TFunction* method, void* args, void* self, void* result);

@@ -203,7 +203,8 @@ namespace rootJS
 				else
 				{
 					// std::cout << "non static " << method->GetName() << std::endl;
-					instance->Set(v8::String::NewFromUtf8(isolate, method->GetName()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, v8::String::NewFromUtf8(isolate, className.c_str())));
+					NODE_SET_METHOD(instance, method->GetName(), CallbackHandler::memberFunctionCallback);
+					//instance->Set(v8::String::NewFromUtf8(isolate, method->GetName()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, v8::String::NewFromUtf8(isolate, className.c_str())));
 				}
 				break;
 			}

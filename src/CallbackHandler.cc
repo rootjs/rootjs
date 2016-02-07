@@ -191,7 +191,25 @@ namespace rootJS
 	{}
 
 	void CallbackHandler::memberFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
-	{}
+	{
+		v8::Local<v8::Object> instance = info.This();
+		v8::String::Utf8Value callStr(info.Callee()->GetName()->ToString());
+		std::map<std::string, Proxy*> map =
+			*((std::map<std::string, Proxy*>*)instance->GetAlignedPointerFromInternalField(0));
+		std::map<std::string, Proxy*>::const_iterator proxySearch
+			= map.find(std::string(*callStr));
+
+		FunctionProxy *proxy = nullptr;
+		if(proxySearch != map.end()) {
+			proxy = (FunctionProxy*)proxySearch->second;
+		}
+
+		if(proxy != nullptr) {
+			info.GetReturnValue().Set(proxy->call(info));
+		} else {
+			Toolbox::throwException(std::string("The method could not be determined."));
+		}
+	}
 
 
 	v8::Local<v8::Array> CallbackHandler::getInfoArgs(int beginIndex, int endIndex, const v8::FunctionCallbackInfo<v8::Value>& info)
