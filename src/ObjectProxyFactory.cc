@@ -17,39 +17,46 @@
 #include "StringProxy.h"
 #include "BooleanProxy.h"
 
-namespace rootJS {
+namespace rootJS
+{
 
 	std::map<std::string, ProxyInitializator> ObjectProxyFactory::proxyMap;
 
-	void ObjectProxyFactory::traverseClass(TClassRef & classRef, ObjectProxy & proxy) {
+	void ObjectProxyFactory::traverseClass(TClassRef & classRef, ObjectProxy & proxy)
+	{
 		TClass *klass = classRef.GetClass();
 
 		TList *propertyList = klass->GetListOfAllPublicDataMembers();
 		TIter nextProperty(propertyList);
 		TDataMember *member;
 
-		while ((member = (TDataMember*)nextProperty())) {
+		while ((member = (TDataMember*)nextProperty()))
+		{
 			v8::Local<v8::Object> nodeObject = proxy.getProxy();
 			ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(*member, classRef, proxy);
 			nodeObject->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName()), memberProxy->get());
 		}
 	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(TGlobal & object) {
-		if(!object.IsValid() || !object.GetAddress()) {
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(TGlobal & object)
+	{
+		if(!object.IsValid() || !object.GetAddress())
+		{
 			return nullptr;
 		}
 		GlobalInfo gMode(object);
 		ObjectProxy* nonObjectProxy = determineProxy(gMode, TClassRef());
 
-		if(nonObjectProxy) {
+		if(nonObjectProxy)
+		{
 			return nonObjectProxy;
 		}
 
 
 		std::string className = getClassNameFromType(object.GetTypeName());
 		DictFuncPtr_t dictFunc = gClassTable->GetDict(className.c_str());
-		if(dictFunc == nullptr) {
+		if(dictFunc == nullptr)
+		{
 			return nullptr;
 		}
 		TClass *klass = dictFunc();
@@ -65,13 +72,15 @@ namespace rootJS {
 		return proxy;
 	}
 
-	std::string ObjectProxyFactory::getClassNameFromType(const char* type) {
+	std::string ObjectProxyFactory::getClassNameFromType(const char* type)
+	{
 		std::string typeString = std::string(type);
 		std::string className = typeString.substr(0, typeString.length()-1);
 		return className;
 	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(const TDataMember & type, TClassRef scope, ObjectProxy & holder) {
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(const TDataMember & type, TClassRef scope, ObjectProxy & holder)
+	{
 		/*
 		 * It is not possible to do pointer arithmetic on void pointers.
 		 * To add the offset to the object we cast the pointer to char* before.
@@ -83,9 +92,12 @@ namespace rootJS {
 		MemberInfo mode(type, object);
 
 		ObjectProxy *memberProxy = determineProxy(mode, scope);
-		if(memberProxy) {
+		if(memberProxy)
+		{
 			memberProxy->setAddress(object);
-		} else {
+		}
+		else
+		{
 			//TODO object?
 			MemberInfo mode(type, object);
 			memberProxy = new ObjectProxy(mode, scope);
@@ -96,36 +108,38 @@ namespace rootJS {
 	}
 
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClassRef &type, v8::Local<v8::Object> proxy)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope)
 	{
 		// TODO
 		return nullptr;
 	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClassRef &type)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy)
 	{
 		// TODO
 		return nullptr;
 	}
 
-
-	ObjectProxy* ObjectProxyFactory::determineProxy(MetaInfo& type, TClassRef ref) {
+	ObjectProxy* ObjectProxyFactory::determineProxy(MetaInfo& type, TClassRef ref)
+	{
 		std::string typeString = std::string(type.getTypeName());
-		if(proxyMap.find(typeString) == proxyMap.end()) {
+		if(proxyMap.find(typeString) == proxyMap.end())
+		{
 			return nullptr;
 		}
 
 		return proxyMap[typeString](type, ref);
 	}
 
-	void ObjectProxyFactory::initializeProxyMap() {
+	void ObjectProxyFactory::initializeProxyMap()
+	{
 		proxyMap["Int_t"] = &NumberProxy::intConstruct;
 		proxyMap["UInt_t"] = &NumberProxy::uintConstruct;
-        proxyMap["int"] = &NumberProxy::intConstruct;
-        proxyMap["unsigned int"] = &NumberProxy::uintConstruct;
+		proxyMap["int"] = &NumberProxy::intConstruct;
+		proxyMap["unsigned int"] = &NumberProxy::uintConstruct;
 
-        proxyMap["Seek_t"] = &NumberProxy::intConstruct;
-        proxyMap["Ssiz_t"] = &NumberProxy::intConstruct;
+		proxyMap["Seek_t"] = &NumberProxy::intConstruct;
+		proxyMap["Ssiz_t"] = &NumberProxy::intConstruct;
 
 		proxyMap["Double_t"] = &NumberProxy::doubleConstruct;
 		proxyMap["LongDouble_t"] = &NumberProxy::ldoubleConstruct;
@@ -177,7 +191,7 @@ namespace rootJS {
 		proxyMap["Option_t"] = &StringProxy::charConstruct;
 
 		proxyMap["Bool_t"] = &BooleanProxy::boolConstruct;
-        proxyMap["bool"] = &BooleanProxy::boolConstruct;
+		proxyMap["bool"] = &BooleanProxy::boolConstruct;
 	}
 
 }
