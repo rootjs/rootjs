@@ -47,11 +47,13 @@ namespace rootJS
 		}
 		else if (clazz->Property() & kIsClass)
 		{
-			return createClassTemplate(clazz)->InstanceTemplate()->NewInstance();
+			return createClassTemplate(clazz)->GetFunction()->NewInstance();
+			// return getConstructor(clazz)->NewInstance();
 		}
 		else if (clazz->Property() & kIsStruct)
 		{
-			return createStructTemplate(clazz)->InstanceTemplate()->NewInstance();
+			return createStructTemplate(clazz)->GetFunction()->NewInstance();
+			// return getConstructor(clazz)->NewInstance();
 		}
 		else if (clazz->Property() & kIsEnum)
 		{
