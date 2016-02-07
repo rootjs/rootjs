@@ -22,6 +22,14 @@ namespace rootJS
 			 * @param message the exception message
 			 */
 			static void throwException(const std::string &message);
+
+			/**
+			 *	Log the specified message.
+			 *
+			 *	@param
+			 *		the message to log
+			 */
+			static void log(const std::string &message);
 	};
 }
 

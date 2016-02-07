@@ -80,12 +80,16 @@ namespace rootJS {
 
 		std::string className = info.getTypeName();
 		DictFuncPtr_t dictFunc = gClassTable->GetDict(className.c_str());
-		if(dictFunc == nullptr) {
+		if(dictFunc == nullptr)
+		{
 			return nullptr;
 		}
 		TClass *klass = dictFunc();
 
 		v8::Local<v8::Object> instance = TemplateFactory::getInstance(klass);
+		if(instance.IsEmpty()) {
+			return nullptr;
+		}
 		instance->SetAlignedPointerInInternalField(0, createObjectProxyVector(klass, info));
 
 		ObjectProxy* proxy = new ObjectProxy(info, scope);
@@ -103,7 +107,8 @@ namespace rootJS {
 		return createObjectProxy(gMode, emptyRef);
 	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(const TDataMember & type, TClassRef scope, ObjectProxy & holder) {
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(const TDataMember & type, TClassRef scope, ObjectProxy & holder)
+	{
 		/*
 		 * It is not possible to do pointer arithmetic on void pointers.
 		 * To add the offset to the object we cast the pointer to char* before.
@@ -118,60 +123,90 @@ namespace rootJS {
 	}
 
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClassRef &type, v8::Local<v8::Object> proxy)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope)
 	{
 		// TODO
 		return nullptr;
 	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClassRef &type)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy)
 	{
 		// TODO
 		return nullptr;
 	}
 
-
-	ObjectProxy* ObjectProxyFactory::determineProxy(MetaInfo& type, TClassRef ref) {
+	ObjectProxy* ObjectProxyFactory::determineProxy(MetaInfo& type, TClassRef ref)
+	{
 		std::string typeString = std::string(type.getTypeName());
-		if(proxyMap.find(typeString) == proxyMap.end()) {
+		if(proxyMap.find(typeString) == proxyMap.end())
+		{
 			return nullptr;
 		}
 
 		return proxyMap[typeString](type, ref);
 	}
 
-	void ObjectProxyFactory::initializeProxyMap() {
+	void ObjectProxyFactory::initializeProxyMap()
+	{
 		proxyMap["Int_t"] = &NumberProxy::intConstruct;
 		proxyMap["UInt_t"] = &NumberProxy::uintConstruct;
+		proxyMap["int"] = &NumberProxy::intConstruct;
+		proxyMap["unsigned int"] = &NumberProxy::uintConstruct;
+
+		proxyMap["Seek_t"] = &NumberProxy::intConstruct;
+		proxyMap["Ssiz_t"] = &NumberProxy::intConstruct;
 
 		proxyMap["Double_t"] = &NumberProxy::doubleConstruct;
 		proxyMap["LongDouble_t"] = &NumberProxy::ldoubleConstruct;
+		proxyMap["double"] = &NumberProxy::doubleConstruct;
+		proxyMap["long double"] = &NumberProxy::ldoubleConstruct;
+
+		proxyMap["Axis_t"] = &NumberProxy::doubleConstruct;
+		proxyMap["Stat_t"] = &NumberProxy::doubleConstruct;
+		proxyMap["Coord_t"] = &NumberProxy::doubleConstruct;
 
 		proxyMap["Short_t"] = &NumberProxy::shortConstruct;
 		proxyMap["UShort_t"] = &NumberProxy::ushortConstruct;
+		proxyMap["short"] = &NumberProxy::shortConstruct;
+		proxyMap["unsigned short"] = &NumberProxy::ushortConstruct;
+
+		proxyMap["Version_t"] = &NumberProxy::shortConstruct;
+		proxyMap["Font_t"] = &NumberProxy::shortConstruct;
+		proxyMap["Style_t"] = &NumberProxy::shortConstruct;
+		proxyMap["Marker_t"] = &NumberProxy::shortConstruct;
+		proxyMap["Width_t"] = &NumberProxy::shortConstruct;
+		proxyMap["Color_t"] = &NumberProxy::shortConstruct;
+		proxyMap["SCoord_t"] = &NumberProxy::shortConstruct;
 
 		proxyMap["Long_t"] = &NumberProxy::longConstruct;
 		proxyMap["ULong_t"] = &NumberProxy::ulongConstruct;
+		proxyMap["long"] = &NumberProxy::longConstruct;
+		proxyMap["unsigned long"] = &NumberProxy::ulongConstruct;
 
 		proxyMap["Long64_t"] = &NumberProxy::llongConstruct;
-		proxyMap["long long"] = &NumberProxy::llongConstruct;
 		proxyMap["ULong64_t"] = &NumberProxy::ullongConstruct;
+		proxyMap["long long"] = &NumberProxy::llongConstruct;
 		proxyMap["unsigned long long"] = &NumberProxy::ullongConstruct;
 		proxyMap["__int64"] = &NumberProxy::llongConstruct;
 		proxyMap["unsigned __int64"] = &NumberProxy::ullongConstruct;
 
 		proxyMap["Float_t"] = &NumberProxy::floatConstruct;
+		proxyMap["float"] = &NumberProxy::floatConstruct;
 
-		proxyMap["Short_t"] = &NumberProxy::shortConstruct;
-		proxyMap["UShort_t"] = &NumberProxy::ushortConstruct;
+		proxyMap["Real_t"] = &NumberProxy::floatConstruct;
+		proxyMap["Angle_t"] = &NumberProxy::floatConstruct;
 
+		proxyMap["Size_t"] = &NumberProxy::floatConstruct;
 		proxyMap["char"] = &StringProxy::charConstruct;
 		proxyMap["char*"] = &StringProxy::charConstruct;
 		proxyMap["std::string"] = &StringProxy::stringConstruct;
 		proxyMap["TString"] = &StringProxy::tStringConstruct;
 
-		proxyMap["bool"] = &BooleanProxy::boolConstruct;
+		proxyMap["Text_t"] = &StringProxy::charConstruct;
+		proxyMap["Option_t"] = &StringProxy::charConstruct;
+
 		proxyMap["Bool_t"] = &BooleanProxy::boolConstruct;
+		proxyMap["bool"] = &BooleanProxy::boolConstruct;
 	}
 
 }

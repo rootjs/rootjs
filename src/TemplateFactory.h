@@ -34,7 +34,8 @@ namespace rootJS
 			static std::map<std::string, v8::Persistent<v8::FunctionTemplate>> classTemplates;
 			static std::map<std::string, v8::Persistent<v8::FunctionTemplate>> structTemplates;
 
-			static TClass* classFromName(const char *className);
+			static bool isValid(TClass *clazz);
+
 			TemplateFactory();
 
 	};
