@@ -21,21 +21,18 @@ namespace rootJS
 		public:
 			virtual ~TemplateFactory();
 
-			/**
-			 * Create a JavasScript prototype template of the specified ROOT class.
-			 * Generated FunctionTemplate's may be used to create instances of JavasScript objects encapsulating objects of the specified ROOT class.
-			 *
-			 * @param classRef
-			 *			the class to generate a template from
-			 *
-			 * @return the generated FunctionTemplate
-			 */
-			static v8::Local<v8::FunctionTemplate> createTemplate(TClass *clazz) throw(std::invalid_argument);
+			static v8::Local<v8::Object> getInstance(TClass *clazz) throw(std::invalid_argument);
+			static v8::Local<v8::Function> getConstructor(TClass *clazz) throw(std::invalid_argument);
 
-			// static v8::Local<v8::FunctionTemplate> createTemplate(std::string const& name);
+			static v8::Local<v8::ObjectTemplate> createNamespaceTemplate(TClass *clazz) throw(std::invalid_argument);
+			static v8::Local<v8::ObjectTemplate> createEnumTemplate(TClass *clazz) throw(std::invalid_argument);
+
+			static v8::Local<v8::FunctionTemplate> createClassTemplate(TClass *clazz) throw(std::invalid_argument);
+			static v8::Local<v8::FunctionTemplate> createStructTemplate(TClass *clazz) throw(std::invalid_argument);
 
 		private:
-			static std::map<std::string, v8::Persistent<v8::FunctionTemplate>> templates;
+			static std::map<std::string, v8::Persistent<v8::FunctionTemplate>> classTemplates;
+			static std::map<std::string, v8::Persistent<v8::FunctionTemplate>> structTemplates;
 
 			static TClass* classFromName(const char *className);
 			TemplateFactory();

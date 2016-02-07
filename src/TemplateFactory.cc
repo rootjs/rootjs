@@ -18,7 +18,8 @@
 namespace rootJS
 {
 	// Initialize static class members
-	std::map<std::string, v8::Persistent<v8::FunctionTemplate>> TemplateFactory::templates;
+	std::map<std::string, v8::Persistent<v8::FunctionTemplate>> TemplateFactory::classTemplates;
+	std::map<std::string, v8::Persistent<v8::FunctionTemplate>> TemplateFactory::structTemplates;
 
 	TemplateFactory::TemplateFactory()
 	{}
@@ -26,7 +27,104 @@ namespace rootJS
 	TemplateFactory::~TemplateFactory()
 	{}
 
-	v8::Local<v8::FunctionTemplate> TemplateFactory::createTemplate(TClass *clazz) throw(std::invalid_argument)
+	v8::Local<v8::Object> TemplateFactory::getInstance(TClass *clazz) throw(std::invalid_argument)
+	{
+		if(clazz == nullptr)
+		{
+			// Toolbox::throwException(std::string("Specified TClass is null."));
+			throw std::invalid_argument(std::string("Specified TClass is null."));
+		}
+
+		if(!clazz->IsLoaded())
+		{
+			// Toolbox::throwException(std::string("Specified TClass is not loaded."));
+			throw std::invalid_argument(std::string("Specified TClass is not loaded."));
+		}
+
+		if (clazz->Property() & kIsNamespace)
+		{
+			return createNamespaceTemplate(clazz)->NewInstance();
+		}
+		else if (clazz->Property() & kIsClass)
+		{
+			return createClassTemplate(clazz)->InstanceTemplate()->NewInstance();
+		}
+		else if (clazz->Property() & kIsStruct)
+		{
+			return createStructTemplate(clazz)->InstanceTemplate()->NewInstance();
+		}
+		else if (clazz->Property() & kIsEnum)
+		{
+			return createEnumTemplate(clazz)->NewInstance();
+		}
+		/*
+		 * else if (clazz->Property() & kIsUnion)
+		 * {
+		 * 	return createUnionTemplate(clazz)->Instance();
+		 * }
+		 * 	else if (clazz->Property() & kIsArray)
+		 * 	{
+		 * 		return createArrayTemplate(clazz)->Instance();
+		 * 	}
+		 */
+		else
+		{
+			throw std::invalid_argument(std::string("The type of the specified TClass is not supported."));
+		}
+	}
+
+	v8::Local<v8::Function> TemplateFactory::getConstructor(TClass *clazz) throw(std::invalid_argument)
+	{
+		if(clazz == nullptr)
+		{
+			// Toolbox::throwException(std::string("Specified TClass is null."));
+			throw std::invalid_argument(std::string("Specified TClass is null."));
+		}
+
+		if(!clazz->IsLoaded())
+		{
+			// Toolbox::throwException(std::string("Specified TClass is not loaded."));
+			throw std::invalid_argument(std::string("Specified TClass is not loaded."));
+		}
+
+		if (clazz->Property() & kIsClass)
+		{
+			return createClassTemplate(clazz)->GetFunction();
+		}
+		else if (clazz->Property() & kIsStruct)
+		{
+			return createStructTemplate(clazz)->GetFunction();
+		}
+		else
+		{
+			throw std::invalid_argument(std::string("The type of the specified TClass is not supported."));
+		}
+	}
+
+	/*
+	 * v8::Local<v8::ObjectTemplate> TemplateFactory::createUnionTemplate(TClass *clazz) throw(std::invalid_argument)
+	 * {}
+	 *
+	 * v8::Local<v8::ObjectTemplate> TemplateFactory::createArrayTemplate(TClass *clazz) throw(std::invalid_argument)
+	 * {}
+	*/
+
+	v8::Local<v8::ObjectTemplate> TemplateFactory::createNamespaceTemplate(TClass *clazz) throw(std::invalid_argument)
+	{
+		throw std::invalid_argument(std::string("Not implemented yet."));
+	}
+
+	v8::Local<v8::ObjectTemplate> TemplateFactory::createEnumTemplate(TClass *clazz) throw(std::invalid_argument)
+	{
+		throw std::invalid_argument(std::string("Not implemented yet."));
+	}
+
+	v8::Local<v8::FunctionTemplate> TemplateFactory::createStructTemplate(TClass *clazz) throw(std::invalid_argument)
+	{
+		throw std::invalid_argument(std::string("Not implemented yet."));
+	}
+
+	v8::Local<v8::FunctionTemplate> TemplateFactory::createClassTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
 		if(clazz == nullptr)
 		{
@@ -44,9 +142,9 @@ namespace rootJS
 		std::string className(clazz->GetName());
 
 		// Check if template has been already created
-		if (templates.count(className) && !templates[className].IsEmpty())
+		if (classTemplates.count(className) && !classTemplates[className].IsEmpty())
 		{
-			return v8::Local<v8::FunctionTemplate>::New(isolate, templates[className]);
+			return v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]);
 		}
 
 		v8::Local<v8::FunctionTemplate> tmplt = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, v8::String::NewFromUtf8(isolate, className.c_str()));
@@ -151,8 +249,8 @@ namespace rootJS
 
 		}
 
-		templates[className].Reset(isolate, tmplt);
-		v8::Local<v8::FunctionTemplate> tmp = v8::Local<v8::FunctionTemplate>::New(isolate, templates[className]);
+		classTemplates[className].Reset(isolate, tmplt);
+		v8::Local<v8::FunctionTemplate> tmp = v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]);
 
 		return tmp;
 	}
