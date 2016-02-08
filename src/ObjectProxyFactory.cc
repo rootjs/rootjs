@@ -2,13 +2,14 @@
 #include "Proxy.h"
 #include <iostream>
 #include <map>
-#include <v8.h>
+#include <node.h>
 #include <TClass.h>
 #include <TClassRef.h>
 #include <TClassTable.h>
 #include <TDataMember.h>
 #include <TDataType.h>
 #include <TList.h>
+#include <TMethod.h>
 
 #include "GlobalInfo.h"
 #include "MemberInfo.h"
@@ -17,43 +18,67 @@
 #include "StringProxy.h"
 #include "BooleanProxy.h"
 
-namespace rootJS
-{
+#include "TemplateFactory.h"
+#include "CallbackHandler.h"
+
+namespace rootJS {
 
 	std::map<std::string, ProxyInitializator> ObjectProxyFactory::proxyMap;
 
-	void ObjectProxyFactory::traverseClass(TClassRef & classRef, ObjectProxy & proxy)
-	{
+	std::map<std::string, Proxy*> *ObjectProxyFactory::createObjectProxyVector(TClass *klass, MetaInfo &info) {
+		std::map<std::string, Proxy*> *result = new std::map<std::string, Proxy*>();
+
+		if(klass == nullptr) {
+			return nullptr;
+		}
+
+		const TList *methodList = klass->GetListOfAllPublicMethods();
+		TIter nextMethod(methodList);
+		TMethod *method;
+
+		while ((method = (TMethod*)nextMethod())) {
+			FunctionProxy *proxy = FunctionProxyFactory::createFunctionProxy(method, klass);
+			(*result)[std::string(method->GetName())] = proxy;
+			proxy->setSelfAddress(info.getAddress());
+		}
+
+		return result;
+	}
+
+	/*void ObjectProxyFactory::traverseClass(TClassRef & classRef, ObjectProxy & proxy) {
 		TClass *klass = classRef.GetClass();
 
 		TList *propertyList = klass->GetListOfAllPublicDataMembers();
 		TIter nextProperty(propertyList);
 		TDataMember *member;
 
-		while ((member = (TDataMember*)nextProperty()))
-		{
+		while ((member = (TDataMember*)nextProperty())) {
 			v8::Local<v8::Object> nodeObject = proxy.getProxy();
 			ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(*member, classRef, proxy);
-			nodeObject->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName()), memberProxy->get());
+			if(memberProxy != nullptr) {
+				nodeObject->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName()), memberProxy->get());
+			}
 		}
-	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(TGlobal & object)
-	{
-		if(!object.IsValid() || !object.GetAddress())
-		{
-			return nullptr;
+		const TList *methodList = klass->GetListOfAllPublicMethods();
+		TIter nextMethod(methodList);
+		TMethod *method;
+
+		while ((method = (TMethod*)nextMethod())) {
+			v8::Local<v8::Object> nodeObject = proxy.getProxy();
+			NODE_SET_METHOD(nodeObject, method->GetName(), CallbackHandler::memberFunctionCallback);
 		}
-		GlobalInfo gMode(object);
-		ObjectProxy* nonObjectProxy = determineProxy(gMode, TClassRef());
+	}*/
 
-		if(nonObjectProxy)
-		{
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClassRef scope) {
+		ObjectProxy* nonObjectProxy = determineProxy(info, scope);
+
+		if(nonObjectProxy) {
 			return nonObjectProxy;
 		}
 
 
-		std::string className = getClassNameFromType(object.GetTypeName());
+		std::string className = info.getTypeName();
 		DictFuncPtr_t dictFunc = gClassTable->GetDict(className.c_str());
 		if(dictFunc == nullptr)
 		{
@@ -61,22 +86,25 @@ namespace rootJS
 		}
 		TClass *klass = dictFunc();
 
-		TClassRef classRef = TClassRef(klass);
-		GlobalInfo mode(object);
-		ObjectProxy *proxy = new ObjectProxy(mode, classRef);
-		//Set an empty proxy and fill iit in the following loops
-		proxy->setProxy(v8::Object::New(v8::Isolate::GetCurrent()));
+		v8::Local<v8::Object> instance = TemplateFactory::getInstance(klass);
+		if(instance.IsEmpty()) {
+			return nullptr;
+		}
+		instance->SetAlignedPointerInInternalField(0, createObjectProxyVector(klass, info));
 
-		traverseClass(classRef, *proxy);
+		ObjectProxy* proxy = new ObjectProxy(info, scope);
+		proxy->setProxy(instance);
 
 		return proxy;
 	}
 
-	std::string ObjectProxyFactory::getClassNameFromType(const char* type)
-	{
-		std::string typeString = std::string(type);
-		std::string className = typeString.substr(0, typeString.length()-1);
-		return className;
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(TGlobal & object) {
+		if(!object.IsValid() || !object.GetAddress()) {
+			return nullptr;
+		}
+		TClassRef emptyRef = TClassRef();
+		GlobalInfo gMode(object);
+		return createObjectProxy(gMode, emptyRef);
 	}
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(const TDataMember & type, TClassRef scope, ObjectProxy & holder)
@@ -91,20 +119,7 @@ namespace rootJS
 
 		MemberInfo mode(type, object);
 
-		ObjectProxy *memberProxy = determineProxy(mode, scope);
-		if(memberProxy)
-		{
-			memberProxy->setAddress(object);
-		}
-		else
-		{
-			//TODO object?
-			MemberInfo mode(type, object);
-			memberProxy = new ObjectProxy(mode, scope);
-			memberProxy->setProxy(v8::Object::New(v8::Isolate::GetCurrent()));
-		}
-
-		return memberProxy;
+		return createObjectProxy(mode, scope);
 	}
 
 

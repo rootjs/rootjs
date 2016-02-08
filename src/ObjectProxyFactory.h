@@ -21,12 +21,12 @@ namespace rootJS
 	{
 		private:
 			ObjectProxyFactory(void);
-			static std::string getClassNameFromType(const char*);
-			static void traverseClass(TClassRef&, ObjectProxy&);
+			static std::map<std::string, Proxy*> *createObjectProxyVector(TClass*, MetaInfo&);
 			static std::map<std::string, ProxyInitializator> proxyMap;
 
 		public:
 			static ObjectProxy* createObjectProxy(TGlobal & object);
+			static ObjectProxy* createObjectProxy(MetaInfo &info, TClassRef scope);
 			static ObjectProxy* createObjectProxy(const TDataMember&, TClassRef, ObjectProxy&);
 
 			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope);

@@ -22,6 +22,7 @@
 #include <TList.h>
 #include <TMethodArg.h>
 #include "FunctionInfo.h"
+#include "FunctionProxyFactory.h"
 #include "PointerInfo.h"
 
 namespace rootJS {
@@ -83,7 +84,14 @@ namespace rootJS {
 
 
 			if ( ! gInterpreter->CallFunc_IsValid( callf ) ) {
-				v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Cling sucks"));
+				gInterpreter->CallFunc_SetFuncProto(
+				    callf,
+				    gcl,
+				    func ? func->GetName() : classRef->GetName(),
+				    callString.c_str(),
+				    func ? (func->Property() & kIsConstMethod) : kFALSE,
+				    &offset );
+				return callf;
 			} else {
 				return callf;
 			}
@@ -97,11 +105,13 @@ namespace rootJS {
 	{
 		std::vector<TFunction*> methods;
 
-		TFunction *method;
-		TIterator *iterator = scope.GetClass()->GetListOfMethodOverloads(name.c_str())->MakeIterator();
-		while ( (method = dynamic_cast<TFunction*>(iterator->Next())) )
-		{
-			methods.push_back(method);
+		const TList *funcList = scope.GetClass()->GetListOfAllPublicMethods();
+		TIter funcIter(funcList);
+		TFunction *func;
+		while((func = (TFunction*)funcIter())) {
+			if(name.compare(func->GetName()) == 0) {
+				methods.push_back(func);
+			}
 		}
 
 		return methods;
@@ -260,7 +270,7 @@ namespace rootJS {
 		switch(facePtr.fKind) {
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
 
-			facePtr.fGeneric(&self, args.Length(), buf.data(), &result);
+			facePtr.fGeneric((selfAddress == nullptr)?self:*(void**)selfAddress, args.Length(), buf.data(), &result);
 			break;
 		default:
 			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
@@ -282,6 +292,17 @@ namespace rootJS {
 
 		return v8::Null(v8::Isolate::GetCurrent());
 	}
+
+	bool FunctionProxy::determineOverload(const v8::FunctionCallbackInfo<v8::Value>& info) {
+		TFunction* overloadedFunction = FunctionProxyFactory::determineFunction(function->GetName(), scope.GetClass(), info);
+		if(overloadedFunction == nullptr) {
+			return false;
+		}
+		function = overloadedFunction;
+		return true;
+	}
+
+
 	/*
 	// TODO
 	bool FunctionProxy::processCall(TFunction* method, void* args, void* self, void* result)

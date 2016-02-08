@@ -28,7 +28,7 @@ namespace rootJS {
             break;
 
 			SWITCH_CAST_DOUBLE(INT_T,Int_t)
-            SWITCH_CAST_DOUBLE(UINT_T,UInt_t)
+			SWITCH_CAST_DOUBLE(UINT_T,UInt_t)
 
 			SWITCH_CAST_DOUBLE(SHORT_T,Short_t)
 			SWITCH_CAST_DOUBLE(USHORT_T,UShort_t)
@@ -78,7 +78,7 @@ namespace rootJS {
 	ROOTJS_NUMBER_PROXY(_int64, LONG64_T )
 	ROOTJS_NUMBER_PROXY(u_int64, ULONG64_T )
 
-    ROOTJS_NUMBER_PROXY(float, FLOAT_T )
+	ROOTJS_NUMBER_PROXY(float, FLOAT_T )
 
 
 	void NumberProxy::setValue(v8::Local<v8::Value> value) {
@@ -114,7 +114,7 @@ namespace rootJS {
 
 		switch(numberType) {
 			SWITCH_SET_VALUE(INT_T,int)
-            SWITCH_SET_VALUE(UINT_T,unsigned int)
+			SWITCH_SET_VALUE(UINT_T,unsigned int)
 
 			SWITCH_SET_VALUE(SHORT_T,short)
 			SWITCH_SET_VALUE(USHORT_T,unsigned short)
