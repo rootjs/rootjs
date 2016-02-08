@@ -13,7 +13,7 @@
 namespace rootJS
 {
 	/**
-	 * Proxies a string.
+	 * Maps C++ strings and c-strings to JavaScript strings.
 	 */
 	class StringProxy: public PrimitiveProxy
 	{
@@ -24,7 +24,7 @@ namespace rootJS
 			/**
 			 * Returns a c_string
 			 * If this is based on a char ptr, this ptr will be returned
-			 * If this is based on a std::string it's c_str will be returned
+			 * If this is based on a std::string its c_str will be returned
 			 */
 			const char* c_str();
 			/**

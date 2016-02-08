@@ -17,7 +17,9 @@ namespace rootJS {
 	    LONG64_T, ULONG64_T, LONGDOUBLE_T
 	};
 
-
+    /**
+     * Uses a C++ macro to map all C++ numbers to JavaScript numbers
+     */
 	class NumberProxy: public PrimitiveProxy {
 		private:
 			NumberType numberType;
@@ -43,10 +45,14 @@ namespace rootJS {
 			 */
 			NumberProxy(MetaInfo& type, TClassRef scope);
 
-			/**
+
+#define ROOTJS_NUMBER_PROXY_DECLARE( datatype )                   \
+        static ObjectProxy* datatype##Construct(MetaInfo& type, TClassRef scope);
+
+            /**
 			 * This calls the constructor.
 			 * We cannot create pointers to constructors,
-			 * but need to map the constructors in out Factory.
+			 * but need to map the constructors in an Factory.
 			 * This is a macro to declare the constructors for the
 			 * various number types.
 
@@ -56,9 +62,6 @@ namespace rootJS {
 			 * @param scope
 			 *			the scope of the encapsulated object
 			 */
-#define ROOTJS_NUMBER_PROXY_DECLARE( datatype )                   \
-        static ObjectProxy* datatype##Construct(MetaInfo& type, TClassRef scope);
-
 			ROOTJS_NUMBER_PROXY_DECLARE(int);
 			ROOTJS_NUMBER_PROXY_DECLARE(uint);
 
