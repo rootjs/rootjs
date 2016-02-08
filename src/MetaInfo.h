@@ -20,22 +20,55 @@ namespace rootJS {
 			};
 			virtual ~MetaInfo() {};
 
+            /**
+             * Checks if the TObject is global.
+             * @return If the TObject is global
+             */
 			virtual bool isGlobal() {
 				return false;
 			};
 			virtual Long_t getOffset() {
 				return 0;
 			};
+
+			/**
+             * Checks if the TObject is a constant.
+             * @return If the TObject is a constant
+             */
 			virtual bool isConst() = 0;
+
+			/**
+             * Checks if the TObject is static.
+             * @return If the TObject is static
+             */
 			virtual bool isStatic() = 0;
+
+			/**
+             * Returns the typename of the TObject.
+             * @return Typename of the TObject
+             */
 			virtual const char* getTypeName() = 0;
+
+			/**
+             * Returns the base address of the TObject.
+             * @return Base address of the TObject
+             */
 			virtual void* getBaseAddress() {
 				return baseAddress;
 			};
+
+			/**
+             * Returns the address of the TObject.
+             * @return Address of the TObject
+             */
 			virtual void* getAddress() {
 				return (void*)((char*)getBaseAddress() + getOffset());
 			}
 
+            /**
+             * Makes a clone of the MetaInfo instance.
+             * @return Pointer to the cloned MetaInfo instance
+             */
 			virtual MetaInfo* clone() = 0;
 
 		protected:

@@ -12,7 +12,7 @@
 namespace rootJS
 {
 	/**
-	 * Proxies a bool.
+	 * Maps C++ ROOT boolean to JavaScript boolean.
 	 */
 	class BooleanProxy: public PrimitiveProxy
 	{
