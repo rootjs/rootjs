@@ -106,12 +106,12 @@ namespace rootJS
 
 					if (clazz->Property() & kIsNamespace) {
 						this->exports->Set(v8::String::NewFromUtf8(
-								v8::Isolate::GetCurrent(), clazz->GetName()),(TemplateFactory::createNamespaceTemplate(clazz))->NewInstance());
+								v8::Isolate::GetCurrent(), clazz->GetName()),TemplateFactory::getInstance(clazz));
 					}
 
 					} else if (clazz->Property() & kIsClass) {
 						this->exports->Set(v8::String::NewFromUtf8(
-											v8::Isolate::GetCurrent(), clazz->GetName()),TemplateFactory::createClassTemplate(clazz)->GetFunction());
+											v8::Isolate::GetCurrent(), clazz->GetName()),TemplateFactory::getConstructor(clazz));
 					}
 				}
 			}
