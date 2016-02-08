@@ -82,6 +82,8 @@ namespace rootJS {
 				return false; /*TODO*/
 			};
 
+			bool determineOverload(const v8::FunctionCallbackInfo<v8::Value>& info);
+
 			void setSelfAddress(void* addr) {
 				selfAddress = addr;
 			}

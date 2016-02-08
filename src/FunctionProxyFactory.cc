@@ -30,8 +30,7 @@ namespace rootJS
 		return new FunctionProxy(FunctionProxy::getCallFunc(scope, function), mode, function, scope);
 	}
 
-	FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClass *scope, v8::FunctionCallbackInfo<v8::Value> args)
-	{
+	TFunction* FunctionProxyFactory::determineFunction(std::string name, TClass *scope, const v8::FunctionCallbackInfo<v8::Value> args) {
 		std::vector<TFunction*> validFuncs;
 		TFunction *callableFunction = nullptr;
 		if(scope == nullptr)
@@ -75,7 +74,16 @@ namespace rootJS
 				break;
 			}
 		}
-		if(callableFunction)
+		if(callableFunction) {
+			return callableFunction;
+		}
+		return nullptr;
+	}
+
+	FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClass *scope, const v8::FunctionCallbackInfo<v8::Value> args)
+	{
+		TFunction *callableFunction = determineFunction(name, scope, args);
+		if(callableFunction != nullptr)
 		{
 			return createFunctionProxy(callableFunction, scope);
 		}

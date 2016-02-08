@@ -30,8 +30,8 @@ namespace rootJS
 			FunctionProxyFactory(void);
 		public:
 			static FunctionProxy* createFunctionProxy(TFunction *function, TClass *scope);
-			static FunctionProxy* fromArgs(std::string name, TClass *scope, v8::FunctionCallbackInfo<v8::Value> args);
-
+			static FunctionProxy* fromArgs(std::string name, TClass *scope, const v8::FunctionCallbackInfo<v8::Value> args);
+			static TFunction* determineFunction(std::string name, TClass *scope, const v8::FunctionCallbackInfo<v8::Value> args);
 			static FunctionProxy* fromArgs(std::string name, TClass *scope, v8::Local<v8::Array> args);
 
 			/**

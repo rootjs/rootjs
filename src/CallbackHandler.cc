@@ -132,6 +132,7 @@ namespace rootJS
 
 	void CallbackHandler::ctorCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
 	{
+		return; //TODO!!!
 		v8::Isolate* isolate = info.GetIsolate();
 		v8::Local<v8::Object> instance = info.This();
 
@@ -207,21 +208,26 @@ namespace rootJS
 	void CallbackHandler::memberFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
 	{
 		v8::Local<v8::Object> instance = info.This();
-		v8::String::Utf8Value callStr(info.Callee()->GetName()->ToString());
+		std::string name  = resolveCallbackName(info.Data());
 		std::map<std::string, Proxy*> map =
 		    *((std::map<std::string, Proxy*>*)instance->GetAlignedPointerFromInternalField(0));
 		std::map<std::string, Proxy*>::const_iterator proxySearch
-		    = map.find(std::string(*callStr));
+		    = map.find(name);
 
 		FunctionProxy *proxy = nullptr;
 		if(proxySearch != map.end()) {
 			proxy = (FunctionProxy*)proxySearch->second;
 		}
 
+		if(!proxy->determineOverload(info)) {
+			Toolbox::throwException("These parameters are not supported.");
+			return;
+		}
+
 		if(proxy != nullptr) {
 			info.GetReturnValue().Set(proxy->call(info));
 		} else {
-			Toolbox::throwException(std::string("The method could not be determined."));
+			Toolbox::throwException("The method could not be determined.");
 		}
 	}
 
