@@ -92,6 +92,7 @@ namespace rootJS
 
 			for (int i = 0; i < gClassTable->Classes(); i++) {
 
+
 				DictFuncPtr_t funcPtr = gClassTable->GetDict(gClassTable->At(i));
 				if (funcPtr == nullptr) {
 					throw std::invalid_argument(std::string("Specified class is null."));
