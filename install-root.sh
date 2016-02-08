@@ -12,9 +12,9 @@ git pull
 cd $HOME
 if [ -d rootbuild ]; then
   cd rootbuild
-  cmake .
+  cmake -D CMAKE_BUILD_TYPE=Debug .
 else
   mkdir rootbuild
   cd rootbuild
-  cmake ../root
+  cmake -D CMAKE_BUILD_TYPE=Debug ../root
 fi

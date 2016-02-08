@@ -31,7 +31,7 @@ namespace rootJS
 			void exposeGlobalFunctions();
 			void exposeGlobals();
 			void exposeMacros();
-			void exposeClasses();
+			void exposeClasses() throw(std::invalid_argument);;
 
 		public:
 			static void initialize(v8::Local<v8::Object>, v8::Local<v8::Object>);

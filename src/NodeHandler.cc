@@ -81,48 +81,41 @@ namespace rootJS
 		TIter next(globals);
 		while(TObject *global = next())
 		{
-			NODE_SET_METHOD(this->exports, global->GetName(), CallbackHandler::staticFunctionCallback);
+			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(global->GetName(), nullptr);
+			exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()), v8::Function::New(v8::Isolate::GetCurrent(), CallbackHandler::globalFunctionCallback, data));
 		}
 	}
 
-	void NodeHandler::exposeClasses()
+	void NodeHandler::exposeClasses() throw(std::invalid_argument)
 	{
-		// gClassTable->PrintTable(); // TODO: remove this line
-
 		gInterpreter->SetClassAutoloading(kTRUE); // maybe not necessary
 
-		for (int i = 0; i < gClassTable->Classes(); i++)
-		{
+			for (int i = 0; i < gClassTable->Classes(); i++) {
 
-			DictFuncPtr_t funcPtr = gClassTable->GetDict(gClassTable->At(i));
-			if (funcPtr == nullptr)
-			{
-				continue;
+				DictFuncPtr_t funcPtr = gClassTable->GetDict(gClassTable->At(i));
+				if (funcPtr == nullptr) {
+					throw std::invalid_argument(std::string("Specified class is null."));
+				}
+
+				TClass *clazz = funcPtr(); // call dictionary function on class
+				if (clazz == nullptr || !clazz->IsLoaded()) {
+					throw std::invalid_argument(std::string("Specified class is not loaded."));
+				}
+				if (((std::string) clazz->GetName()).find(":") == std::string::npos) {
+
+					if (clazz->Property() & kIsNamespace) {
+						this->exports->Set(v8::String::NewFromUtf8(
+								v8::Isolate::GetCurrent(), clazz->GetName()),(TemplateFactory::createNamespaceTemplate(clazz))->NewInstance());
+					}
+
+					} else if (clazz->Property() & kIsClass) {
+						this->exports->Set(v8::String::NewFromUtf8(
+											v8::Isolate::GetCurrent(), clazz->GetName()),TemplateFactory::createClassTemplate(clazz)->GetFunction());
+					}
+				}
 			}
 
-			TClass *clazz = funcPtr(); // call dictionary function on class
-			if (clazz == nullptr || !clazz->IsLoaded())
-			{
-				continue;
-			}
-
-			if (clazz->Property() & kIsNamespace)
-			{
-				// std::cout << "Namespace: " << clazz->GetName() << std::endl;
-
-			}
-			else if (clazz->Property() & kIsClass)
-			{
-				// std::cout << "Class: " << clazz->GetName() << std::endl;
-
-			}
-			/*
-			 else if (clazz->Property() & ....)
-			 {
-
-			 }
-			 */
 		}
-	}
 
-}
+
+

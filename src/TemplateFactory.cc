@@ -4,6 +4,8 @@
 #include "ObjectProxyFactory.h"
 #include "FunctionProxy.h"
 #include "FunctionProxyFactory.h"
+#include "MemberInfo.h"
+#include "Toolbox.h"
 
 #include "TClassTable.h"
 #include "TMethod.h"
@@ -47,11 +49,13 @@ namespace rootJS
 		}
 		else if (clazz->Property() & kIsClass)
 		{
-			return createClassTemplate(clazz)->InstanceTemplate()->NewInstance();
+			return createClassTemplate(clazz)->GetFunction()->NewInstance();
+			// return getConstructor(clazz)->NewInstance();
 		}
 		else if (clazz->Property() & kIsStruct)
 		{
-			return createStructTemplate(clazz)->InstanceTemplate()->NewInstance();
+			return createStructTemplate(clazz)->GetFunction()->NewInstance();
+			// return getConstructor(clazz)->NewInstance();
 		}
 		else if (clazz->Property() & kIsEnum)
 		{
@@ -126,16 +130,14 @@ namespace rootJS
 
 	v8::Local<v8::FunctionTemplate> TemplateFactory::createClassTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
-		if(clazz == nullptr)
+		if(!isValid(clazz))
 		{
-			// Toolbox::throwException(std::string("Specified TClass is null."));
-			throw std::invalid_argument(std::string("Specified TClass is null."));
+			throw std::invalid_argument(std::string("Specified TClass is null or not loaded."));
 		}
 
-		if(!clazz->IsLoaded())
+		if(clazz->Property() & kClassIsAbstract)
 		{
-			// Toolbox::throwException(std::string("Specified TClass is not loaded."));
-			throw std::invalid_argument(std::string("Specified TClass is not loaded."));
+			throw std::invalid_argument(std::string("Specified TClass is abstract."));
 		}
 
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
@@ -147,7 +149,7 @@ namespace rootJS
 			return v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]);
 		}
 
-		v8::Local<v8::FunctionTemplate> tmplt = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, v8::String::NewFromUtf8(isolate, className.c_str()));
+		v8::Local<v8::FunctionTemplate> tmplt = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
 		tmplt->SetClassName(v8::String::NewFromUtf8(isolate, className.c_str()));
 
 		v8::Local<v8::ObjectTemplate> prototype = tmplt->PrototypeTemplate();
@@ -155,7 +157,6 @@ namespace rootJS
 
 		v8::Local<v8::ObjectTemplate> instance = tmplt->InstanceTemplate();
 		instance->SetInternalFieldCount(1); // each instance stores a reference to an ObjectProxy
-		// instance->SetNamedPropertyHandler();
 
 		TIter funcIter(clazz->GetListOfAllPublicMethods(kTRUE));
 		TMethod *method = nullptr;
@@ -164,7 +165,7 @@ namespace rootJS
 		{
 			if (method == nullptr || !method->IsValid())
 			{
-				// TODO: log this
+				Toolbox::log("Invalid method found in " + className + ".");
 				continue;
 			}
 
@@ -172,12 +173,16 @@ namespace rootJS
 			Long_t property = method->Property();
 			if ((property & kIsPureVirtual)) // (property & kIsAbstract)
 			{
+				Toolbox::log("Skipped pure virtual method in " + className + ".");
 				continue;
 			}
 
 			/*
 			 * TODO: make overridden or overloaded methods only occur once
 			 */
+
+			Toolbox::log("Make overridden or overloaded methods only occur once.");
+
 			switch (method->ExtraProperty())
 			{
 			case kIsConstructor:
@@ -191,19 +196,13 @@ namespace rootJS
 			default:
 				if (property & kIsStatic)
 				{
-					std::string methodName(className);
-					methodName.append("::");
-					methodName.append(method->GetName());
-
-					FunctionProxy *proxy = FunctionProxyFactory::createFunctionProxy(method, clazz);
-					CallbackHandler::registerStaticFunction(methodName, proxy);
-
-					prototype->Set(v8::String::NewFromUtf8(isolate, method->GetName()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, v8::String::NewFromUtf8(isolate, className.c_str())));
+					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
+					prototype->Set(v8::String::NewFromUtf8(isolate, method->GetName()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
 				}
 				else
 				{
-					// std::cout << "non static " << method->GetName() << std::endl;
-					instance->Set(v8::String::NewFromUtf8(isolate, method->GetName()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, v8::String::NewFromUtf8(isolate, className.c_str())));
+					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
+					instance->Set(v8::String::NewFromUtf8(isolate, method->GetName()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, data));
 				}
 				break;
 			}
@@ -217,28 +216,14 @@ namespace rootJS
 		{
 			if (member == nullptr || !member->IsValid())
 			{
-				// TODO: log this
+				Toolbox::log("Invalid member found in " + className + ".");
 				continue;
 			}
 
 			if(member->Property() & kIsStatic)
 			{
-				void *address = (void*) member->GetOffsetCint();
-
-				TClass *memberClazz = classFromName(member->GetTypeName());
-				if(memberClazz == nullptr)
-				{
-					// TODO: log this
-					continue;
-				}
-				TClassRef classRef(memberClazz);
-
-				std::string memberName(memberClazz->GetName());
-				memberName.append("::");
-				memberName.append(member->GetName());
-
-				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(address, classRef);
-				CallbackHandler::registerStaticObject(memberName, proxy);
+				// TODO: Call: ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(MemberInfo(member), clazz);
+				CallbackHandler::registerStaticObject(member->GetName(), clazz, nullptr); /* member->GetName(), clazz, proxy*/
 
 				prototype->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback);
 			}
@@ -255,20 +240,9 @@ namespace rootJS
 		return tmp;
 	}
 
-
-	TClass* TemplateFactory::classFromName(const char *className)
+	bool TemplateFactory::isValid(TClass* clazz)
 	{
-		if(className == nullptr)
-		{
-			return nullptr;
-		}
-
-		DictFuncPtr_t dictPtr = gClassTable->GetDict(className);
-		if(dictPtr == nullptr)
-		{
-			return nullptr;
-		}
-
-		return dictPtr();
+		return ((clazz != nullptr) && clazz->IsLoaded());
 	}
+
 }
