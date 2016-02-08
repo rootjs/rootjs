@@ -121,11 +121,11 @@ namespace rootJS {
 	void ObjectProxyFactory::initializeProxyMap() {
 		proxyMap["Int_t"] = &NumberProxy::intConstruct;
 		proxyMap["UInt_t"] = &NumberProxy::uintConstruct;
-        proxyMap["int"] = &NumberProxy::intConstruct;
-        proxyMap["unsigned int"] = &NumberProxy::uintConstruct;
+		proxyMap["int"] = &NumberProxy::intConstruct;
+		proxyMap["unsigned int"] = &NumberProxy::uintConstruct;
 
-        proxyMap["Seek_t"] = &NumberProxy::intConstruct;
-        proxyMap["Ssiz_t"] = &NumberProxy::intConstruct;
+		proxyMap["Seek_t"] = &NumberProxy::intConstruct;
+		proxyMap["Ssiz_t"] = &NumberProxy::intConstruct;
 
 		proxyMap["Double_t"] = &NumberProxy::doubleConstruct;
 		proxyMap["LongDouble_t"] = &NumberProxy::ldoubleConstruct;
@@ -177,7 +177,7 @@ namespace rootJS {
 		proxyMap["Option_t"] = &StringProxy::charConstruct;
 
 		proxyMap["Bool_t"] = &BooleanProxy::boolConstruct;
-        proxyMap["bool"] = &BooleanProxy::boolConstruct;
+		proxyMap["bool"] = &BooleanProxy::boolConstruct;
 	}
 
 }

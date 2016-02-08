@@ -22,7 +22,7 @@ namespace rootJS
 		// TODO
 	}
 
-	ObjectProxy* BooleanProxy::boolConstruct(MetaInfo& type, TClassRef scope){
+	ObjectProxy* BooleanProxy::boolConstruct(MetaInfo& type, TClassRef scope) {
 		return new BooleanProxy(type, scope);
 	}
 
