@@ -15,5 +15,10 @@ describe('Objects', function() {
 			  root.gSystem.Dump("test");
 		  }).should.throw();
 	  });
+	  it('should be possible to call virtual methods', function() {
+		  (function() {
+			  root.gBenchmark.Start("test");
+		  }).should.not.throw();
+	  })
   });
 });

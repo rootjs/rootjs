@@ -16,7 +16,7 @@
 
 namespace rootJS {
 	enum class mappedTypes {
-	    CHAR
+	    CHAR, INT, DOUBLE, BOOL
 	};
 	/**
 	 * Represents a ROOT callable and provides functionality to invoke those callables.

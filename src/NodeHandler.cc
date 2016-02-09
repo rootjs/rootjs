@@ -90,33 +90,33 @@ namespace rootJS
 	{
 		gInterpreter->SetClassAutoloading(kTRUE); // maybe not necessary
 
-			for (int i = 0; i < gClassTable->Classes(); i++) {
+		for (int i = 0; i < gClassTable->Classes(); i++) {
 
 
-				DictFuncPtr_t funcPtr = gClassTable->GetDict(gClassTable->At(i));
-				if (funcPtr == nullptr) {
-					throw std::invalid_argument(std::string("Specified class is null."));
-				}
-
-				TClass *clazz = funcPtr(); // call dictionary function on class
-				if (clazz == nullptr || !clazz->IsLoaded()) {
-					throw std::invalid_argument(std::string("Specified class is not loaded."));
-				}
-				if (((std::string) clazz->GetName()).find(":") == std::string::npos) {
-
-					if (clazz->Property() & kIsNamespace) {
-						this->exports->Set(v8::String::NewFromUtf8(
-								v8::Isolate::GetCurrent(), clazz->GetName()),TemplateFactory::getInstance(clazz));
-					}
-
-					} else if (clazz->Property() & kIsClass) {
-						this->exports->Set(v8::String::NewFromUtf8(
-											v8::Isolate::GetCurrent(), clazz->GetName()),TemplateFactory::getConstructor(clazz));
-					}
-				}
+			DictFuncPtr_t funcPtr = gClassTable->GetDict(gClassTable->At(i));
+			if (funcPtr == nullptr) {
+				throw std::invalid_argument(std::string("Specified class is null."));
 			}
 
+			TClass *clazz = funcPtr(); // call dictionary function on class
+			if (clazz == nullptr || !clazz->IsLoaded()) {
+				throw std::invalid_argument(std::string("Specified class is not loaded."));
+			}
+			if (((std::string) clazz->GetName()).find(":") == std::string::npos) {
+
+				if (clazz->Property() & kIsNamespace) {
+					this->exports->Set(v8::String::NewFromUtf8(
+					                       v8::Isolate::GetCurrent(), clazz->GetName()),TemplateFactory::getInstance(clazz));
+				}
+
+			} else if (clazz->Property() & kIsClass) {
+				this->exports->Set(v8::String::NewFromUtf8(
+				                       v8::Isolate::GetCurrent(), clazz->GetName()),TemplateFactory::getConstructor(clazz));
+			}
 		}
+	}
+
+}
 
 
 

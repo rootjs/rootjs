@@ -16,7 +16,12 @@ namespace rootJS
 {
 
 	std::map<std::string, v8BasicTypes> FunctionProxyFactory::basicTypeMap = {
-		{"char", v8BasicTypes::STRING}
+		{"char", v8BasicTypes::STRING},
+		{"TString", v8BasicTypes::STRING},
+		{"Int_t", v8BasicTypes::NUMBER},
+		{"int", v8BasicTypes::NUMBER},
+		{"Double_t", v8BasicTypes::NUMBER},
+		{"Bool_t", v8BasicTypes::BOOLEAN}
 	};
 
 	FunctionProxyFactory::FunctionProxyFactory()
@@ -174,6 +179,16 @@ namespace rootJS
 				{
 				case v8BasicTypes::STRING:
 					return arg->IsString();
+				case v8BasicTypes::NUMBER:
+					return arg->IsNumber() || arg->IsNumberObject();
+				case v8BasicTypes::BOOLEAN:
+					return arg->IsBoolean() || arg->IsBooleanObject();
+				case v8BasicTypes::ARRAY:
+					//TODO: CHeck array contents...
+					return false;
+				case v8BasicTypes::OBJECT:
+					//TODO: Check object type
+					return false;
 				default:
 					v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
 					return false;
