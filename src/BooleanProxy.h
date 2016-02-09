@@ -13,8 +13,8 @@ namespace rootJS
 	 */
 	class BooleanProxy: public PrimitiveProxy
 	{
-	private:
-		bool backedUp = false;
+		private:
+			bool backedUp = false;
 		public:
 			/**
 			 * Check if the type is a boolean type.

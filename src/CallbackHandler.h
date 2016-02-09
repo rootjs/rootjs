@@ -197,7 +197,6 @@ namespace rootJS
 			struct AsyncCallParam {
 				v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> params;
 				FunctionProxy* proxy;
-				v8::Isolate* isolate;
 			};
 			static std::map<std::string, ObjectProxy*> globalObjectMap;
 			static std::map<std::string, ObjectProxy*> staticObjectMap;

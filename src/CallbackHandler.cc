@@ -68,14 +68,28 @@ namespace rootJS
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, params);
 		if(proxy != nullptr)
 		{
-			//TODO: Callback!
-			proxy->prepareCall(params);
-			ObjectProxy *resultProxy = proxy->call();
-			if(resultProxy) {
-				args.GetReturnValue().Set(resultProxy->get());
-				delete resultProxy;
+			if(callback.IsEmpty()) {
+				proxy->prepareCall(params);
+				ObjectProxy *resultProxy = proxy->call();
+				if(resultProxy) {
+					args.GetReturnValue().Set(resultProxy->get());
+					delete resultProxy;
+				}
+				delete proxy;
+			} else {
+				AsyncCallParam *asynCallParam = new AsyncCallParam();
+				v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), params);
+				v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
+				/*
+				 * Instead of member calls: we do not need to clone the proxy here because
+				 * it is being created in this callback (not during initialization)
+				 */
+				asynCallParam->params = persistentArgs;
+				asynCallParam->proxy = proxy;
+				proxy->prepareCall(params);
+				AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
+				runner->run();
 			}
-			delete proxy;
 		}
 		else
 		{
@@ -254,11 +268,15 @@ namespace rootJS
 				v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), params);
 				v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
 
+				/*
+				 * Clone the FunctionProxy because when the same function is called multiple times
+				 * prepareCall might be called with new data before the old call finished,
+				 * which leads to unexpected results (while testing: multiple frees of the param buffer)
+				 */
 				FunctionProxy* cloneProxy = proxy->clone();
 
 				asynCallParam->params = persistentArgs;
 				asynCallParam->proxy = cloneProxy;
-				asynCallParam->isolate = v8::Isolate::GetCurrent();
 				cloneProxy->prepareCall(params);
 				AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
 				runner->run();

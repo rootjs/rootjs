@@ -121,7 +121,7 @@ namespace rootJS
 		}
 	}
 
-		}
+}
 
 
 

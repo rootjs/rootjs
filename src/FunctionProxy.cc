@@ -386,23 +386,23 @@ namespace rootJS
 	/*
 	// TODO
 	bool FunctionProxy::processCall(TFunction* method, void* args, void* self, void* result)
-{
-}
+	{
+	}
 
 	void* FunctionProxy::callConstructor(TFunction* method, TClassRef type, void* args)
-{
-}
+	{
+	}
 
 	void FunctionProxy::callDestructor(TClassRef type, void* self)
-{
-}
+	{
+	}
 
 	void* FunctionProxy::callObject(TFunction* method, void* self, void* args, TClassRef resType)
-{
-}
+	{
+	}
 
 	template <typename T>
 	T FunctionProxy::callPrimitive(TFunction* method, void* self, void* args)
-{
-}*/
+	{
+	}*/
 }
