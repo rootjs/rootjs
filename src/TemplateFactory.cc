@@ -201,6 +201,8 @@ namespace rootJS
 		/**
 		 *	Add public methods as properties
 		 */
+		std::map<std::string, TFunction*> methods;
+
 		TIter funcIter(clazz->GetListOfAllPublicMethods(kTRUE));
 		TMethod *method = nullptr;
 
@@ -212,17 +214,26 @@ namespace rootJS
 				continue;
 			}
 
+			std::string methodName(method->GetName());
+
 			// skip abstract or pure virtual functions
 			Long_t property = method->Property();
 			if ((property & kIsPureVirtual)) // (property & kIsAbstract)
 			{
-				Toolbox::log("Skipped pure virtual method '" + std::string(method->GetName()) + "' in '" + className + "'.");
+				Toolbox::log("Skipped pure virtual method '" + methodName + "' in '" + className + "'.");
 				continue;
 			}
 
-			/*
-			 * TODO: make overridden or overloaded methods only occur once
-			 */
+			// make overridden or overloaded methods only occur once
+			if (methods.count(methodName))
+			{
+				// Toolbox::log("Already set method '" + methodName + "' as property in '" + className + "'.");
+				continue;
+			}
+			else
+			{
+				methods[methodName] = method;
+			}
 
 			switch (method->ExtraProperty())
 			{
@@ -233,18 +244,19 @@ namespace rootJS
 				break;
 			case kIsOperator:
 				// TODO: handle operators
-				Toolbox::log("Operator '" + std::string(method->GetName()) + "' found in '" + className + "'.");
+				// Toolbox::log("Operator '" + methodName + "' found in '" + className + "'.");
 				break;
 			default:
+
 				if (property & kIsStatic)
 				{
-					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
-					prototype->Set(v8::String::NewFromUtf8(isolate, method->GetName()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
+					prototype->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
 				}
 				else
 				{
-					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
-					instance->Set(v8::String::NewFromUtf8(isolate, method->GetName()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, data));
+					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
+					instance->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, data));
 				}
 				break;
 			}
@@ -266,6 +278,7 @@ namespace rootJS
 
 			if(member->Property() & kIsStatic)
 			{
+				// TODO:
 				// MemberInfo info(*member);
 				// ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
 				CallbackHandler::registerStaticObject(member->GetName(), clazz, nullptr); /* member->GetName(), clazz, proxy*/
