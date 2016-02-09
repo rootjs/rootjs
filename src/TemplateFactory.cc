@@ -278,10 +278,9 @@ namespace rootJS
 
 			if(member->Property() & kIsStatic)
 			{
-				// TODO:
-				// MemberInfo info(*member);
-				// ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
-				CallbackHandler::registerStaticObject(member->GetName(), clazz, nullptr); /* member->GetName(), clazz, proxy*/
+				MemberInfo info(*member, (void*)(member->GetOffsetCint()));	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
+				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
+				CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
 
 				prototype->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback);
 			}
