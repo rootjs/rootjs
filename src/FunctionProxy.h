@@ -16,14 +16,16 @@
 #include "FunctionInfo.h"
 
 namespace rootJS {
-	enum class mappedTypes {
+	enum class mappedTypes
+	{
 	    CHAR, INT, DOUBLE, BOOL, TSTRING
 	};
 	/**
 	 * Represents a ROOT callable and provides functionality to invoke those callables.
 	 * Also acts as a static cache for already created FunctionProxy objects.
 	 */
-	class FunctionProxy: public Proxy {
+	class FunctionProxy: public Proxy
+	{
 		public:
 			/**
 			 * Get a pointer to a CallFunc object, which encapsulates the ROOT function in memory.
@@ -49,7 +51,7 @@ namespace rootJS {
 			 * @param function the function's reflection object
 			 * @param scope the class that the function belongs to
 			 */
-			FunctionProxy(void* address, FunctionInfo& mode, TFunction* function, TClassRef scope);
+			FunctionProxy(void *address, FunctionInfo &mode, TFunction *function, TClass *scope);
 
 
 			/**
@@ -73,22 +75,30 @@ namespace rootJS {
 			 */
 			ObjectProxy* call();
 
-			virtual bool isConst() {
+			virtual bool isConst()
+			{
 				return true;
 			};
-			virtual bool isGlobal() {
+
+			virtual bool isGlobal()
+			{
 				return true; /*TODO*/
 			};
-			virtual bool isStatic() {
+
+			virtual bool isStatic()
+			{
 				return true; /*TODO*/
 			};
-			virtual bool isTemplate() {
+
+			virtual bool isTemplate()
+			{
 				return false; /*TODO*/
 			};
 
 			bool determineOverload(const v8::Local<v8::Array>& info);
 
-			void setSelfAddress(void* addr) {
+			void setSelfAddress(void* addr)
+			{
 				selfAddress = addr;
 			}
 

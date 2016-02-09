@@ -25,19 +25,19 @@ namespace rootJS {
 
 	std::map<std::string, ProxyInitializator> ObjectProxyFactory::proxyMap;
 
-	std::map<std::string, Proxy*> *ObjectProxyFactory::createObjectProxyVector(TClass *klass, MetaInfo &info) {
+	std::map<std::string, Proxy*> *ObjectProxyFactory::createObjectProxyVector(MetaInfo &info, TClass *clazz) {
 		std::map<std::string, Proxy*> *result = new std::map<std::string, Proxy*>();
 
-		if(klass == nullptr) {
+		if(clazz == nullptr) {
 			return nullptr;
 		}
 
-		const TList *methodList = klass->GetListOfAllPublicMethods();
+		const TList *methodList = clazz->GetListOfAllPublicMethods();
 		TIter nextMethod(methodList);
 		TMethod *method;
 
 		while ((method = (TMethod*)nextMethod())) {
-			FunctionProxy *proxy = FunctionProxyFactory::createFunctionProxy(method, klass);
+			FunctionProxy *proxy = FunctionProxyFactory::createFunctionProxy(method, clazz);
 			(*result)[std::string(method->GetName())] = proxy;
 			proxy->setSelfAddress(info.getAddress());
 		}
@@ -70,7 +70,7 @@ namespace rootJS {
 		}
 	}*/
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClassRef scope) {
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope) {
 		ObjectProxy* nonObjectProxy = determineProxy(info, scope);
 
 		if(nonObjectProxy) {
@@ -84,13 +84,13 @@ namespace rootJS {
 		{
 			return nullptr;
 		}
-		TClass *klass = dictFunc();
+		TClass *clazz = dictFunc();
 
-		v8::Local<v8::Object> instance = TemplateFactory::getInstance(klass);
+		v8::Local<v8::Object> instance = TemplateFactory::getInstance(clazz);
 		if(instance.IsEmpty()) {
 			return nullptr;
 		}
-		instance->SetAlignedPointerInInternalField(0, createObjectProxyVector(klass, info));
+		instance->SetAlignedPointerInInternalField(0, createObjectProxyVector(info, clazz));
 
 		ObjectProxy* proxy = new ObjectProxy(info, scope);
 		proxy->setProxy(instance);
@@ -98,16 +98,16 @@ namespace rootJS {
 		return proxy;
 	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(TGlobal & object) {
-		if(!object.IsValid() || !object.GetAddress()) {
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(TGlobal &global) {
+		if(!global.IsValid() || !global.GetAddress()) {
 			return nullptr;
 		}
-		TClassRef emptyRef = TClassRef();
-		GlobalInfo gMode(object);
-		return createObjectProxy(gMode, emptyRef);
+
+		GlobalInfo gMode(global);
+		return createObjectProxy(gMode, nullptr);
 	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(const TDataMember & type, TClassRef scope, ObjectProxy & holder)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(TDataMember const& type, TClass *scope, ObjectProxy &holder)
 	{
 		/*
 		 * It is not possible to do pointer arithmetic on void pointers.
@@ -123,27 +123,21 @@ namespace rootJS {
 	}
 
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope)
-	{
-		// TODO
-		return nullptr;
-	}
-
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy)
 	{
 		// TODO
 		return nullptr;
 	}
 
-	ObjectProxy* ObjectProxyFactory::determineProxy(MetaInfo& type, TClassRef ref)
+	ObjectProxy* ObjectProxyFactory::determineProxy(MetaInfo &info, TClass* clazz)
 	{
-		std::string typeString = std::string(type.getTypeName());
+		std::string typeString = std::string(info.getTypeName());
 		if(proxyMap.find(typeString) == proxyMap.end())
 		{
 			return nullptr;
 		}
 
-		return proxyMap[typeString](type, ref);
+		return proxyMap[typeString](info, clazz);
 	}
 
 	void ObjectProxyFactory::initializeProxyMap()

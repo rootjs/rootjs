@@ -1,26 +1,34 @@
 #include "Proxy.h"
 
-rootJS::Proxy::Proxy(rootJS::MetaInfo& type, TClassRef & scope) :
-	type(type.clone()), scope(TClassRef(scope)) {
+namespace rootJS
+{
 
-}
+	Proxy::Proxy(MetaInfo &info, TClass *scope) : info(info.clone()), scope(scope)
+	{}
 
-rootJS::Proxy::~Proxy() {
-	delete type;
-}
+	Proxy::~Proxy()
+	{
+		delete info;
+	}
 
-void rootJS::Proxy::setAddress(void* address) {
-	//this->address = address;
-}
+	void Proxy::setAddress(void* address)
+	{
+		//this->address = address;
+	}
 
-void* rootJS::Proxy::getAddress() {
-	return type->getAddress();
-}
+	void* Proxy::getAddress()
+	{
+		return info->getAddress();
+	}
 
-TClassRef& rootJS::Proxy::getScope() {
-	return scope;
-}
+	TClass* Proxy::getScope()
+	{
+		return scope.GetClass();
+	}
 
-rootJS::MetaInfo* rootJS::Proxy::getType() {
-	return type;
+	MetaInfo* Proxy::getTypeInfo()
+	{
+		return info;
+	}
+
 }

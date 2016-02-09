@@ -2,12 +2,9 @@
 #define BOOLEAN_PROXY_H
 
 #include "PrimitiveProxy.h"
+
 #include <string>
 #include <regex>
-
-#include <TClassRef.h>
-#include <TDataMember.h>
-#include "MetaInfo.h"
 
 namespace rootJS
 {
@@ -30,10 +27,10 @@ namespace rootJS
 			/**
 			 * Create a new BooleanProxy.
 			 *
-			 * @param type the type of the excapsulated object
+			 * @param info the type of the excapsulated object
 			 * @param scope the scope of the encapsulated object
 			 */
-			BooleanProxy(MetaInfo& type, TClassRef scope);
+			BooleanProxy(MetaInfo &info, TClass *scope);
 
 			~BooleanProxy();
 
@@ -43,7 +40,7 @@ namespace rootJS
 			 * @param info the type of the encapsulated object
 			 * @param scope the scope of the encapsulated object
 			 */
-			static ObjectProxy *boolConstruct(MetaInfo& info, TClassRef scope);
+			static ObjectProxy* boolConstruct(MetaInfo &info, TClass *scope);
 
 			/**
 			 * Returns a v8 Boolean depending on MetaInfo
@@ -61,4 +58,4 @@ namespace rootJS
 	};
 }
 
-#endif // BOOLEAN_PROXY_H
+#endif

@@ -5,21 +5,16 @@
 
 namespace rootJS {
 
-	ObjectProxy::ObjectProxy(MetaInfo &type, TClassRef scope)
-		: Proxy(type, scope) {
+	ObjectProxy::ObjectProxy(MetaInfo &info, TClass *scope) : Proxy(info, scope) {
 
 	}
 
 	const char* ObjectProxy::getTypeName() {
-		return type->getTypeName();
-	}
-
-	MetaInfo *ObjectProxy::getTypeInfo() {
-		return type;
+		return getTypeInfo()->getTypeName();
 	}
 
 	Long_t ObjectProxy::getOffset() {
-		return type->getOffset();
+		return getTypeInfo()->getOffset();
 	}
 
 	void ObjectProxy::set(ObjectProxy &value) {
@@ -45,19 +40,19 @@ namespace rootJS {
 	}
 
 	bool ObjectProxy::isTemplate() {
-		return false; // TODO
+		return false;
 	}
 
 	bool ObjectProxy::isGlobal() {
-		return type->isGlobal();
+		return getTypeInfo()->isGlobal();
 	}
 
 	bool ObjectProxy::isConst() {
-		return type->isConst();
+		return getTypeInfo()->isConst();
 	}
 
 	bool ObjectProxy::isStatic() {
-		return type->isStatic(); // TODO
+		return getTypeInfo()->isStatic();
 	}
 
 	void ObjectProxy::setValue(v8::Local<v8::Value> value) {
