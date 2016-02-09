@@ -127,8 +127,6 @@ namespace rootJS {
 	{
 		this->address = address;
 		this->function = function;
-		argsReflection = function->GetListOfMethodArgs();
-		returnType = function->GetReturnTypeName();
 	}
 
 	std::vector<ObjectProxy*> FunctionProxy::validateArgs(v8::FunctionCallbackInfo<v8::Value> args)
@@ -281,7 +279,7 @@ namespace rootJS {
 	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg) {
 		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(std::string(arg->GetTypeName()));
 		if(iterator == typeMap.end()) {
-			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
+			Toolbox::throwException(std::string("bufferParam does not know how to handle ") + arg->GetTypeName());
 			return nullptr;
 		}
 		switch(iterator->second) {
@@ -311,7 +309,7 @@ namespace rootJS {
 		std::vector<void*> buf( args.Length() );
 		for(int i = 0; i < args.Length(); i++) {
 			void** bufEl = (void**)malloc(sizeof(void*));
-			*bufEl = bufferParam(((TMethodArg*)argsReflection->At(i)), args[i]);
+			*bufEl = bufferParam((TMethodArg*)(function->GetListOfMethodArgs()->At(i)), args[i]);
 			buf[i] = bufEl;
 		}
 

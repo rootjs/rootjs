@@ -31,6 +31,8 @@ namespace rootJS {
 			gApplication = new NodeApplication( "rootJS", &argc, argv );
 			delete[] argv;
 
+			InitROOTGlobals();
+
 			return kTRUE;
 		}
 
