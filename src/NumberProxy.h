@@ -46,16 +46,18 @@ namespace rootJS {
 			NumberProxy(MetaInfo& type, TClassRef scope);
 
 
-#define ROOTJS_NUMBER_PROXY_DECLARE( datatype )                   \
-        static ObjectProxy* datatype##Construct(MetaInfo& type, TClassRef scope);
+            #define ROOTJS_NUMBER_PROXY_DECLARE(datatype)                   \
+            static ObjectProxy* datatype##Construct(MetaInfo& type, TClassRef scope);
 
+
+            ///@{
             /**
 			 * This calls the constructor.
 			 * We cannot create pointers to constructors,
 			 * but need to map the constructors in an Factory.
 			 * This is a macro to declare the constructors for the
 			 * various number types.
-
+			 *
 			 * @param type
 			 * 			the type of the encapsulated object
 			 *
@@ -81,7 +83,7 @@ namespace rootJS {
 
 			ROOTJS_NUMBER_PROXY_DECLARE(_int64);
 			ROOTJS_NUMBER_PROXY_DECLARE(u_int64);
-
+            ///@}
 
 			/**
 			* This calls the constructor.
