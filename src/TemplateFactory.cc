@@ -165,7 +165,7 @@ namespace rootJS
 		{
 			if (method == nullptr || !method->IsValid())
 			{
-				Toolbox::log("Invalid method found in " + className + ".");
+				Toolbox::log("Invalid method found in '" + className + "'.");
 				continue;
 			}
 
@@ -173,15 +173,13 @@ namespace rootJS
 			Long_t property = method->Property();
 			if ((property & kIsPureVirtual)) // (property & kIsAbstract)
 			{
-				Toolbox::log("Skipped pure virtual method in " + className + ".");
+				Toolbox::log("Skipped pure virtual method '" + std::string(method->GetName()) + "' in '" + className + "'.");
 				continue;
 			}
 
 			/*
 			 * TODO: make overridden or overloaded methods only occur once
 			 */
-
-			Toolbox::log("Make overridden or overloaded methods only occur once.");
 
 			switch (method->ExtraProperty())
 			{
@@ -216,13 +214,14 @@ namespace rootJS
 		{
 			if (member == nullptr || !member->IsValid())
 			{
-				Toolbox::log("Invalid member found in " + className + ".");
+				Toolbox::log("Invalid member found in '" + className + "'.");
 				continue;
 			}
 
 			if(member->Property() & kIsStatic)
 			{
-				// TODO: Call: ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(MemberInfo(member), clazz);
+				// MemberInfo info(*member);
+				// ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
 				CallbackHandler::registerStaticObject(member->GetName(), clazz, nullptr); /* member->GetName(), clazz, proxy*/
 
 				prototype->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback);
