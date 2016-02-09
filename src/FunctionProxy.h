@@ -10,15 +10,15 @@
 #include <v8.h>
 
 #include <TClassRef.h>
+#include <TInterpreter.h>
 #include <TFunction.h>
 #include <TMethodArg.h>
 #include "FunctionInfo.h"
 
-namespace rootJS
-{
+namespace rootJS {
 	enum class mappedTypes
 	{
-			CHAR
+	    CHAR, INT, DOUBLE, BOOL, TSTRING
 	};
 	/**
 	 * Represents a ROOT callable and provides functionality to invoke those callables.
@@ -64,13 +64,16 @@ namespace rootJS
 			 */
 			std::vector<ObjectProxy*> validateArgs(v8::FunctionCallbackInfo<v8::Value> args);
 
+
+			void prepareCall(const v8::Local<v8::Array>& args);
+
 			/**
 			 * Invokes the proxied function.
 			 *
 			 * @param args the arguments for the function call.
 			 * @return the function's return value encasulated in an ObjectProxy
 			 */
-			v8::Local<v8::Value> call(const v8::FunctionCallbackInfo<v8::Value>& args);
+			ObjectProxy* call();
 
 			virtual bool isConst()
 			{
@@ -92,20 +95,22 @@ namespace rootJS
 				return false; /*TODO*/
 			};
 
-			bool determineOverload(const v8::FunctionCallbackInfo<v8::Value>& info);
+			bool determineOverload(const v8::Local<v8::Array>& info);
 
 			void setSelfAddress(void* addr)
 			{
 				selfAddress = addr;
 			}
 
+			FunctionProxy* clone();
+
 
 		private:
 			void *address;
+			TInterpreter::CallFuncIFacePtr_t facePtr;
 			TFunction* function;
-			TList* argsReflection;
+			std::vector<void*> buf;
 			void* selfAddress = 0;
-			const char* returnType;
 
 			static bool processCall(TFunction* method, void* args, void* self, void* result);
 
@@ -125,4 +130,4 @@ namespace rootJS
 	};
 }
 
-#endif
+#endif // FUNCTION_PROXY_H

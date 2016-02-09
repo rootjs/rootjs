@@ -1,13 +1,14 @@
 #include "AsyncRunner.h"
 
 namespace rootJS {
-	AsyncRunner::AsyncRunner(AsyncFunction *func, void *param, v8::Local<v8::Function> callback):
+	AsyncRunner::AsyncRunner(AsyncFunction func, void *param, v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> callback):
 		func(func), param(param), callback(callback) {
 
 	}
 
 	void AsyncRunner::run() {
 		uv_work_t *req = new uv_work_t();
+		req->data = this;
 		uv_queue_work(uv_default_loop(), req, uvRunner, uvCallback);
 	}
 
@@ -17,12 +18,24 @@ namespace rootJS {
 	}
 
 	void AsyncRunner::uvCallback(uv_work_t *req, int status) {
+		v8::HandleScope scope(v8::Isolate::GetCurrent());
 		AsyncRunner *runner = static_cast<AsyncRunner*>(req->data);
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		std::vector<v8::Local<v8::Value>> passParams;
+
+		for(int i = 0; i < runner->result.size(); i++) {
+			if(runner->result[i] == nullptr) {
+				continue;
+			}
+			passParams.push_back(runner->result[i]->get());
+			delete runner->result[i];
+		}
+
+		v8::Local<v8::Function> cb = runner->callback.Get(isolate);
 		if(runner->result.size()) {
-			runner->callback->Call(isolate->GetCurrentContext()->Global(), runner->result.size(), &(runner->result[0]));
+			cb->Call(isolate->GetCurrentContext()->Global(), passParams.size(), &(passParams[0]));
 		} else {
-			runner->callback->Call(isolate->GetCurrentContext()->Global(), 0, nullptr);
+			cb->Call(isolate->GetCurrentContext()->Global(), 0, nullptr);
 		}
 	}
 }

@@ -21,5 +21,12 @@ describe('Functions', function() {
 	  it('should be possible to call a function that returns a char*', function() {
 		  root.Compress('these are multiple words').should.equal('thesearemultiplewords');
 	  });
+	  it('should be possible to call a function with a callback that is called when the root code has been processed', function(done) {
+		  root.Compress('these are multiple words', function(result) {
+			  result.should.equal('thesearemultiplewords');
+			  done();
+		  });
+		  root.Compress('these are multiple words').should.equal('thesearemultiplewords');
+	  });
   });
 });

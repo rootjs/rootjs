@@ -13,6 +13,8 @@ namespace rootJS
 	 */
 	class BooleanProxy: public PrimitiveProxy
 	{
+		private:
+			bool backedUp = false;
 		public:
 			/**
 			 * Check if the type is a boolean type.
@@ -29,6 +31,8 @@ namespace rootJS
 			 * @param scope the scope of the encapsulated object
 			 */
 			BooleanProxy(MetaInfo &info, TClass *scope);
+
+			~BooleanProxy();
 
 			/**
 			 * Creates a BooleanProxy, can be derefered to be added to a map
@@ -49,6 +53,8 @@ namespace rootJS
 			 * Sets the boolen in memory, using the data passed via JS
 			 */
 			virtual void setValue(v8::Local<v8::Value> value);
+
+			virtual void backup();
 	};
 }
 

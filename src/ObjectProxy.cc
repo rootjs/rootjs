@@ -58,4 +58,8 @@ namespace rootJS {
 	void ObjectProxy::setValue(v8::Local<v8::Value> value) {
 		return;
 	}
+
+	void ObjectProxy::backup() {
+		throw std::runtime_error("Backup does not work for raw ObjectProxy because the length of the data to be backuped is unknown.");
+	}
 }

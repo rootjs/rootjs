@@ -1,6 +1,7 @@
 #include "StringProxy.h"
 
 #include "Toolbox.h"
+#include "PointerInfo.h"
 
 namespace rootJS
 {
@@ -13,8 +14,24 @@ namespace rootJS
 		return false;
 	}
 
-	v8::Local<v8::Value> StringProxy::get()
-	{
+	StringProxy::~StringProxy() {
+		if(backedUp) {
+			switch(strType) {
+			case StringType::CHAR:
+				free(*(char**)getAddress());
+				break;
+			case StringType::STRING:
+				delete (*(std::string**)getAddress());
+				break;
+			case StringType::TSTRING:
+				delete (*(TString**)getAddress());
+				break;
+			}
+			free(getAddress());
+		}
+	}
+
+	v8::Local<v8::Value> StringProxy::get() {
 		const char* c = c_str();
 		if(c == nullptr)
 		{
@@ -33,15 +50,15 @@ namespace rootJS
 		case StringType::CHAR:
 			return *(char**)getAddress();
 		case StringType::STRING:
-			{
-				std::string *str = (std::string*)getAddress();
-				return str->c_str();
-			}
+		{
+			std::string *str = (std::string*)getAddress();
+			return str->c_str();
+		}
 		case StringType::TSTRING:
-			{
-				TString *tstr = (TString*)getAddress();
-				return tstr->Data();
-			}
+		{
+			TString *tstr = (TString*)getAddress();
+			return tstr->Data();
+		}
 		}
 		return "Failed to load c_str from this var";
 	}
@@ -85,23 +102,50 @@ namespace rootJS
 		switch(strType)
 		{
 		case StringType::CHAR:
-			{
-				Toolbox::throwException("This value cannot be overwritten, it's a char pointer.");
-				break;
-			}
+		{
+			Toolbox::throwException("This value cannot be overwritten, it's a char pointer.");
+			break;
+		}
 		case StringType::STRING:
-			{
-				std::string *strObj = (std::string*)getAddress();
-				*strObj = charValue.c_str();
-				break;
-			}
+		{
+			std::string *strObj = (std::string*)getAddress();
+			*strObj = charValue.c_str();
+			break;
+		}
 		case StringType::TSTRING:
-			{
-				TString *strObj = (TString*)getAddress();
-				*strObj = charValue.c_str();
-				break;
-			}
+		{
+			TString *strObj = (TString*)getAddress();
+			*strObj = charValue.c_str();
+			break;
+		}
 		}
 	}
 
+	void StringProxy::backup() {
+		void **ptrptr = (void**)malloc(sizeof(void*));
+		switch(strType) {
+		case StringType::CHAR: {
+			char* backupPtr = (char*)malloc(strlen(*(char**)getAddress()) + 1);
+			strncpy(backupPtr, *(char**)getAddress(), strlen(*(char**)getAddress()));
+			backupPtr[strlen(*(char**)getAddress())] = '\0';
+			*ptrptr = backupPtr;
+			break;
+		}
+		case StringType::STRING: {
+			std::string *backupStr = new std::string(*(std::string*)getAddress());
+			*ptrptr = backupStr;
+			break;
+		}
+		case StringType::TSTRING: {
+			TString *backupTStr = new TString(*(TString*)getAddress());
+			*ptrptr = backupTStr;
+			break;
+		}
+		}
+
+		const char* typeName = info->getTypeName();
+		delete info;
+		info = new PointerInfo(ptrptr, typeName);
+		backedUp = true;
+	}
 }

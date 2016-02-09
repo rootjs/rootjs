@@ -13,8 +13,8 @@ namespace rootJS
 {
 	enum class NumberType
 	{
-			INT_T, DOUBLE_T, SHORT_T, USHORT_T, UINT_T,  LONG_T, ULONG_T, FLOAT_T,
-			LONG64_T, ULONG64_T, LONGDOUBLE_T
+	    INT_T, DOUBLE_T, SHORT_T, USHORT_T, UINT_T,  LONG_T, ULONG_T, FLOAT_T,
+	    LONG64_T, ULONG64_T, LONGDOUBLE_T
 	};
 
 	/**
@@ -26,7 +26,7 @@ namespace rootJS
 			NumberType numberType;
 
 			Double_t castToDouble(void*);
-
+			bool backedUp = false;
 		public:
 			/**
 			 * Check if the type is a number type.
@@ -47,6 +47,9 @@ namespace rootJS
 			 */
 			NumberProxy(MetaInfo &info, TClass *scope);
 
+			~NumberProxy();
+
+			virtual void backup();
 
 #define ROOTJS_NUMBER_PROXY_DECLARE(datatype)                   \
             static ObjectProxy* datatype##Construct(MetaInfo &info, TClass *scope);
@@ -129,4 +132,4 @@ namespace rootJS
 	};
 }
 
-#endif
+#endif /* NUMBER_PROXY_H */

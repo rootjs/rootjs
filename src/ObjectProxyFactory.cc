@@ -193,6 +193,7 @@ namespace rootJS {
 		proxyMap["Size_t"] = &NumberProxy::floatConstruct;
 		proxyMap["char"] = &StringProxy::charConstruct;
 		proxyMap["char*"] = &StringProxy::charConstruct;
+		proxyMap["const char*"] = &StringProxy::charConstruct;
 		proxyMap["std::string"] = &StringProxy::stringConstruct;
 		proxyMap["TString"] = &StringProxy::tStringConstruct;
 

@@ -29,8 +29,14 @@ namespace rootJS
 {
 	std::map<TFunction*, CallFunc_t*> FunctionProxy::functions;
 	std::map<std::string, mappedTypes> FunctionProxy::typeMap = {
-	            {"char", mappedTypes::CHAR}
-	        };
+		{"char", mappedTypes::CHAR},
+		{"TString", mappedTypes::TSTRING},
+		{"Int_t", mappedTypes::INT},
+		{"int", mappedTypes::INT},
+		{"Double_t", mappedTypes::DOUBLE},
+		{"Bool_t", mappedTypes::BOOL},
+		//{"_t", mappedTypes::CHAR}
+	};
 
 	CallFunc_t* FunctionProxy::getCallFunc(const TClassRef& classRef, TFunction* method)
 	{
@@ -129,8 +135,6 @@ namespace rootJS
 	{
 		this->address = address;
 		this->function = function;
-		argsReflection = function->GetListOfMethodArgs();
-		returnType = function->GetReturnTypeName();
 	}
 
 	std::vector<ObjectProxy*> FunctionProxy::validateArgs(v8::FunctionCallbackInfo<v8::Value> args)
@@ -241,74 +245,133 @@ namespace rootJS
 		return validatedArgs;
 	}
 
+	char* argToChar(v8::Local<v8::Value> originalArg) {
+		v8::String::Utf8Value string(originalArg->ToString());
+		char *str = (char *) malloc(string.length() + 1);
+		strcpy(str, *string);
+		return str;
+	}
+
+	double getDoubleFromArg(v8::Local<v8::Value> originalArg) {
+		if(originalArg->IsNumber()) {
+			return v8::Local<v8::Number>::Cast(originalArg)->Value();
+		} else if(originalArg->IsNumberObject()) {
+			return v8::Local<v8::NumberObject>::Cast(originalArg)->ValueOf();
+		} else {
+			return -1;
+		}
+	}
+
+	double* argToDouble(v8::Local<v8::Value> originalArg) {
+		double *doubleValue = (double*)malloc(sizeof(double));
+		*doubleValue = getDoubleFromArg(originalArg);
+		return doubleValue;
+	}
+
+	int* argToInt(v8::Local<v8::Value> originalArg) {
+		int *intValue = (int *)malloc(sizeof(int));
+		*intValue = (int)getDoubleFromArg(originalArg);
+		return intValue;
+	}
+
+	bool* argToBool(v8::Local<v8::Value> originalArg) {
+		bool* boolValue = (bool*)malloc(sizeof(bool));
+		if(originalArg->IsBoolean()) {
+			*boolValue = v8::Local<v8::Boolean>::Cast(originalArg)->Value();
+		} else {
+			*boolValue = v8::Local<v8::BooleanObject>::Cast(originalArg)->ValueOf();
+		}
+		return boolValue;
+	}
+
+	TString* argToTString(v8::Local<v8::Value> originalArg) {
+		v8::String::Utf8Value string(originalArg->ToString());
+		return new TString(*string);
+	}
+
 	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg)
 	{
 		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(std::string(arg->GetTypeName()));
 		if(iterator == typeMap.end())
 		{
-			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
+			Toolbox::throwException(std::string("bufferParam does not know how to handle ") + arg->GetTypeName());
 			return nullptr;
 		}
 		switch(iterator->second)
 		{
 		case mappedTypes::CHAR:
-			v8::String::Utf8Value string(originalArg->ToString());
-			char *str = (char *) malloc(string.length() + 1);
-			strcpy(str, *string);
-			return str;
+			return argToChar(originalArg);
+		case mappedTypes::INT:
+			return argToInt(originalArg);
+		case mappedTypes::DOUBLE:
+			return argToDouble(originalArg);
+		case mappedTypes::BOOL:
+			return argToBool(originalArg);
+		case mappedTypes::TSTRING:
+			return argToTString(originalArg);
 		}
 
 		//TODO: This will explode - huge fireball
 		return nullptr;
 	}
 
-	v8::Local<v8::Value> FunctionProxy::call(const v8::FunctionCallbackInfo<v8::Value>& args)
+	void FunctionProxy::prepareCall(const  v8::Local<v8::Array>& args)
 	{
 		CallFunc_t* callFunc = (CallFunc_t*)getCallFunc(scope, function);
 		if(!callFunc)
 		{
 			//TODO Handle this, should not segfault (maybe throw something...)
 		}
-		TInterpreter::CallFuncIFacePtr_t facePtr = gCling->CallFunc_IFacePtr( callFunc );
+		this->facePtr = gCling->CallFunc_IFacePtr( callFunc );
+
+		buf = std::vector<void*>( args->Length() );
+		for(int i = 0; i < (int)args->Length(); i++) {
+			void** bufEl = (void**)malloc(sizeof(void*));
+			*bufEl = bufferParam((TMethodArg*)(function->GetListOfMethodArgs()->At(i)), args->Get(i));
+			buf[i] = bufEl;
+		}
+	}
+
+	ObjectProxy* FunctionProxy::call()
+	{
 		void *self = nullptr; //TODO?
 		void *result = nullptr; //TODO?
-		std::vector<void*> buf( args.Length() );
-		for(int i = 0; i < args.Length(); i++)
-		{
-			void* bufEl = bufferParam(((TMethodArg*)argsReflection->At(i)), args[i]);
-			buf[i] = &bufEl;
-		}
-
-		switch(facePtr.fKind)
-		{
+		switch(facePtr.fKind) {
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
 
-						facePtr.fGeneric((selfAddress == nullptr)?self:*(void**)selfAddress, args.Length(), buf.data(), &result);
+			facePtr.fGeneric((selfAddress == nullptr)?self:*(void**)selfAddress, buf.size(), buf.data(), &result);
 			break;
 		default:
-				v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
+			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
 		}
 
-		for(int i = 0; i < args.Length(); i++)
-{
+		for(int i = 0; i < (int)buf.size(); i++)
+		{
 			free(*((void**)buf[i]));
+			free((void*)buf[i]);
 		}
 
 		PointerInfo mode((void*)&result, function->GetReturnTypeName());
 		ObjectProxy* proxy = ObjectProxyFactory::determineProxy(mode, TClassRef());
 
-		if(proxy)
-		{
-			v8::Local<v8::Value> result = proxy->get();
-			delete proxy;
-			return result;
+		if(proxy) {
+			proxy->backup();
+			return proxy;
 		}
 
-
-		return v8::Null(v8::Isolate::GetCurrent());
+		return nullptr;
 	}
 
-	bool FunctionProxy::determineOverload(const v8::FunctionCallbackInfo<v8::Value>& info)
+	FunctionProxy* FunctionProxy::clone()
+	{
+		FunctionProxy *p = new FunctionProxy(address, *(rootJS::FunctionInfo*)info, function, scope);
+		p->buf = buf;
+		p->facePtr = facePtr;
+		p->selfAddress = selfAddress;
+		return p;
+	}
+
+	bool FunctionProxy::determineOverload(const v8::Local<v8::Array>& info)
 	{
 		TFunction* overloadedFunction = FunctionProxyFactory::determineFunction(function->GetName(), scope.GetClass(), info);
 		if(overloadedFunction == nullptr)
@@ -323,23 +386,23 @@ namespace rootJS
 	/*
 	// TODO
 	bool FunctionProxy::processCall(TFunction* method, void* args, void* self, void* result)
-{
-}
+	{
+	}
 
 	void* FunctionProxy::callConstructor(TFunction* method, TClassRef type, void* args)
-{
-}
+	{
+	}
 
 	void FunctionProxy::callDestructor(TClassRef type, void* self)
-{
-}
+	{
+	}
 
 	void* FunctionProxy::callObject(TFunction* method, void* self, void* args, TClassRef resType)
-{
-}
+	{
+	}
 
 	template <typename T>
 	T FunctionProxy::callPrimitive(TFunction* method, void* self, void* args)
-{
-}*/
+	{
+	}*/
 }

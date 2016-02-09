@@ -1,4 +1,6 @@
 #include "NumberProxy.h"
+#include "PointerInfo.h"
+#include <v8.h>
 
 #include "Toolbox.h"
 
@@ -13,6 +15,13 @@ namespace rootJS
 	NumberProxy::NumberProxy(MetaInfo &info, TClass *scope): PrimitiveProxy(info, scope)
 	{}
 
+	NumberProxy::~NumberProxy() {
+		if(backedUp) {
+			free(*(void**)getAddress());
+			free(getAddress());
+		}
+	}
+
 	v8::Local<v8::Value> NumberProxy::get()
 	{
 		if(getAddress())
@@ -22,8 +31,43 @@ namespace rootJS
 		return getProxy();
 	}
 
-	Double_t NumberProxy::castToDouble(void *ptr)
+	void NumberProxy::backup()
 	{
+		void **ptrptr = (void**)malloc(sizeof(void*));
+		void *numberPtr = 0;
+		switch(numberType) {
+#define BACKUP(numbertype, pointer) \
+			case NumberType::numbertype:		\
+				numberPtr = malloc(sizeof(pointer)); \
+				*(pointer*)numberPtr = *((pointer*)getAddress()); \
+				break;
+
+			BACKUP(INT_T,Int_t)
+			BACKUP(UINT_T,UInt_t)
+
+			BACKUP(SHORT_T,Short_t)
+			BACKUP(USHORT_T,UShort_t)
+
+			BACKUP(DOUBLE_T,Double_t)
+			BACKUP(LONGDOUBLE_T,LongDouble_t)
+
+			BACKUP(LONG_T,Long_t)
+			BACKUP(ULONG_T,ULong_t)
+
+			BACKUP(LONG64_T,Long64_t)
+			BACKUP(ULONG64_T,ULong64_t)
+
+			BACKUP(FLOAT_T,Float_t)
+		}
+		*ptrptr = numberPtr;
+
+		const char* typeName = info->getTypeName();
+		delete info;
+		info = new PointerInfo(ptrptr, typeName);
+		backedUp = true;
+	}
+
+	Double_t NumberProxy::castToDouble(void *ptr) {
 		switch(numberType)
 		{
 

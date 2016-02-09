@@ -29,7 +29,7 @@ namespace rootJS
 			 * Enum value representing the type
 			 */
 			StringType strType;
-
+			bool backedUp = false;
 		public:
 			/**
 			 * Create a new StringProxy.
@@ -46,6 +46,8 @@ namespace rootJS
 			 * @return if the type is a string type.
 			 */
 			static bool isString(std::string type);
+
+			~StringProxy();
 
 			/**
 			 * Creates a StringProxy based on a const char*, nullterminated string
@@ -84,7 +86,9 @@ namespace rootJS
 			 * will set a new value
 			 */
 			virtual void setValue(v8::Local<v8::Value> value);
+
+			virtual void backup();
 	};
 }
 
-#endif
+#endif // STRING_PROXY_H

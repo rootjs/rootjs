@@ -16,7 +16,12 @@ namespace rootJS
 {
 
 	std::map<std::string, v8BasicTypes> FunctionProxyFactory::basicTypeMap = {
-		{"char", v8BasicTypes::STRING}
+		{"char", v8BasicTypes::STRING},
+		{"TString", v8BasicTypes::STRING},
+		{"Int_t", v8BasicTypes::NUMBER},
+		{"int", v8BasicTypes::NUMBER},
+		{"Double_t", v8BasicTypes::NUMBER},
+		{"Bool_t", v8BasicTypes::BOOLEAN}
 	};
 
 	FunctionProxyFactory::FunctionProxyFactory()
@@ -30,7 +35,7 @@ namespace rootJS
 		return new FunctionProxy(FunctionProxy::getCallFunc(scope, function), mode, function, scope);
 	}
 
-	TFunction* FunctionProxyFactory::determineFunction(std::string name, TClass *scope, const v8::FunctionCallbackInfo<v8::Value> args) {
+	TFunction* FunctionProxyFactory::determineFunction(std::string name, TClass *scope, const v8::Local<v8::Array> args) {
 		std::vector<TFunction*> validFuncs;
 		TFunction *callableFunction = nullptr;
 		if(scope == nullptr)
@@ -54,15 +59,15 @@ namespace rootJS
 
 		for(TFunction* value: validFuncs)
 		{
-			if(value->GetNargs() != args.Length())
+			if(value->GetNargs() != (int)args->Length())
 			{
 				continue;
 			}
 			TList *funcArgs = value->GetListOfMethodArgs();
 			bool argsMatch = true;
-			for(int i = 0; i < args.Length(); i++)
+			for(int i = 0; i < (int)args->Length(); i++)
 			{
-				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args[i]))
+				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i)))
 				{
 					argsMatch = false;
 					break;
@@ -77,17 +82,6 @@ namespace rootJS
 		if(callableFunction) {
 			return callableFunction;
 		}
-		return nullptr;
-	}
-
-	FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClass *scope, const v8::FunctionCallbackInfo<v8::Value> args)
-	{
-		TFunction *callableFunction = determineFunction(name, scope, args);
-		if(callableFunction != nullptr)
-		{
-			return createFunctionProxy(callableFunction, scope);
-		}
-
 		return nullptr;
 	}
 
@@ -116,13 +110,13 @@ namespace rootJS
 
 		for(TFunction* value: validFuncs)
 		{
-			if(value->GetNargs() != args->Length())
+			if(value->GetNargs() != (int)args->Length())
 			{
 				continue;
 			}
 			TList *funcArgs = value->GetListOfMethodArgs();
 			bool argsMatch = true;
-			for(int i = 0; i < args->Length(); i++)
+			for(int i = 0; i < (int)args->Length(); i++)
 			{
 				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i)))
 				{
@@ -174,6 +168,16 @@ namespace rootJS
 				{
 				case v8BasicTypes::STRING:
 					return arg->IsString();
+				case v8BasicTypes::NUMBER:
+					return arg->IsNumber() || arg->IsNumberObject();
+				case v8BasicTypes::BOOLEAN:
+					return arg->IsBoolean() || arg->IsBooleanObject();
+				case v8BasicTypes::ARRAY:
+					//TODO: CHeck array contents...
+					return false;
+				case v8BasicTypes::OBJECT:
+					//TODO: Check object type
+					return false;
 				default:
 					v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
 					return false;
