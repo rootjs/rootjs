@@ -6,14 +6,14 @@
 
 #include "MetaInfo.h"
 
-namespace rootJS {
+namespace rootJS
+{
 	/**
 	 * The proxy super class from which both proxies inherit.
 	 * The proxies act as intermediary between Node.js and ROOT.
 	 */
-	class Proxy {
-		private:
-
+	class Proxy
+	{
 		protected:
 			Proxy(MetaInfo & type, TClassRef & scope);
 			virtual ~Proxy();
@@ -73,4 +73,4 @@ namespace rootJS {
 			virtual bool isStatic() = 0;
 	};
 }
-#endif /* PROXY_H_ */
+#endif
