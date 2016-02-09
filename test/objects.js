@@ -40,7 +40,6 @@ describe('Objects', function() {
 	  it('should be possible to run multiple functions asynchronously in parallel', function(done) {
 		  var join = 5;
 		  var cb = function() {
-			  join--;
 			  if(--join <= 0) {
 				  done();
 			  }

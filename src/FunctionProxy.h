@@ -92,6 +92,8 @@ namespace rootJS {
 				selfAddress = addr;
 			}
 
+			FunctionProxy* clone();
+
 
 		private:
 			void *address;

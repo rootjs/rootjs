@@ -253,10 +253,13 @@ namespace rootJS
 				AsyncCallParam *asynCallParam = new AsyncCallParam();
 				v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), params);
 				v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
+
+				FunctionProxy* cloneProxy = proxy->clone();
+
 				asynCallParam->params = persistentArgs;
-				asynCallParam->proxy = proxy;
+				asynCallParam->proxy = cloneProxy;
 				asynCallParam->isolate = v8::Isolate::GetCurrent();
-				proxy->prepareCall(params);
+				cloneProxy->prepareCall(params);
 				AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
 				runner->run();
 			}
@@ -271,6 +274,7 @@ namespace rootJS
 		ObjectProxy* resultProxy = asynCallParam->proxy->call();
 		resultVector.push_back(resultProxy);
 		runner->setResult(resultVector);
+		delete asynCallParam->proxy;
 		delete asynCallParam;
 	}
 

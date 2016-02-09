@@ -351,6 +351,14 @@ namespace rootJS {
 		return nullptr;
 	}
 
+	FunctionProxy* FunctionProxy::clone() {
+		FunctionProxy *p = new FunctionProxy(address, *(rootJS::FunctionInfo*)type, function, scope);
+		p->buf = buf;
+		p->facePtr = facePtr;
+		p->selfAddress = selfAddress;
+		return p;
+	}
+
 	bool FunctionProxy::determineOverload(const v8::Local<v8::Array>& info) {
 		TFunction* overloadedFunction = FunctionProxyFactory::determineFunction(function->GetName(), scope.GetClass(), info);
 		if(overloadedFunction == nullptr) {
