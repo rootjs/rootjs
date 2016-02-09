@@ -29,6 +29,7 @@ namespace rootJS {
 	std::map<TFunction*, CallFunc_t*> FunctionProxy::functions;
 	std::map<std::string, mappedTypes> FunctionProxy::typeMap = {
 		{"char", mappedTypes::CHAR},
+		{"TString", mappedTypes::TSTRING},
 		{"Int_t", mappedTypes::INT},
 		{"int", mappedTypes::INT},
 		{"Double_t", mappedTypes::DOUBLE},
@@ -276,6 +277,11 @@ namespace rootJS {
 		return boolValue;
 	}
 
+	TString* argToTString(v8::Local<v8::Value> originalArg) {
+		v8::String::Utf8Value string(originalArg->ToString());
+		return new TString(*string);
+	}
+
 	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg) {
 		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(std::string(arg->GetTypeName()));
 		if(iterator == typeMap.end()) {
@@ -291,6 +297,8 @@ namespace rootJS {
 			return argToDouble(originalArg);
 		case mappedTypes::BOOL:
 			return argToBool(originalArg);
+			case mappedTypes::TSTRING:
+			return argToTString(originalArg);
 		}
 
 		//TODO: This will explode - huge fireball
