@@ -19,7 +19,6 @@
 
 namespace rootJS
 {
-	// Initialize static class members
 	std::map<std::string, v8::Persistent<v8::FunctionTemplate>> TemplateFactory::classTemplates;
 	std::map<std::string, v8::Persistent<v8::FunctionTemplate>> TemplateFactory::structTemplates;
 
@@ -31,16 +30,9 @@ namespace rootJS
 
 	v8::Local<v8::Object> TemplateFactory::getInstance(TClass *clazz) throw(std::invalid_argument)
 	{
-		if(clazz == nullptr)
+		if(!isValid(clazz))
 		{
-			// Toolbox::throwException(std::string("Specified TClass is null."));
-			throw std::invalid_argument(std::string("Specified TClass is null."));
-		}
-
-		if(!clazz->IsLoaded())
-		{
-			// Toolbox::throwException(std::string("Specified TClass is not loaded."));
-			throw std::invalid_argument(std::string("Specified TClass is not loaded."));
+			throw std::invalid_argument("Specified TClass is null or not loaded.");
 		}
 
 		if (clazz->Property() & kIsNamespace)
@@ -49,13 +41,15 @@ namespace rootJS
 		}
 		else if (clazz->Property() & kIsClass)
 		{
-			return createClassTemplate(clazz)->GetFunction()->NewInstance();
-			// return getConstructor(clazz)->NewInstance();
+			return createClassTemplate(clazz)->InstanceTemplate()->NewInstance(); // creation without ctor callback
+			// return createClassTemplate(clazz)->GetFunction()->NewInstance();   // creation with ctor callback
+			// return getConstructor(clazz)->NewInstance();						  // creation with ctor callback
 		}
 		else if (clazz->Property() & kIsStruct)
 		{
-			return createStructTemplate(clazz)->GetFunction()->NewInstance();
-			// return getConstructor(clazz)->NewInstance();
+			return createStructTemplate(clazz)->InstanceTemplate()->NewInstance(); // creation without ctor callback
+			// return createStructTemplate(clazz)->GetFunction()->NewInstance();   // creation with ctor callback
+			// return getConstructor(clazz)->NewInstance();						   // creation with ctor callback
 		}
 		else if (clazz->Property() & kIsEnum)
 		{
@@ -73,22 +67,15 @@ namespace rootJS
 		 */
 		else
 		{
-			throw std::invalid_argument(std::string("The type of the specified TClass is not supported."));
+			throw std::invalid_argument("The type of the specified TClass '" + std::string(clazz->GetName()) + "'is not supported.");
 		}
 	}
 
 	v8::Local<v8::Function> TemplateFactory::getConstructor(TClass *clazz) throw(std::invalid_argument)
 	{
-		if(clazz == nullptr)
+		if(!isValid(clazz))
 		{
-			// Toolbox::throwException(std::string("Specified TClass is null."));
-			throw std::invalid_argument(std::string("Specified TClass is null."));
-		}
-
-		if(!clazz->IsLoaded())
-		{
-			// Toolbox::throwException(std::string("Specified TClass is not loaded."));
-			throw std::invalid_argument(std::string("Specified TClass is not loaded."));
+			throw std::invalid_argument("Specified TClass is null or not loaded.");
 		}
 
 		if (clazz->Property() & kIsClass)
@@ -101,7 +88,7 @@ namespace rootJS
 		}
 		else
 		{
-			throw std::invalid_argument(std::string("The type of the specified TClass is not supported."));
+			throw std::invalid_argument("The type of the specified TClass '" + std::string(clazz->GetName()) + "'is not supported.");
 		}
 	}
 
@@ -125,39 +112,95 @@ namespace rootJS
 
 	v8::Local<v8::FunctionTemplate> TemplateFactory::createStructTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
-		throw std::invalid_argument(std::string("Not implemented yet."));
+		if(!isValid(clazz))
+		{
+			throw std::invalid_argument(std::string("Specified TClass is null or not loaded."));
+		}
+
+		if(!(clazz->Property() & kIsStruct))
+		{
+			throw std::invalid_argument("Specified TClass '" + std::string(clazz->GetName()) + "' is not a struct.");
+		}
+
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::EscapableHandleScope handle_scope(isolate);
+
+		std::string structName(clazz->GetName());
+
+		// check if template has been created already
+		if (structTemplates.count(structName) && !structTemplates[structName].IsEmpty())
+		{
+			return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, structTemplates[structName]));
+		}
+
+		v8::Local<v8::FunctionTemplate> tmplt = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
+		tmplt->SetClassName(v8::String::NewFromUtf8(isolate, structName.c_str()));
+
+		// create template
+		createInstantiableTemplate(clazz, tmplt);
+
+		// store template in map
+		structTemplates[structName].Reset(isolate, tmplt);
+
+		return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, structTemplates[structName]));
 	}
 
 	v8::Local<v8::FunctionTemplate> TemplateFactory::createClassTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
 		if(!isValid(clazz))
 		{
-			throw std::invalid_argument(std::string("Specified TClass is null or not loaded."));
+			throw std::invalid_argument("Specified TClass is null or not loaded.");
+		}
+
+		if(!(clazz->Property() & kIsClass))
+		{
+			throw std::invalid_argument("Specified TClass '" + std::string(clazz->GetName()) + "' is not a class.");
 		}
 
 		if(clazz->Property() & kClassIsAbstract)
 		{
-			throw std::invalid_argument(std::string("Specified TClass is abstract."));
+			throw std::invalid_argument("Specified TClass '" + std::string(clazz->GetName()) + "'is abstract.");
 		}
 
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::EscapableHandleScope handle_scope(isolate);
+
 		std::string className(clazz->GetName());
 
-		// Check if template has been already created
+		// check if template has been created already
 		if (classTemplates.count(className) && !classTemplates[className].IsEmpty())
 		{
-			return v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]);
+			return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]));
 		}
 
 		v8::Local<v8::FunctionTemplate> tmplt = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
 		tmplt->SetClassName(v8::String::NewFromUtf8(isolate, className.c_str()));
 
+		// create template
+		createInstantiableTemplate(clazz, tmplt);
+
+		// store template in map
+		classTemplates[className].Reset(isolate, tmplt);
+
+		return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]));
+	}
+
+	void TemplateFactory::createInstantiableTemplate(TClass *clazz, v8::Local<v8::FunctionTemplate> tmplt) throw(std::invalid_argument)
+	{
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		std::string className(clazz->GetName());
+
+		// add static functions and members to the prototype template
 		v8::Local<v8::ObjectTemplate> prototype = tmplt->PrototypeTemplate();
-		prototype->SetInternalFieldCount(1);
+		// prototype->SetInternalFieldCount(1);
 
+		// add non-static functions and members to the instance template
 		v8::Local<v8::ObjectTemplate> instance = tmplt->InstanceTemplate();
-		instance->SetInternalFieldCount(1); // each instance stores a reference to an ObjectProxy
+		instance->SetInternalFieldCount(1); // each instance stores a map containing the property proxies
 
+		/**
+		 *	Add public methods as properties
+		 */
 		TIter funcIter(clazz->GetListOfAllPublicMethods(kTRUE));
 		TMethod *method = nullptr;
 
@@ -189,7 +232,8 @@ namespace rootJS
 				// don't expose
 				break;
 			case kIsOperator:
-				// TODO
+				// TODO: handle operators
+				Toolbox::log("Operator '" + std::string(method->GetName()) + "' found in '" + className + "'.");
 				break;
 			default:
 				if (property & kIsStatic)
@@ -206,7 +250,9 @@ namespace rootJS
 			}
 		}
 
-
+		/**
+		 *	Add public members as properties
+		 */
 		TIter memberIter((TList*)clazz->GetListOfAllPublicDataMembers(kTRUE));
 		TDataMember *member = nullptr;
 
@@ -232,11 +278,6 @@ namespace rootJS
 			}
 
 		}
-
-		classTemplates[className].Reset(isolate, tmplt);
-		v8::Local<v8::FunctionTemplate> tmp = v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]);
-
-		return tmp;
 	}
 
 	bool TemplateFactory::isValid(TClass* clazz)
