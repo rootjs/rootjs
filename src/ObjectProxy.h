@@ -95,6 +95,7 @@ namespace rootJS {
 			virtual bool isGlobal();
 			virtual bool isConst();
 			virtual bool isStatic();
+			virtual void backup();
 
 		protected:
 			v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */

@@ -15,10 +15,13 @@ describe('Objects', function() {
 			  root.gSystem.Dump("test");
 		  }).should.throw();
 	  });
+	  it('should have gSystem.ProcessEvents returning a boolean value', function() {
+		  root.gSystem.ProcessEvents().should.be.type('boolean');
+	  });
 	  it('should be possible to call virtual methods', function() {
 		  (function() {
 			  root.gBenchmark.Start("test");
 		  }).should.not.throw();
-	  })
+	  });
   });
 });

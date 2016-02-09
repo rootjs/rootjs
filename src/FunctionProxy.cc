@@ -338,14 +338,15 @@ namespace rootJS {
 			free((void*)buf[i]);
 		}
 
-		if(result != nullptr) {
+		//if(result != nullptr) {
 			PointerInfo mode((void*)&result, function->GetReturnTypeName());
 			ObjectProxy* proxy = ObjectProxyFactory::determineProxy(mode, TClassRef());
 
 			if(proxy) {
+				proxy->backup();
 				return proxy;
 			}
-		}
+		//}
 
 		return nullptr;
 	}

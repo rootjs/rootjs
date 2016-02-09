@@ -31,6 +31,7 @@ namespace rootJS
 			 * Enum value representing the type
 			 */
 			StringType strType;
+			bool backedUp = false;
 		public:
 			/**
 			 * Check if the type is a boolean type.
@@ -47,6 +48,8 @@ namespace rootJS
 			 * @param scope the scope of the encapsulated object
 			 */
 			StringProxy(MetaInfo& info, TClassRef scope);
+
+			~StringProxy();
 
 			/**
 			 * Creates a StringProxy based on a const char*, nullterminated string
@@ -85,6 +88,8 @@ namespace rootJS
 			 * will set a new value
 			 */
 			virtual void setValue(v8::Local<v8::Value> value);
+
+			virtual void backup();
 	};
 }
 

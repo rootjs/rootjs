@@ -25,6 +25,7 @@ namespace rootJS {
 			NumberType numberType;
 
 			Double_t castToDouble(void*);
+			bool backedUp = false;
 		public:
 			/**
 			 * Check if the type is a number type.
@@ -44,6 +45,10 @@ namespace rootJS {
 			 *			the scope of the encapsulated object
 			 */
 			NumberProxy(MetaInfo& type, TClassRef scope);
+
+			~NumberProxy();
+
+			virtual void backup();
 
 
 #define ROOTJS_NUMBER_PROXY_DECLARE( datatype )                   \

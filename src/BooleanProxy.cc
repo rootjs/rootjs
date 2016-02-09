@@ -1,4 +1,5 @@
 #include "BooleanProxy.h"
+#include "PointerInfo.h"
 #include "Toolbox.h"
 
 namespace rootJS
@@ -22,6 +23,13 @@ namespace rootJS
 		// TODO
 	}
 
+	BooleanProxy::~BooleanProxy()
+	{
+		if(backedUp) {
+			free(getAddress());
+		}
+	}
+
 	ObjectProxy* BooleanProxy::boolConstruct(MetaInfo& type, TClassRef scope) {
 		return new BooleanProxy(type, scope);
 	}
@@ -43,5 +51,15 @@ namespace rootJS
 		} else {
 			Toolbox::throwException("This element can only store a bool value.");
 		}
+	}
+
+	void BooleanProxy::backup() {
+		bool *boolPtr = (bool*)malloc(sizeof(bool));
+		*boolPtr = *(bool*)getAddress();
+
+		const char* typeName = type->getTypeName();
+		delete type;
+		type = new PointerInfo(boolPtr, typeName);
+		backedUp = true;
 	}
 }
