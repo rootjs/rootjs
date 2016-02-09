@@ -305,32 +305,35 @@ namespace rootJS {
 		return nullptr;
 	}
 
-	v8::Local<v8::Value> FunctionProxy::call(const  v8::Local<v8::Array>& args)
-	{
+	void FunctionProxy::prepareCall(const  v8::Local<v8::Array>& args) {
 		CallFunc_t* callFunc = (CallFunc_t*)getCallFunc(scope, function);
 		if(!callFunc) {
 			//TODO Handle this, should not segfault (maybe throw something...)
 		}
-		TInterpreter::CallFuncIFacePtr_t facePtr = gCling->CallFunc_IFacePtr( callFunc );
-		void *self = nullptr; //TODO?
-		void *result = nullptr; //TODO?
-		std::vector<void*> buf( args->Length() );
+		this->facePtr = gCling->CallFunc_IFacePtr( callFunc );
+
+		buf = std::vector<void*>( args->Length() );
 		for(int i = 0; i < (int)args->Length(); i++) {
 			void** bufEl = (void**)malloc(sizeof(void*));
 			*bufEl = bufferParam((TMethodArg*)(function->GetListOfMethodArgs()->At(i)), args->Get(i));
 			buf[i] = bufEl;
 		}
+	}
 
+	ObjectProxy* FunctionProxy::call()
+	{
+		void *self = nullptr; //TODO?
+		void *result = nullptr; //TODO?
 		switch(facePtr.fKind) {
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
 
-			facePtr.fGeneric((selfAddress == nullptr)?self:*(void**)selfAddress, args->Length(), buf.data(), &result);
+			facePtr.fGeneric((selfAddress == nullptr)?self:*(void**)selfAddress, buf.size(), buf.data(), &result);
 			break;
 		default:
 			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
 		}
 
-		for(int i = 0; i < (int)args->Length(); i++) {
+		for(int i = 0; i < (int)buf.size(); i++) {
 			free(*((void**)buf[i]));
 			free((void*)buf[i]);
 		}
@@ -340,13 +343,11 @@ namespace rootJS {
 			ObjectProxy* proxy = ObjectProxyFactory::determineProxy(mode, TClassRef());
 
 			if(proxy) {
-				v8::Local<v8::Value> result = proxy->get();
-				delete proxy;
-				return result;
+				return proxy;
 			}
 		}
 
-		return v8::Null(v8::Isolate::GetCurrent());
+		return nullptr;
 	}
 
 	bool FunctionProxy::determineOverload(const v8::Local<v8::Array>& info) {

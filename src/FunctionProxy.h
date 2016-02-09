@@ -10,6 +10,7 @@
 #include <v8.h>
 
 #include <TClassRef.h>
+#include <TInterpreter.h>
 #include <TFunction.h>
 #include <TMethodArg.h>
 #include "FunctionInfo.h"
@@ -61,13 +62,16 @@ namespace rootJS {
 			 */
 			std::vector<ObjectProxy*> validateArgs(v8::FunctionCallbackInfo<v8::Value> args);
 
+
+			void prepareCall(const v8::Local<v8::Array>& args);
+
 			/**
 			 * Invokes the proxied function.
 			 *
 			 * @param args the arguments for the function call.
 			 * @return the function's return value encasulated in an ObjectProxy
 			 */
-			v8::Local<v8::Value> call(const v8::Local<v8::Array>& args);
+			ObjectProxy* call();
 
 			virtual bool isConst() {
 				return true;
@@ -91,7 +95,9 @@ namespace rootJS {
 
 		private:
 			void *address;
+			TInterpreter::CallFuncIFacePtr_t facePtr;
 			TFunction* function;
+			std::vector<void*> buf;
 			void* selfAddress = 0;
 
 			static bool processCall(TFunction* method, void* args, void* self, void* result);

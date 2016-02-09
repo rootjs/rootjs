@@ -69,7 +69,12 @@ namespace rootJS
 		if(proxy != nullptr)
 		{
 			//TODO: Callback!
-			args.GetReturnValue().Set(proxy->call(params));
+			proxy->prepareCall(params);
+			ObjectProxy *resultProxy = proxy->call();
+			if(resultProxy) {
+				args.GetReturnValue().Set(resultProxy->get());
+				delete resultProxy;
+			}
 			delete proxy;
 		}
 		else
@@ -123,7 +128,12 @@ namespace rootJS
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, params);
 		if(proxy != nullptr)
 		{
-			args.GetReturnValue().Set(proxy->call(params));
+			proxy->prepareCall(params);
+			ObjectProxy *resultProxy = proxy->call();
+			if(proxy) {
+				args.GetReturnValue().Set(resultProxy->get());
+				delete resultProxy;
+			}
 			//TODO: Callback!
 			delete proxy;
 		}
@@ -233,12 +243,22 @@ namespace rootJS
 
 		if(proxy != nullptr) {
 			if(callback.IsEmpty()) {
-				info.GetReturnValue().Set(proxy->call(params));
+				proxy->prepareCall(params);
+				ObjectProxy *resultProxy = proxy->call();
+				if(resultProxy) {
+					info.GetReturnValue().Set(resultProxy->get());
+					delete resultProxy;
+				}
 			} else {
 				AsyncCallParam *asynCallParam = new AsyncCallParam();
-				asynCallParam->params = params;
+				v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), params);
+				v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
+				asynCallParam->params = persistentArgs;
 				asynCallParam->proxy = proxy;
-				AsyncRunner runner(&asyncMemberCall, asynCallParam, callback);
+				asynCallParam->isolate = v8::Isolate::GetCurrent();
+				proxy->prepareCall(params);
+				AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
+				runner->run();
 			}
 		} else {
 			Toolbox::throwException("The method could not be determined.");
@@ -247,8 +267,9 @@ namespace rootJS
 
 	void CallbackHandler::asyncMemberCall(AsyncRunner* runner, void* param) {
 		AsyncCallParam *asynCallParam = (AsyncCallParam*)param;
-		std::vector<v8::Local<v8::Value>> resultVector;
-		resultVector.push_back(asynCallParam->proxy->call(asynCallParam->params));
+		std::vector<ObjectProxy*> resultVector;
+		ObjectProxy* resultProxy = asynCallParam->proxy->call();
+		resultVector.push_back(resultProxy);
 		runner->setResult(resultVector);
 		delete asynCallParam;
 	}
