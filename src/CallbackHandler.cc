@@ -7,6 +7,7 @@
 #include "TClassRef.h"
 #include "TClassTable.h"
 
+#include <vector>
 #include <TROOT.h>
 
 namespace rootJS
@@ -59,18 +60,16 @@ namespace rootJS
 			return;
 		}
 
-		/*
-		 * TODO:
-		 * v8::Local<v8::Function> *callback = nullptr;
-		 * v8::Local<v8::Array> argss = getInfoArgs(callback, args);
-		*/
+		v8::Local<v8::Function> callback;
+		v8::Local<v8::Array> params = getInfoArgs(&callback, args);
 
 		// std::cout << "global function name:" << name << std::endl;
 
-		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
+		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, params);
 		if(proxy != nullptr)
 		{
-			args.GetReturnValue().Set(proxy->call(args));
+			//TODO: Callback!
+			args.GetReturnValue().Set(proxy->call(params));
 			delete proxy;
 		}
 		else
@@ -117,10 +116,15 @@ namespace rootJS
 			return;
 		}
 
-		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
+		v8::Local<v8::Function> callback;
+		v8::Local<v8::Array> params = getInfoArgs(&callback, args);
+
+
+		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, params);
 		if(proxy != nullptr)
 		{
-			args.GetReturnValue().Set(proxy->call(args));
+			args.GetReturnValue().Set(proxy->call(params));
+			//TODO: Callback!
 			delete proxy;
 		}
 		else
@@ -219,16 +223,34 @@ namespace rootJS
 			proxy = (FunctionProxy*)proxySearch->second;
 		}
 
-		if(!proxy->determineOverload(info)) {
+		v8::Local<v8::Function> callback;
+		v8::Local<v8::Array> params = getInfoArgs(&callback, info);
+
+		if(!proxy->determineOverload(params)) {
 			Toolbox::throwException("These parameters are not supported.");
 			return;
 		}
 
 		if(proxy != nullptr) {
-			info.GetReturnValue().Set(proxy->call(info));
+			if(callback.IsEmpty()) {
+				info.GetReturnValue().Set(proxy->call(params));
+			} else {
+				AsyncCallParam *asynCallParam = new AsyncCallParam();
+				asynCallParam->params = params;
+				asynCallParam->proxy = proxy;
+				AsyncRunner runner(&asyncMemberCall, asynCallParam, callback);
+			}
 		} else {
 			Toolbox::throwException("The method could not be determined.");
 		}
+	}
+
+	void CallbackHandler::asyncMemberCall(AsyncRunner* runner, void* param) {
+		AsyncCallParam *asynCallParam = (AsyncCallParam*)param;
+		std::vector<v8::Local<v8::Value>> resultVector;
+		resultVector.push_back(asynCallParam->proxy->call(asynCallParam->params));
+		runner->setResult(resultVector);
+		delete asynCallParam;
 	}
 
 

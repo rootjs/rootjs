@@ -35,7 +35,7 @@ namespace rootJS
 		return new FunctionProxy(FunctionProxy::getCallFunc(scope, function), mode, function, scope);
 	}
 
-	TFunction* FunctionProxyFactory::determineFunction(std::string name, TClass *scope, const v8::FunctionCallbackInfo<v8::Value> args) {
+	TFunction* FunctionProxyFactory::determineFunction(std::string name, TClass *scope, const v8::Local<v8::Array> args) {
 		std::vector<TFunction*> validFuncs;
 		TFunction *callableFunction = nullptr;
 		if(scope == nullptr)
@@ -59,15 +59,15 @@ namespace rootJS
 
 		for(TFunction* value: validFuncs)
 		{
-			if(value->GetNargs() != args.Length())
+			if(value->GetNargs() != (int)args->Length())
 			{
 				continue;
 			}
 			TList *funcArgs = value->GetListOfMethodArgs();
 			bool argsMatch = true;
-			for(int i = 0; i < args.Length(); i++)
+			for(int i = 0; i < (int)args->Length(); i++)
 			{
-				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args[i]))
+				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i)))
 				{
 					argsMatch = false;
 					break;
@@ -82,17 +82,6 @@ namespace rootJS
 		if(callableFunction) {
 			return callableFunction;
 		}
-		return nullptr;
-	}
-
-	FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClass *scope, const v8::FunctionCallbackInfo<v8::Value> args)
-	{
-		TFunction *callableFunction = determineFunction(name, scope, args);
-		if(callableFunction != nullptr)
-		{
-			return createFunctionProxy(callableFunction, scope);
-		}
-
 		return nullptr;
 	}
 
@@ -121,13 +110,13 @@ namespace rootJS
 
 		for(TFunction* value: validFuncs)
 		{
-			if(value->GetNargs() != args->Length())
+			if(value->GetNargs() != (int)args->Length())
 			{
 				continue;
 			}
 			TList *funcArgs = value->GetListOfMethodArgs();
 			bool argsMatch = true;
-			for(int i = 0; i < args->Length(); i++)
+			for(int i = 0; i < (int)args->Length(); i++)
 			{
 				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i)))
 				{

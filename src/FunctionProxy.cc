@@ -297,7 +297,7 @@ namespace rootJS {
 			return argToDouble(originalArg);
 		case mappedTypes::BOOL:
 			return argToBool(originalArg);
-			case mappedTypes::TSTRING:
+		case mappedTypes::TSTRING:
 			return argToTString(originalArg);
 		}
 
@@ -305,7 +305,7 @@ namespace rootJS {
 		return nullptr;
 	}
 
-	v8::Local<v8::Value> FunctionProxy::call(const v8::FunctionCallbackInfo<v8::Value>& args)
+	v8::Local<v8::Value> FunctionProxy::call(const  v8::Local<v8::Array>& args)
 	{
 		CallFunc_t* callFunc = (CallFunc_t*)getCallFunc(scope, function);
 		if(!callFunc) {
@@ -314,23 +314,23 @@ namespace rootJS {
 		TInterpreter::CallFuncIFacePtr_t facePtr = gCling->CallFunc_IFacePtr( callFunc );
 		void *self = nullptr; //TODO?
 		void *result = nullptr; //TODO?
-		std::vector<void*> buf( args.Length() );
-		for(int i = 0; i < args.Length(); i++) {
+		std::vector<void*> buf( args->Length() );
+		for(int i = 0; i < (int)args->Length(); i++) {
 			void** bufEl = (void**)malloc(sizeof(void*));
-			*bufEl = bufferParam((TMethodArg*)(function->GetListOfMethodArgs()->At(i)), args[i]);
+			*bufEl = bufferParam((TMethodArg*)(function->GetListOfMethodArgs()->At(i)), args->Get(i));
 			buf[i] = bufEl;
 		}
 
 		switch(facePtr.fKind) {
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
 
-			facePtr.fGeneric((selfAddress == nullptr)?self:*(void**)selfAddress, args.Length(), buf.data(), &result);
+			facePtr.fGeneric((selfAddress == nullptr)?self:*(void**)selfAddress, args->Length(), buf.data(), &result);
 			break;
 		default:
 			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
 		}
 
-		for(int i = 0; i < args.Length(); i++) {
+		for(int i = 0; i < (int)args->Length(); i++) {
 			free(*((void**)buf[i]));
 			free((void*)buf[i]);
 		}
@@ -349,7 +349,7 @@ namespace rootJS {
 		return v8::Null(v8::Isolate::GetCurrent());
 	}
 
-	bool FunctionProxy::determineOverload(const v8::FunctionCallbackInfo<v8::Value>& info) {
+	bool FunctionProxy::determineOverload(const v8::Local<v8::Array>& info) {
 		TFunction* overloadedFunction = FunctionProxyFactory::determineFunction(function->GetName(), scope.GetClass(), info);
 		if(overloadedFunction == nullptr) {
 			return false;

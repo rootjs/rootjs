@@ -10,14 +10,17 @@ namespace rootJS {
 	class AsyncRunner {
 			typedef void (*AsyncFunction)(AsyncRunner* runner, void* param);
 		private:
-			AsyncFunction *func;
+			AsyncFunction func;
 			void *param;
 			v8::Local<v8::Function> callback;
 			std::vector<v8::Local<v8::Value>> result;
 
 		public:
-			AsyncRunner(AsyncFunction *func, void *param, v8::Local<v8::Function> callback);
+			AsyncRunner(AsyncFunction func, void *param, v8::Local<v8::Function> callback);
 			void run();
+			void setResult(std::vector<v8::Local<v8::Value>> result) {
+				this->result = result;
+			};
 			static void uvRunner(uv_work_t *req);
 			static void uvCallback(uv_work_t *req, int status);
 	};

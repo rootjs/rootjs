@@ -9,6 +9,7 @@
 #include "ObjectProxyFactory.h"
 #include "FunctionProxy.h"
 #include "FunctionProxyFactory.h"
+#include "AsyncRunner.h"
 
 namespace rootJS
 {
@@ -193,6 +194,10 @@ namespace rootJS
 			static v8::Local<v8::Value> createFunctionCallbackData(TClass *scope);
 
 		private:
+			struct AsyncCallParam {
+				v8::Local<v8::Array> params;
+				FunctionProxy* proxy;
+			};
 			static std::map<std::string, ObjectProxy*> globalObjectMap;
 			static std::map<std::string, ObjectProxy*> staticObjectMap;
 
@@ -202,6 +207,8 @@ namespace rootJS
 			static std::string resolveCallbackName(v8::Local<v8::Value> data) throw(std::invalid_argument);
 
 			static std::string toString(v8::Local<v8::Value> data) throw(std::invalid_argument);
+
+			static void asyncMemberCall(AsyncRunner* runner, void* param);
 	};
 }
 
