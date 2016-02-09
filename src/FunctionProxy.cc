@@ -25,11 +25,12 @@
 #include "FunctionProxyFactory.h"
 #include "PointerInfo.h"
 
-namespace rootJS {
+namespace rootJS
+{
 	std::map<TFunction*, CallFunc_t*> FunctionProxy::functions;
 	std::map<std::string, mappedTypes> FunctionProxy::typeMap = {
-		{"char", mappedTypes::CHAR}
-	};
+	            {"char", mappedTypes::CHAR}
+	        };
 
 	CallFunc_t* FunctionProxy::getCallFunc(const TClassRef& classRef, TFunction* method)
 	{
@@ -46,7 +47,8 @@ namespace rootJS {
 
 			ClassInfo_t* gcl;
 			gcl = classRef.GetClass() ? classRef->GetClassInfo() : nullptr;
-			if ( ! gcl ) {
+			if ( ! gcl )
+			{
 				gcl = gInterpreter->ClassInfo_Factory();
 			}
 
@@ -54,7 +56,8 @@ namespace rootJS {
 			TIter iarg( method_args );
 
 			TMethodArg* method_arg = 0;
-			while ((method_arg = (TMethodArg*)iarg.Next())) {
+			while ((method_arg = (TMethodArg*)iarg.Next()))
+			{
 				std::string fullType = method_arg->GetTypeNormalizedName();
 				if ( callString.empty() )
 					callString = fullType;
@@ -83,7 +86,8 @@ namespace rootJS {
 			 */
 
 
-			if ( ! gInterpreter->CallFunc_IsValid( callf ) ) {
+			if ( ! gInterpreter->CallFunc_IsValid( callf ) )
+			{
 				gInterpreter->CallFunc_SetFuncProto(
 				    callf,
 				    gcl,
@@ -92,7 +96,9 @@ namespace rootJS {
 				    func ? (func->Property() & kIsConstMethod) : kFALSE,
 				    &offset );
 				return callf;
-			} else {
+			}
+			else
+			{
 				return callf;
 			}
 
@@ -108,8 +114,10 @@ namespace rootJS {
 		const TList *funcList = scope.GetClass()->GetListOfAllPublicMethods();
 		TIter funcIter(funcList);
 		TFunction *func;
-		while((func = (TFunction*)funcIter())) {
-			if(name.compare(func->GetName()) == 0) {
+		while((func = (TFunction*)funcIter()))
+		{
+			if(name.compare(func->GetName()) == 0)
+			{
 				methods.push_back(func);
 			}
 		}
@@ -117,8 +125,7 @@ namespace rootJS {
 		return methods;
 	}
 
-	FunctionProxy::FunctionProxy(void* address, FunctionInfo& mode, TFunction* function, TClassRef scope)
-		: Proxy(mode, scope)
+	FunctionProxy::FunctionProxy(void *address, FunctionInfo &mode, TFunction *function, TClass *scope) : Proxy(mode, scope)
 	{
 		this->address = address;
 		this->function = function;
@@ -234,13 +241,16 @@ namespace rootJS {
 		return validatedArgs;
 	}
 
-	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg) {
+	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg)
+	{
 		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(std::string(arg->GetTypeName()));
-		if(iterator == typeMap.end()) {
+		if(iterator == typeMap.end())
+		{
 			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
 			return nullptr;
 		}
-		switch(iterator->second) {
+		switch(iterator->second)
+		{
 		case mappedTypes::CHAR:
 			v8::String::Utf8Value string(originalArg->ToString());
 			char *str = (char *) malloc(string.length() + 1);
@@ -255,35 +265,40 @@ namespace rootJS {
 	v8::Local<v8::Value> FunctionProxy::call(const v8::FunctionCallbackInfo<v8::Value>& args)
 	{
 		CallFunc_t* callFunc = (CallFunc_t*)getCallFunc(scope, function);
-		if(!callFunc) {
+		if(!callFunc)
+		{
 			//TODO Handle this, should not segfault (maybe throw something...)
 		}
 		TInterpreter::CallFuncIFacePtr_t facePtr = gCling->CallFunc_IFacePtr( callFunc );
 		void *self = nullptr; //TODO?
 		void *result = nullptr; //TODO?
 		std::vector<void*> buf( args.Length() );
-		for(int i = 0; i < args.Length(); i++) {
+		for(int i = 0; i < args.Length(); i++)
+		{
 			void* bufEl = bufferParam(((TMethodArg*)argsReflection->At(i)), args[i]);
 			buf[i] = &bufEl;
 		}
 
-		switch(facePtr.fKind) {
+		switch(facePtr.fKind)
+		{
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
 
-			facePtr.fGeneric((selfAddress == nullptr)?self:*(void**)selfAddress, args.Length(), buf.data(), &result);
+						facePtr.fGeneric((selfAddress == nullptr)?self:*(void**)selfAddress, args.Length(), buf.data(), &result);
 			break;
 		default:
-			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
+				v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
 		}
 
-		for(int i = 0; i < args.Length(); i++) {
+		for(int i = 0; i < args.Length(); i++)
+{
 			free(*((void**)buf[i]));
 		}
 
 		PointerInfo mode((void*)&result, function->GetReturnTypeName());
 		ObjectProxy* proxy = ObjectProxyFactory::determineProxy(mode, TClassRef());
 
-		if(proxy) {
+		if(proxy)
+		{
 			v8::Local<v8::Value> result = proxy->get();
 			delete proxy;
 			return result;
@@ -293,9 +308,11 @@ namespace rootJS {
 		return v8::Null(v8::Isolate::GetCurrent());
 	}
 
-	bool FunctionProxy::determineOverload(const v8::FunctionCallbackInfo<v8::Value>& info) {
+	bool FunctionProxy::determineOverload(const v8::FunctionCallbackInfo<v8::Value>& info)
+	{
 		TFunction* overloadedFunction = FunctionProxyFactory::determineFunction(function->GetName(), scope.GetClass(), info);
-		if(overloadedFunction == nullptr) {
+		if(overloadedFunction == nullptr)
+		{
 			return false;
 		}
 		function = overloadedFunction;
@@ -306,23 +323,23 @@ namespace rootJS {
 	/*
 	// TODO
 	bool FunctionProxy::processCall(TFunction* method, void* args, void* self, void* result)
-	{
-	}
+{
+}
 
 	void* FunctionProxy::callConstructor(TFunction* method, TClassRef type, void* args)
-	{
-	}
+{
+}
 
 	void FunctionProxy::callDestructor(TClassRef type, void* self)
-	{
-	}
+{
+}
 
 	void* FunctionProxy::callObject(TFunction* method, void* self, void* args, TClassRef resType)
-	{
-	}
+{
+}
 
 	template <typename T>
 	T FunctionProxy::callPrimitive(TFunction* method, void* self, void* args)
-	{
-	}*/
+{
+}*/
 }

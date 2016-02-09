@@ -1,10 +1,12 @@
 #ifndef PROXY_H_
 #define PROXY_H_
 
-#include "TObject.h"
-#include "TClassRef.h"
-
 #include "MetaInfo.h"
+
+#include "TClass.h"
+#include "TClassRef.h"
+#include "TObject.h"
+
 
 namespace rootJS
 {
@@ -14,15 +16,8 @@ namespace rootJS
 	 */
 	class Proxy
 	{
-		protected:
-			Proxy(MetaInfo & type, TClassRef & scope);
-			virtual ~Proxy();
-
-
-			MetaInfo *type; /**<type meta information of encapsulated object */
-			TClassRef scope; /**<scope meta information of encapsulated object*/
-
 		public:
+			virtual ~Proxy();
 
 			/**
 			 * set the address this proxy points to
@@ -40,13 +35,13 @@ namespace rootJS
 			 * get meta information about the encapsulated objcet's scope
 			 * @return meta information about the scope
 			 */
-			TClassRef& getScope();
+			TClass* getScope();
 
 			/**
 			 * get meta information about the encapsulated objcet's type
 			 * @return meta information about the type
 			 */
-			virtual MetaInfo* getType();
+			virtual MetaInfo* getTypeInfo();
 
 			/**
 			 * check if the encapsulated object is a template
@@ -71,6 +66,12 @@ namespace rootJS
 			 * @return if the encapsulated object is static
 			 */
 			virtual bool isStatic() = 0;
+
+		protected:
+			Proxy(MetaInfo &info, TClass *scope);
+
+			MetaInfo *info; /**<type meta information of encapsulated object */
+			TClassRef scope; /**<scope meta information of encapsulated object*/
 	};
 }
 #endif

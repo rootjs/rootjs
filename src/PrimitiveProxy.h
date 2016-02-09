@@ -3,22 +3,21 @@
 
 #include "ObjectProxy.h"
 
-#include <TDataMember.h>
-#include <TClassRef.h>
-
-namespace rootJS {
-	class PrimitiveProxy: public ObjectProxy {
+namespace rootJS
+{
+	class PrimitiveProxy: public ObjectProxy
+	{
 		public:
 			/**
 			 * Create a new PrimitiveProxy.
 			 *
-			 * @param type
+			 * @param info
 			 * 			the type of the encapsulated object
 			 *
 			 * @param scope
 			 *			the scope of the encapsulated object
 			 */
-			PrimitiveProxy(MetaInfo& type, TClassRef scope);
+			PrimitiveProxy(MetaInfo &type, TClass *scope);
 
 			/**
 			 * Check if this proxy encapsulates a primitive type.
@@ -29,4 +28,4 @@ namespace rootJS {
 	};
 }
 
-#endif /* PRIMITIVE_PROXY_H */
+#endif

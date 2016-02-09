@@ -4,10 +4,6 @@
 #include "PrimitiveProxy.h"
 
 #include <string>
-
-#include <TClassRef.h>
-#include <TDataMember.h>
-
 #include <v8.h>
 
 namespace rootJS
@@ -21,17 +17,28 @@ namespace rootJS
 			enum class StringType {
 			    CHAR, STRING, TSTRING
 			};
+
 			/**
 			 * Returns a c_string
 			 * If this is based on a char ptr, this ptr will be returned
 			 * If this is based on a std::string its c_str will be returned
 			 */
 			const char* c_str();
+
 			/**
 			 * Enum value representing the type
 			 */
 			StringType strType;
+
 		public:
+			/**
+			 * Create a new StringProxy.
+			 *
+			 * @param info the type of the encapsulated object
+			 * @param scope the scope of the encapsulated object
+			 */
+			StringProxy(MetaInfo &info, TClass *scope);
+
 			/**
 			 * Check if the type is a boolean type.
 			 *
@@ -41,20 +48,12 @@ namespace rootJS
 			static bool isString(std::string type);
 
 			/**
-			 * Create a new StringProxy.
-			 *
-			 * @param info the type of the encapsulated object
-			 * @param scope the scope of the encapsulated object
-			 */
-			StringProxy(MetaInfo& info, TClassRef scope);
-
-			/**
 			 * Creates a StringProxy based on a const char*, nullterminated string
 			 *
 			 * @param info the type of the encapsulated object
 			 * @param scope the scope of the encapsulated object
 			 */
-			static ObjectProxy *charConstruct(MetaInfo& info, TClassRef scope);
+			static ObjectProxy* charConstruct(MetaInfo &info, TClass *scope);
 
 			/**
 			 * Creates a StringProxy based on a const std::string, nullterminated string
@@ -62,7 +61,7 @@ namespace rootJS
 			 * @param info the type of the encapsulated object
 			 * @param scope the scope of the encapsulated object
 			 */
-			static ObjectProxy *stringConstruct(MetaInfo& info, TClassRef scope);
+			static ObjectProxy* stringConstruct(MetaInfo &info, TClass *scope);
 
 			/**
 			 * Creates a StringProxy based on a const TString, nullterminated string
@@ -70,7 +69,7 @@ namespace rootJS
 			 * @param info the type of the encapsulated object
 			 * @param scope the scope of the encapsulated object
 			 */
-			static ObjectProxy *tStringConstruct(MetaInfo& info, TClassRef scope);
+			static ObjectProxy* tStringConstruct(MetaInfo &info, TClass *scope);
 
 
 			/**
@@ -88,4 +87,4 @@ namespace rootJS
 	};
 }
 
-#endif // STRING_PROXY_H
+#endif

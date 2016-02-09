@@ -3,12 +3,12 @@
 namespace rootJS
 {
 
-	Proxy::Proxy(rootJS::MetaInfo& type, TClassRef & scope) : type(type.clone()), scope(TClassRef(scope))
+	Proxy::Proxy(MetaInfo &info, TClass *scope) : info(info.clone()), scope(scope)
 	{}
 
 	Proxy::~Proxy()
 	{
-		delete type;
+		delete info;
 	}
 
 	void Proxy::setAddress(void* address)
@@ -18,17 +18,17 @@ namespace rootJS
 
 	void* Proxy::getAddress()
 	{
-		return type->getAddress();
+		return info->getAddress();
 	}
 
-	TClassRef& Proxy::getScope()
+	TClass* Proxy::getScope()
 	{
-		return scope;
+		return scope.GetClass();
 	}
 
-	MetaInfo* Proxy::getType()
+	MetaInfo* Proxy::getTypeInfo()
 	{
-		return type;
+		return info;
 	}
 
 }
