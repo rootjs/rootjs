@@ -108,6 +108,7 @@ namespace rootJS
 			case StringType::CHAR:{
 				char* backupPtr = (char*)malloc(strlen(*(char**)getAddress()) + 1);
 				strncpy(backupPtr, *(char**)getAddress(), strlen(*(char**)getAddress()));
+				backupPtr[strlen(*(char**)getAddress())] = '\0';
 				*ptrptr = backupPtr;
 				break;
 			}

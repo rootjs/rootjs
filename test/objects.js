@@ -23,5 +23,31 @@ describe('Objects', function() {
 			  root.gBenchmark.Start("test");
 		  }).should.not.throw();
 	  });
+	  it('should be possible to call methods asynchronously', function(done) {
+		  var AsyncWorks = false;
+		  root.gSystem.Exec("sleep 100ms", function(result) {
+			  AsyncWorks.should.equal(true);
+			  done();
+		  });
+		  AsyncWorks = true;
+	  });
+	  it('should be possible to get return values as a param of a callback function', function(done) {
+		  root.gApplication.GetName(function(name) {
+			  name.should.equal("TApplication");
+			  done();
+		  });
+	  });
+	  it('should be possible to run multiple functions asynchronously in parallel', function(done) {
+		  var join = 5;
+		  var cb = function() {
+			  join--;
+			  if(--join <= 0) {
+				  done();
+			  }
+		  };
+		  for(var i = 0; i < 5; i++) {
+			  root.gSystem.Exec("sleep 100ms", cb);
+		  }
+	  });
   });
 });
