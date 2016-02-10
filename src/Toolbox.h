@@ -11,6 +11,8 @@ namespace rootJS
 	class Toolbox
 	{
 		public:
+			static const int INTERNAL_FIELD_COUNT = 2;
+
 			/**
 			 * Enumerates the internal fields of v8::Objects.
 			 */
