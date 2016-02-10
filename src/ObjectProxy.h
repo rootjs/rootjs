@@ -18,8 +18,8 @@
 namespace rootJS {
 
 	/**
-	 *The ObjectProxy class is used to represent ROOT objects.
-	 *It differentiates between primitive and non-primitive object types.
+	 * The ObjectProxy class is used to represent ROOT objects.
+	 * It differentiates between primitive and non-primitive object types.
 	 */
 	class ObjectProxy : public Proxy {
 
@@ -42,9 +42,9 @@ namespace rootJS {
 			 */
 			const char* getTypeName();
 
-			/*
-			*get the offset
-			@return the offset
+			/**
+			* Get the offset
+            * @return the offset
 			*/
 			Long_t getOffset();
 
@@ -88,10 +88,35 @@ namespace rootJS {
 			 */
 			virtual bool isPrimitive();
 
+            /**
+			 * Check if this proxy encapsulates a template.
+			 *
+			 * @return true if this ProxyObject encapsulates a template
+			 */
 			virtual bool isTemplate();
+
+			/**
+			 * Check if this proxy encapsulates a global.
+			 *
+			 * @return true if this ProxyObject encapsulates a global
+			 */
 			virtual bool isGlobal();
+			/**
+			 * Check if this proxy encapsulates a constant.
+			 *
+			 * @return true if this ProxyObject encapsulates a constant
+			 */
 			virtual bool isConst();
+			/**
+			 * Check if this proxy encapsulates a static.
+			 *
+			 * @return true if this ProxyObject encapsulates a static
+			 */
 			virtual bool isStatic();
+
+			/**
+             * Saves the object to memory
+             */
 			virtual void backup();
 
 		protected:
