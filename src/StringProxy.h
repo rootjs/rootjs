@@ -92,7 +92,7 @@ namespace rootJS
 			virtual void setValue(v8::Local<v8::Value> value);
 
 			/**
-			* Saves the string to memory
+			* Saves the value to the heap
 			*/
 			virtual void backup();
 	};

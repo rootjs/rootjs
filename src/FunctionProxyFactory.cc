@@ -1,7 +1,8 @@
+#include "FunctionProxy.h"
 #include "FunctionProxyFactory.h"
 #include "Toolbox.h"
+#include "Types.h"
 
-#include "FunctionProxy.h"
 #include <vector>
 #include <map>
 
@@ -110,7 +111,7 @@ namespace rootJS
 
 		for(TFunction* value: validFuncs)
 		{
-			if(value->GetNargs() != (int)args->Length())
+			if((int)args->Length() < value->GetNargs() || (int)args->Length() > value->GetNargsOpt())
 			{
 				continue;
 			}
@@ -146,20 +147,7 @@ namespace rootJS
 
 	bool FunctionProxyFactory::paramMatches(const char* type, v8::Local<v8::Value> arg)
 	{
-		if (arg->IsObject())
-		{
-			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
-			if (objectArg->InternalFieldCount() > 0)
-			{
-				ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr));
-				return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
-			}
-			else
-			{
-				Toolbox::throwException(std::string("v8::Object contains no InternalField entries"));
-			}
-		}
-		else
+		if (Types::isV8Primitive(*arg))
 		{
 			std::map<std::string, v8BasicTypes>::iterator it = basicTypeMap.find(std::string(type));
 			if(it != basicTypeMap.end())
@@ -167,11 +155,11 @@ namespace rootJS
 				switch(it->second)
 				{
 				case v8BasicTypes::STRING:
-					return arg->IsString();
+					return Types::isV8String(*arg);
 				case v8BasicTypes::NUMBER:
-					return arg->IsNumber() || arg->IsNumberObject();
+					return Types::isV8Number(*arg);
 				case v8BasicTypes::BOOLEAN:
-					return arg->IsBoolean() || arg->IsBooleanObject();
+					return Types::isV8Boolean(*arg);
 				case v8BasicTypes::ARRAY:
 					//TODO: CHeck array contents...
 					return false;
@@ -182,6 +170,19 @@ namespace rootJS
 					v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
 					return false;
 				}
+			}
+		}
+		else
+		{
+			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
+			if (objectArg->InternalFieldCount() > 0)
+			{
+				ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr));
+				return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
+			}
+			else
+			{
+				Toolbox::throwException(std::string("v8::Object contains no InternalField entries"));
 			}
 		}
 

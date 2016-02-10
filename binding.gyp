@@ -29,7 +29,8 @@
 				'src/CallbackHandler.cc',
 				'src/TemplateFactory.cc',
 				'src/Toolbox.cc',
-				'src/PointerInfo.cc'
+				'src/PointerInfo.cc',
+				'src/Types.cc'
 			],
 
 			'cflags_cc!'  : [ '-fno-rtti', '-fno-exceptions'],
