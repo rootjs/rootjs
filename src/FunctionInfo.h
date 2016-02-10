@@ -6,9 +6,9 @@
 
 namespace rootJS {
 
-    /**
-     * This class contains the info for a TFunction
-     */
+	/**
+	 * This class contains the info for a TFunction
+	 */
 	class FunctionInfo: public MetaInfo {
 		public:
 			FunctionInfo(TFunction* func) : MetaInfo(TObject(), nullptr) {
@@ -36,9 +36,9 @@ namespace rootJS {
 				return new FunctionInfo(func);
 			};
 		protected:
-            /**
-             * The function the FunctionInfo is holding.
-             */
+			/**
+			 * The function the FunctionInfo is holding.
+			 */
 			TFunction* func;
 	};
 }

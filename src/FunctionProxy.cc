@@ -332,7 +332,7 @@ namespace rootJS
 		}
 	}
 
-	ObjectProxy* FunctionProxy::call()
+	ObjectProxy* FunctionProxy::call(bool isConstructorCall /* false */)
 	{
 		void *self = nullptr; //TODO?
 		void *result = nullptr; //TODO?
@@ -353,8 +353,16 @@ namespace rootJS
 			free((void*)buf[i]);
 		}
 
-		PointerInfo mode((void*)&result, function->GetReturnTypeName());
-		ObjectProxy* proxy = ObjectProxyFactory::createObjectProxy(mode, TClassRef());
+		ObjectProxy* proxy;
+		if(isConstructorCall) {
+			void** ptrptr = (void**)malloc(sizeof(void*)); //TODO: This pointer needs to be freed when the JS Local goes out of scope... Figure out how to do this...
+			*ptrptr = result;
+			PointerInfo mode((void*)ptrptr, function->GetReturnTypeName());
+			proxy = ObjectProxyFactory::createObjectProxy(mode, TClassRef());
+		} else {
+			PointerInfo mode((void*)&result, function->GetReturnTypeName());
+			proxy = ObjectProxyFactory::createObjectProxy(mode, TClassRef());
+		}
 
 		if(proxy) {
 			proxy->backup();

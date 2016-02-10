@@ -35,6 +35,8 @@ namespace rootJS {
 			 */
 			ObjectProxy(MetaInfo &info, TClass *scope);
 
+			~ObjectProxy();
+
 
 			/**
 			 * Return the name of the type
@@ -44,7 +46,7 @@ namespace rootJS {
 
 			/**
 			* Get the offset
-            * @return the offset
+			* @return the offset
 			*/
 			Long_t getOffset();
 
@@ -88,7 +90,7 @@ namespace rootJS {
 			 */
 			virtual bool isPrimitive();
 
-            /**
+			/**
 			 * Check if this proxy encapsulates a template.
 			 *
 			 * @return true if this ProxyObject encapsulates a template
@@ -115,12 +117,15 @@ namespace rootJS {
 			virtual bool isStatic();
 
 			/**
-             * Saves the object to memory
-             */
+			 * Saves the object to memory
+			 */
 			virtual void backup();
 
 		protected:
 			v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
+
+		private:
+			bool backedUp = false;
 	};
 }
 

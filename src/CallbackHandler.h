@@ -5,6 +5,9 @@
 #include <map>
 #include <string>
 
+#include <TError.h>
+#include <TClassEdit.h>
+
 #include "ObjectProxy.h"
 #include "ObjectProxyFactory.h"
 #include "FunctionProxy.h"

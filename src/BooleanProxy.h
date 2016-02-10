@@ -57,9 +57,9 @@ namespace rootJS
 			 */
 			virtual void setValue(v8::Local<v8::Value> value);
 
-            /**
-             * Saves the boolean to memory
-             */
+			/**
+			 * Saves the boolean to memory
+			 */
 			virtual void backup();
 	};
 }

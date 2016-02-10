@@ -208,7 +208,7 @@ namespace rootJS
 			}
 
 			funcProxy->prepareCall(args);
-			ObjectProxy *proxy = funcProxy->call();
+			ObjectProxy *proxy = funcProxy->call(true);
 
 			if(proxy == nullptr) {
 				Toolbox::throwException("Constructor failed, resulting class could not be mapped to a JavaScript object.");

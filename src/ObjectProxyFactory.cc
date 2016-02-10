@@ -202,7 +202,7 @@ namespace rootJS
 
 		proxyMap["std::string"]        = &StringProxy::stringConstruct;
 
-		proxyMap["TString"]            = &StringProxy::tStringConstruct;
+		//proxyMap["TString"]            = &StringProxy::tStringConstruct;
 
 		proxyMap["Bool_t"]             = &BooleanProxy::boolConstruct;
 		proxyMap["bool"]               = &BooleanProxy::boolConstruct;

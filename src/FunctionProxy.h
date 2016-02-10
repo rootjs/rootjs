@@ -73,9 +73,9 @@ namespace rootJS {
 			 * @param args the arguments for the function call.
 			 * @return the function's return value encasulated in an ObjectProxy
 			 */
-			ObjectProxy* call();
+			ObjectProxy* call(bool isConstructorCall = false);
 
-            /**
+			/**
 			 * Check if this proxy encapsulates a constant.
 			 *
 			 * @return true if this ProxyObject encapsulates a constant
@@ -84,7 +84,7 @@ namespace rootJS {
 			{
 				return true;
 			};
-            /**
+			/**
 			 * Check if this proxy encapsulates a global.
 			 *
 			 * @return true if this ProxyObject encapsulates a global
@@ -93,7 +93,7 @@ namespace rootJS {
 			{
 				return true; /*TODO*/
 			};
-            /**
+			/**
 			 * Check if this proxy encapsulates a static.
 			 *
 			 * @return true if this ProxyObject encapsulates a static
@@ -102,7 +102,7 @@ namespace rootJS {
 			{
 				return true; /*TODO*/
 			};
-            /**
+			/**
 			 * Check if this proxy encapsulates a template.
 			 *
 			 * @return true if this ProxyObject encapsulates a template
@@ -112,30 +112,30 @@ namespace rootJS {
 				return false; /*TODO*/
 			};
 
-            /**
-             * Determines which overloaded function is wanted
-             * @param info
-             *              The info of the overloaded function
-             * @return true if the overloaded function is found
-             */
+			/**
+			 * Determines which overloaded function is wanted
+			 * @param info
+			 *              The info of the overloaded function
+			 * @return true if the overloaded function is found
+			 */
 			bool determineOverload(const v8::Local<v8::Array>& info);
 
-            /**
-             * Sets the address of the function
-             *
-             * @param addr
-             *              The address the function will be set to
-             */
+			/**
+			 * Sets the address of the function
+			 *
+			 * @param addr
+			 *              The address the function will be set to
+			 */
 			void setSelfAddress(void* addr)
 			{
 				selfAddress = addr;
 			}
 
-            /**
-             * Makes a clone of the current FunctionProxy
-             *
-             * @return A pointer to the clone
-             */
+			/**
+			 * Makes a clone of the current FunctionProxy
+			 *
+			 * @return A pointer to the clone
+			 */
 			FunctionProxy* clone();
 
 

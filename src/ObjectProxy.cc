@@ -1,5 +1,7 @@
 #include "ObjectProxy.h"
 
+#include "PointerInfo.h"
+
 #include <TObject.h>
 #include <TGlobal.h>
 
@@ -7,6 +9,12 @@ namespace rootJS {
 
 	ObjectProxy::ObjectProxy(MetaInfo &info, TClass *scope) : Proxy(info, scope) {
 
+	}
+
+	ObjectProxy::~ObjectProxy() {
+		if(backedUp) {
+			free(getAddress());
+		}
 	}
 
 	const char* ObjectProxy::getTypeName() {
@@ -60,6 +68,14 @@ namespace rootJS {
 	}
 
 	void ObjectProxy::backup() {
-		throw std::runtime_error("Backup does not work for raw ObjectProxy because the length of the data to be backuped is unknown.");
+		//The object will be on the heap when a raw objectproxy is being created.
+		//Simply Backup its holder
+		void** ptrptr = (void**)malloc(sizeof(void*));
+		*ptrptr = getAddress();
+
+		const char* typeName = info->getTypeName();
+		delete info;
+		info = new PointerInfo(ptrptr, typeName);
+		backedUp = true;
 	}
 }

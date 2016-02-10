@@ -8,9 +8,9 @@
 
 namespace rootJS
 {
-    /**
-     * The NodeHandler is the main entry point when you require rootJS
-     */
+	/**
+	 * The NodeHandler is the main entry point when you require rootJS
+	 */
 	class NodeHandler
 	{
 		private:
@@ -38,9 +38,9 @@ namespace rootJS
 			void exposeClasses() throw(std::invalid_argument);
 
 		public:
-            /**
-             * The method which starts rootJS.
-             */
+			/**
+			 * The method which starts rootJS.
+			 */
 			static void initialize(v8::Local<v8::Object>, v8::Local<v8::Object>);
 			v8::Local<v8::Object> getExports(void);
 	};
