@@ -151,7 +151,7 @@ namespace rootJS
 			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
 			if (objectArg->InternalFieldCount() > 0)
 			{
-				ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::v8ObjectInternalField::ObjectProxyPtr));
+				ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr));
 				return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
 			}
 			else

@@ -11,6 +11,9 @@
 
 namespace rootJS
 {
+    /**
+     * An enum containing the standard number types in C++.
+     */
 	enum class NumberType
 	{
 	    INT_T, DOUBLE_T, SHORT_T, USHORT_T, UINT_T,  LONG_T, ULONG_T, FLOAT_T,
@@ -18,13 +21,23 @@ namespace rootJS
 	};
 
 	/**
-	 * Uses a C++ macro to map all C++ numbers to JavaScript numbers
-	 */
+     * The NumberProxy is the proxy between C++ numbers and JavaScript number.
+     * The NumberProxy uses a C++ macro to map all C++ numbers to JavaScript numbers,
+     * and all number are casted to doubles, as doubles are the number type
+     * supported by JavaScipt.
+     */
 	class NumberProxy: public PrimitiveProxy
 	{
 		private:
-			NumberType numberType;
+			NumberType numberType; /** The type of the C++/ROOT number */
 
+            /**
+             * As JavaScript can only support doubles, all number types
+             * have to be cast to a double.
+             *
+             * @param address of the number which is to be cast
+             * @return the number casted into a double
+             */
 			Double_t castToDouble(void*);
 			bool backedUp = false;
 		public:
@@ -90,31 +103,6 @@ namespace rootJS
 			ROOTJS_NUMBER_PROXY_DECLARE(u_int64);
 			///@}
 
-			/**
-			* This calls the constructor.
-			* We cannot create pointers to constructors,
-			* but need to map the constructors in out Factory.
-
-			* @param type
-			* 			the type of the encapsulated object
-			*
-			* @param scope
-			*			the scope of the encapsulated object
-			*/
-			//static ObjectProxy* doubleConstruct(const TDataMember& type, TClassRef scope);
-
-			/**
-			 * This calls the constructor.
-			 * We cannot create pointers to constructors,
-			 * but need to map the constructors in out Factory.
-
-			 * @param type
-			 * 			the type of the encapsulated object
-			 *
-			 * @param scope
-			 *			the scope of the encapsulated object
-			 */
-			//static ObjectProxy* doubleConstruct(void *address, const TGlobal& type, TClassRef scope);
 
 			/**
 			 * Return the encapsulating javascript value.

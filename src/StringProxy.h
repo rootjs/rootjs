@@ -14,22 +14,24 @@ namespace rootJS
 	class StringProxy: public PrimitiveProxy
 	{
 		private:
+            /**
+             * An enum containing the two standard string types, string and c-strings.
+             * It also contains standard string type in ROOT, TStrings.
+             */
 			enum class StringType {
 			    CHAR, STRING, TSTRING
 			};
 
 			/**
 			 * Returns a c_string
-			 * If this is based on a char ptr, this ptr will be returned
-			 * If this is based on a std::string its c_str will be returned
+			 * @return  If this is based on a char ptr, this ptr will be returned
+			 *          If this is based on a std::string its c_str will be returned
 			 */
 			const char* c_str();
 
-			/**
-			 * Enum value representing the type
-			 */
-			StringType strType;
-			bool backedUp = false;
+
+			StringType strType; /** Enum value representing the type */
+			bool backedUp = false; /** Checks if the string is backed up. */
 		public:
 			/**
 			 * Create a new StringProxy.
@@ -84,9 +86,14 @@ namespace rootJS
 			/**
 			 * When the base is an immutable string (std::String, TString) this
 			 * will set a new value
+             * @param value
+			 *              The value to be set
 			 */
 			virtual void setValue(v8::Local<v8::Value> value);
 
+             /**
+             * Saves the string to memory
+             */
 			virtual void backup();
 	};
 }

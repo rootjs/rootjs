@@ -156,7 +156,7 @@ namespace rootJS
 					if (objectArg->InternalFieldCount() > 0)
 					{
 						// TODO validate arg
-						void *arg = objectArg->GetAlignedPointerFromInternalField(Toolbox::v8ObjectInternalField::ObjectProxyPtr);
+						void *arg = objectArg->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
 						validatedArgs.push_back(static_cast<ObjectProxy*>(arg));
 					}
 					else
