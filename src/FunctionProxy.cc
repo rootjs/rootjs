@@ -338,8 +338,10 @@ namespace rootJS
 		void *result = nullptr; //TODO?
 		switch(facePtr.fKind) {
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
-
 			facePtr.fGeneric((selfAddress == nullptr)?self:*(void**)selfAddress, buf.size(), buf.data(), &result);
+			break;
+		case (TInterpreter::CallFuncIFacePtr_t::kCtor):
+			facePtr.fCtor(buf.data(), &result, buf.size());
 			break;
 		default:
 			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
@@ -352,7 +354,7 @@ namespace rootJS
 		}
 
 		PointerInfo mode((void*)&result, function->GetReturnTypeName());
-		ObjectProxy* proxy = ObjectProxyFactory::determineProxy(mode, TClassRef());
+		ObjectProxy* proxy = ObjectProxyFactory::createObjectProxy(mode, TClassRef());
 
 		if(proxy) {
 			proxy->backup();

@@ -102,7 +102,8 @@ namespace rootJS
 
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createNamespaceTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
-		throw std::invalid_argument("Not implemented yet.");
+		v8::Local<v8::ObjectTemplate> namespaceTemplate = v8::ObjectTemplate::New(v8::Isolate::GetCurrent());
+		return namespaceTemplate;
 	}
 
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createEnumTemplate(TClass *clazz) throw(std::invalid_argument)
@@ -175,6 +176,7 @@ namespace rootJS
 
 		v8::Local<v8::FunctionTemplate> tmplt = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
 		tmplt->SetClassName(v8::String::NewFromUtf8(isolate, className.c_str()));
+		tmplt->PrototypeTemplate()->SetInternalFieldCount(1);
 
 		// create template
 		createInstantiableTemplate(clazz, tmplt);

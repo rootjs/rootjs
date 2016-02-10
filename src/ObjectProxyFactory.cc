@@ -7,6 +7,7 @@
 
 #include "MemberInfo.h"
 #include "GlobalInfo.h"
+#include "PointerInfo.h"
 
 #include "TemplateFactory.h"
 #include "CallbackHandler.h"
@@ -68,7 +69,7 @@ namespace rootJS
 			v8::Local<v8::Object> nodeObject = proxy.getProxy();
 			NODE_SET_METHOD(nodeObject, method->GetName(), CallbackHandler::memberFunctionCallback);
 		}
-}*/
+	}*/
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope)
 	{
@@ -125,10 +126,10 @@ namespace rootJS
 	}
 
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *clazz, v8::Local<v8::Object> proxy)
 	{
-		// TODO
-		return nullptr;
+		PointerInfo mode(address, clazz->GetName());
+		return createObjectProxy(mode, clazz);
 	}
 
 	ObjectProxy* ObjectProxyFactory::determineProxy(MetaInfo &info, TClass* clazz)
