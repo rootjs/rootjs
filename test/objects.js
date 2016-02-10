@@ -49,4 +49,10 @@ describe('Objects', function() {
 		  }
 	  });
   });
+  describe('Constructor', function() {
+	  it('should be possible to create a new TString', function(){
+		  var testSring = new root.TString("test");
+		  testSring.Data().should.equal("test");
+	  });
+  });
 });

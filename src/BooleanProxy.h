@@ -57,9 +57,9 @@ namespace rootJS
 			 */
 			virtual void setValue(v8::Local<v8::Value> value);
 
-            /**
-             * Saves the value to the heap
-             */
+			/**
+			 * Saves the value to the heap
+			 */
 			virtual void backup();
 	};
 }

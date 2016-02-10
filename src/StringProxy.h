@@ -14,12 +14,12 @@ namespace rootJS
 	class StringProxy: public PrimitiveProxy
 	{
 		private:
-            /**
-             * An enum containing the two standard string types, string and c-strings.
-             * It also contains standard string type in ROOT, TStrings.
-             */
+			/**
+			 * An enum containing the two standard string types, string and c-strings.
+			 * It also contains standard string type in ROOT, TStrings.
+			 */
 			enum class StringType {
-				CHAR, STRING, TSTRING
+			    CHAR, STRING, TSTRING
 			};
 
 			/**
@@ -86,14 +86,14 @@ namespace rootJS
 			/**
 			 * When the base is an immutable string (std::String, TString) this
 			 * will set a new value
-             * @param value
+			 * @param value
 			 *              The value to be set
 			 */
 			virtual void setValue(v8::Local<v8::Value> value);
 
-             /**
-             * Saves the value to the heap
-             */
+			/**
+			* Saves the value to the heap
+			*/
 			virtual void backup();
 	};
 }

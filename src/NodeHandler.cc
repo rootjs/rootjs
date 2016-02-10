@@ -46,6 +46,7 @@ namespace rootJS
 	{
 		exposeGlobals();
 		exposeGlobalFunctions();
+		exposeClasses();
 	}
 
 	void NodeHandler::exposeGlobals()
@@ -110,10 +111,12 @@ namespace rootJS
 				{
 					this->exports->Set(v8::String::NewFromUtf8(
 					                       v8::Isolate::GetCurrent(), clazz->GetName()),TemplateFactory::getInstance(clazz));
+					continue;
 				}
 
 			}
-			else if (clazz->Property() & kIsClass)
+
+			if (clazz->Property() & kIsClass)
 			{
 				this->exports->Set(v8::String::NewFromUtf8(
 				                       v8::Isolate::GetCurrent(), clazz->GetName()),TemplateFactory::getConstructor(clazz));
@@ -122,6 +125,3 @@ namespace rootJS
 	}
 
 }
-
-
-

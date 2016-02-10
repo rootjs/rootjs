@@ -4,9 +4,9 @@
 
 namespace rootJS {
 
-    /**
-     * This class contains the info for a pointer
-     */
+	/**
+	 * This class contains the info for a pointer
+	 */
 	class PointerInfo: public MetaInfo {
 		public:
 			PointerInfo(void* baseAddr, const char* typeName);
@@ -31,9 +31,9 @@ namespace rootJS {
 				return new PointerInfo(baseAddress, typeName);
 			};
 		protected:
-            /**
-             * Type of the pointer
-             */
+			/**
+			 * Type of the pointer
+			 */
 			const char *typeName;
 	};
 }

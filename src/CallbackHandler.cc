@@ -170,13 +170,6 @@ namespace rootJS
 		v8::Isolate* isolate = info.GetIsolate();
 		v8::Local<v8::Object> instance = info.This();
 
-		if(instance->InternalFieldCount() < 1)
-		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
-			Toolbox::throwException("Unexpected internal field count.");
-			return;
-		}
-
 		if (!info.IsConstructCall())
 		{
 			info.GetReturnValue().Set(v8::Undefined(isolate));
@@ -204,21 +197,25 @@ namespace rootJS
 		if(callback.IsEmpty())	// create object on current thread
 		{
 			// try
-			void *address = FunctionProxyFactory::createInstance(name, clazz, args);
+			FunctionProxy *funcProxy = FunctionProxyFactory::fromArgs(name, clazz, args);
 			// catch
 
-			if(address == nullptr)
+			if(funcProxy == nullptr)
 			{
 				info.GetReturnValue().Set(v8::Undefined(isolate));
 				Toolbox::throwException("No suitable constructor found for the supplied arguments. Could not create a new '" + std::string(clazz->GetName()) + "'.");
 				return;
 			}
 
-			//try
-			/* ObjectProxy proxy* = */ ObjectProxyFactory::createObjectProxy(address, clazz, instance); /*address, type, holder*/
-			//catch
+			funcProxy->prepareCall(args);
+			ObjectProxy *proxy = funcProxy->call(true);
 
-			info.GetReturnValue().Set(instance);
+			if(proxy == nullptr) {
+				Toolbox::throwException("Constructor failed, resulting class could not be mapped to a JavaScript object.");
+				return;
+			}
+
+			info.GetReturnValue().Set(proxy->get());
 			return;
 		}
 
@@ -405,7 +402,7 @@ namespace rootJS
 			{
 				throw std::invalid_argument(std::string("The scope named '" + scopeName + "' is null."));
 			}
-			else if(scope->IsLoaded())
+			else if(!scope->IsLoaded())
 			{
 				throw std::invalid_argument(std::string("The scope named '" + scopeName + "' is not loaded."));
 			}

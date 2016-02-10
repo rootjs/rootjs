@@ -7,6 +7,7 @@
 
 #include "MemberInfo.h"
 #include "GlobalInfo.h"
+#include "PointerInfo.h"
 
 #include "TemplateFactory.h"
 #include "CallbackHandler.h"
@@ -125,10 +126,10 @@ namespace rootJS
 	}
 
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *clazz, v8::Local<v8::Object> proxy)
 	{
-		// TODO
-		return nullptr;
+		PointerInfo mode(address, clazz->GetName());
+		return createObjectProxy(mode, clazz);
 	}
 
 	ObjectProxy* ObjectProxyFactory::determineProxy(MetaInfo &info, TClass* clazz)
@@ -201,7 +202,7 @@ namespace rootJS
 
 		proxyMap["std::string"]        = &StringProxy::stringConstruct;
 
-		proxyMap["TString"]            = &StringProxy::tStringConstruct;
+		//proxyMap["TString"]            = &StringProxy::tStringConstruct;
 
 		proxyMap["Bool_t"]             = &BooleanProxy::boolConstruct;
 		proxyMap["bool"]               = &BooleanProxy::boolConstruct;

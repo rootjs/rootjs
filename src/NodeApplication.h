@@ -4,9 +4,9 @@
 #include "TApplication.h"
 
 namespace rootJS {
-    /**
-     * NodeApplication is used to handle ROOT GUIs
-     */
+	/**
+	 * NodeApplication is used to handle ROOT GUIs
+	 */
 	class NodeApplication : public TApplication {
 		public:
 			/**

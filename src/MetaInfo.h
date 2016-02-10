@@ -13,14 +13,14 @@ namespace rootJS {
 	 * */
 	class MetaInfo {
 		protected:
-            /**
-             * The base address of the specific TObject
-             */
+			/**
+			 * The base address of the specific TObject
+			 */
 			void* baseAddress;
 		public:
-            /**
-             * Creates MetaInfo with a specific TObject and its base address
-             */
+			/**
+			 * Creates MetaInfo with a specific TObject and its base address
+			 */
 			MetaInfo(const TObject &foo, void *baseAddress) {
 				this->baseAddress = baseAddress;
 			};
@@ -37,7 +37,7 @@ namespace rootJS {
 			/**
 			 * Get the offset. This calls up
 			 * the TDataMember::GetOffset() function.
-             * @return The offset
+			 * @return The offset
 			 */
 			virtual Long_t getOffset() {
 				return 0;

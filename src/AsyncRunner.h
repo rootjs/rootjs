@@ -27,13 +27,13 @@ namespace rootJS {
 			 *
 			 * @param func The function to be called asynchronously.
 			 * @param *param The parameters for the function.
-			 * @param callback The callback to be executed in the node thread after the 
+			 * @param callback The callback to be executed in the node thread after the
 			 * 		asynchronous function is finished.
 			 */
 			AsyncRunner(AsyncFunction func, void *param, v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> callback);
 
 			/**
-			 * Runs the function given with the constructor asynchronously. 
+			 * Runs the function given with the constructor asynchronously.
 			 * After it has finished, the callback function is executed in the original node thread.
 			 */
 			void run();
@@ -56,8 +56,8 @@ namespace rootJS {
 
 			/**
 			 * Executes the callback function.
-			 * 
-			 * @param *req The libuv request, used to get context.	
+			 *
+			 * @param *req The libuv request, used to get context.
 			 * @param status If the callback is canceled with uv_cancel() this is UV_ECANCELED.
 			 */
 			static void uvCallback(uv_work_t *req, int status);

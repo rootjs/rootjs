@@ -13,11 +13,11 @@ namespace rootJS
 {
 	enum class v8BasicTypes
 	{
-		BOOLEAN,
-		STRING,
-		NUMBER,
-		ARRAY,
-		OBJECT
+	    BOOLEAN,
+	    STRING,
+	    NUMBER,
+	    ARRAY,
+	    OBJECT
 	};
 
 	class FunctionProxyFactory
@@ -29,8 +29,8 @@ namespace rootJS
 
 			FunctionProxyFactory(void);
 		public:
-            /**
-             * Create a new FunctionProxy of the given function
+			/**
+			 * Create a new FunctionProxy of the given function
 			 *
 			 * @param function
 			 * 			the function to be proxied
@@ -42,7 +42,7 @@ namespace rootJS
 			 */
 			static FunctionProxy* createFunctionProxy(TFunction *function, TClass *scope);
 			/**
-             * Uses the parameters to determine which function is to be called up
+			 * Uses the parameters to determine which function is to be called up
 			 *
 			 * @param name
 			 * 			the name of the function
@@ -50,7 +50,7 @@ namespace rootJS
 			 * @param scope
 			 * 			the type of the instance that will be created
 			 *
-             * @param args
+			 * @param args
 			 * 			the arguments of the function
 			 *
 			 * @return the pointer to the function which was determined
@@ -58,7 +58,7 @@ namespace rootJS
 			static TFunction* determineFunction(std::string name, TClass *scope, const v8::Local<v8::Array> args);
 
 			/**
-             * Determines which overloaded function should be called up
+			 * Determines which overloaded function should be called up
 			 *
 			 * @param name
 			 * 			the name of the function
@@ -66,7 +66,7 @@ namespace rootJS
 			 * @param scope
 			 * 			the type of the instance that will be created
 			 *
-             * @param args
+			 * @param args
 			 * 			the arguments of the function
 			 *
 			 * @return the pointer to the function proxy of the overloaded function

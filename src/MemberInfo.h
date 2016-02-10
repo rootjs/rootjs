@@ -9,9 +9,9 @@
 
 namespace rootJS {
 
-    /**
-     * This class contains the info for a TDataMember
-     */
+	/**
+	 * This class contains the info for a TDataMember
+	 */
 	class MemberInfo : public MetaInfo {
 		public:
 			MemberInfo(const TDataMember &, void* baseAddress);
@@ -24,7 +24,7 @@ namespace rootJS {
 			virtual bool isStatic();
 			virtual const char* getTypeName();
 
-            /** The type the MemberInfo is holding.  */
+			/** The type the MemberInfo is holding.  */
 			const TDataMember &currentObject;
 			virtual MetaInfo* clone() {
 				return new MemberInfo(currentObject, baseAddress);

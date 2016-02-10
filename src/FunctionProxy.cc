@@ -332,14 +332,16 @@ namespace rootJS
 		}
 	}
 
-	ObjectProxy* FunctionProxy::call()
+	ObjectProxy* FunctionProxy::call(bool isConstructorCall /* false */)
 	{
 		void *self = nullptr; //TODO?
 		void *result = nullptr; //TODO?
 		switch(facePtr.fKind) {
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
-
 			facePtr.fGeneric((selfAddress == nullptr)?self:*(void**)selfAddress, buf.size(), buf.data(), &result);
+			break;
+		case (TInterpreter::CallFuncIFacePtr_t::kCtor):
+			facePtr.fCtor(buf.data(), &result, buf.size());
 			break;
 		default:
 			v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
@@ -351,8 +353,16 @@ namespace rootJS
 			free((void*)buf[i]);
 		}
 
-		PointerInfo mode((void*)&result, function->GetReturnTypeName());
-		ObjectProxy* proxy = ObjectProxyFactory::determineProxy(mode, TClassRef());
+		ObjectProxy* proxy;
+		if(isConstructorCall) {
+			void** ptrptr = (void**)malloc(sizeof(void*)); //TODO: This pointer needs to be freed when the JS Local goes out of scope... Figure out how to do this...
+			*ptrptr = result;
+			PointerInfo mode((void*)ptrptr, function->GetReturnTypeName());
+			proxy = ObjectProxyFactory::createObjectProxy(mode, TClassRef());
+		} else {
+			PointerInfo mode((void*)&result, function->GetReturnTypeName());
+			proxy = ObjectProxyFactory::createObjectProxy(mode, TClassRef());
+		}
 
 		if(proxy) {
 			proxy->backup();

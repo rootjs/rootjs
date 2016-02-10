@@ -4,9 +4,9 @@
 
 namespace rootJS {
 
-    /**
-     * This class contains the info for a TGlobal
-     */
+	/**
+	 * This class contains the info for a TGlobal
+	 */
 	class GlobalInfo: public MetaInfo {
 		public:
 			GlobalInfo(const TGlobal & type);
@@ -20,7 +20,7 @@ namespace rootJS {
 			};
 			virtual const char* getTypeName();
 
-            /** The type the GlobalInfo is holding.  */
+			/** The type the GlobalInfo is holding.  */
 			const TGlobal &currentObject;
 
 			virtual MetaInfo* clone() {
