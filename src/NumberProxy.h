@@ -62,6 +62,9 @@ namespace rootJS
 
 			~NumberProxy();
 
+            /**
+             * Saves the value to the heap
+             */
 			virtual void backup();
 
 #define ROOTJS_NUMBER_PROXY_DECLARE(datatype)                   \

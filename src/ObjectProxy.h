@@ -115,7 +115,7 @@ namespace rootJS {
 			virtual bool isStatic();
 
 			/**
-             * Saves the object to memory
+             * Saves the value to the heap
              */
 			virtual void backup();
 
