@@ -35,7 +35,10 @@ namespace rootJS
 			static std::map<std::string, v8::Persistent<v8::FunctionTemplate>> structTemplates;
 
 			static void createInstantiableTemplate(TClass *clazz, v8::Local<v8::FunctionTemplate> tmplt) throw(std::invalid_argument);
+
+			static inline bool isTemplateFunction(std::string const& functionName);
 			static bool isValid(TClass *clazz);
+
 
 			TemplateFactory();
 

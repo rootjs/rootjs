@@ -216,6 +216,13 @@ namespace rootJS
 
 			std::string methodName(method->GetName());
 
+			// Skip template functions
+			if(isTemplateFunction(methodName))
+			{
+				// Toolbox::log("Skipped template method '" + methodName + "' in '" + className + "'.");
+				continue;
+			}
+
 			// skip abstract or pure virtual functions
 			Long_t property = method->Property();
 			if ((property & kIsPureVirtual)) // (property & kIsAbstract)
@@ -292,9 +299,18 @@ namespace rootJS
 		}
 	}
 
+	bool TemplateFactory::isTemplateFunction(std::string const& functionName)
+	{
+		if(functionName.size() > 0)
+		{
+			return (functionName[functionName.size()-1] == '>') && (functionName.find('<') != std::string::npos);
+		}
+
+		return false;
+	}
+
 	bool TemplateFactory::isValid(TClass* clazz)
 	{
 		return ((clazz != nullptr) && clazz->IsLoaded());
 	}
-
 }
