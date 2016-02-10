@@ -35,7 +35,8 @@ namespace rootJS {
 			 */
 			ObjectProxy(MetaInfo &info, TClass *scope);
 
-
+			~ObjectProxy();
+			
 			/**
 			 * Return the name of the type
 			 * @return the name of the type
