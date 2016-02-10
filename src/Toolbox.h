@@ -14,7 +14,7 @@ namespace rootJS
 			/**
 			 * Enumerates the internal fields of v8::Objects.
 			 */
-			enum v8ObjectInternalField { ObjectProxyPtr };
+			enum InternalFieldData { ObjectProxyPtr, PropertyMapPtr };
 
 			/**
 			 * Throws a new v8 exception.
@@ -33,4 +33,4 @@ namespace rootJS
 	};
 }
 
-#endif // TOOLBOX_H
+#endif
