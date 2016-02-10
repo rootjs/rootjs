@@ -194,10 +194,12 @@ namespace rootJS
 			static v8::Local<v8::Value> createFunctionCallbackData(TClass *scope);
 
 		private:
-			struct AsyncCallParam {
+			struct AsyncCallParam
+			{
 				v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> params;
 				FunctionProxy* proxy;
 			};
+
 			static std::map<std::string, ObjectProxy*> globalObjectMap;
 			static std::map<std::string, ObjectProxy*> staticObjectMap;
 
@@ -208,7 +210,7 @@ namespace rootJS
 
 			static std::string toString(v8::Local<v8::Value> data) throw(std::invalid_argument);
 
-			static void asyncMemberCall(AsyncRunner* runner, void* param);
+			static void asyncMemberCall(AsyncRunner *runner, void *param);
 	};
 }
 

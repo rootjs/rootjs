@@ -41,7 +41,7 @@ namespace rootJS
 		}
 	}
 
-	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
+	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
 	{
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
@@ -50,50 +50,53 @@ namespace rootJS
 
 		try
 		{
-			name  = resolveCallbackName(args.Data());
-			scope = resolveCallbackScope(args.Data(), true);
+			name  = resolveCallbackName(info.Data());
+			scope = resolveCallbackScope(info.Data(), true);
 		}
 		catch(const std::invalid_argument& e)
 		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
 			Toolbox::throwException(e.what());
-			args.GetReturnValue().Set(v8::Undefined(isolate));
 			return;
 		}
 
 		v8::Local<v8::Function> callback;
-		v8::Local<v8::Array> params = getInfoArgs(&callback, args);
-
-		// std::cout << "global function name:" << name << std::endl;
+		v8::Local<v8::Array> params = getInfoArgs(&callback, info);
 
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, params);
-		if(proxy != nullptr)
+		if(proxy == nullptr)
 		{
-			if(callback.IsEmpty()) {
-				proxy->prepareCall(params);
-				ObjectProxy *resultProxy = proxy->call();
-				if(resultProxy) {
-					args.GetReturnValue().Set(resultProxy->get());
-					delete resultProxy;
-				}
-				delete proxy;
-			} else {
-				AsyncCallParam *asynCallParam = new AsyncCallParam();
-				v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), params);
-				v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
-				/*
-				 * Instead of member calls: we do not need to clone the proxy here because
-				 * it is being created in this callback (not during initialization)
-				 */
-				asynCallParam->params = persistentArgs;
-				asynCallParam->proxy = proxy;
-				proxy->prepareCall(params);
-				AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
-				runner->run();
+			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("The method could not be determined.");
+			return;
+		}
+
+		if(callback.IsEmpty())
+		{
+			proxy->prepareCall(params);
+			ObjectProxy *resultProxy = proxy->call();
+			if(resultProxy)
+			{
+				info.GetReturnValue().Set(resultProxy->get());
+				delete resultProxy;
 			}
+			delete proxy;
 		}
 		else
 		{
-			Toolbox::throwException("The method could not be determined.");
+			AsyncCallParam *asynCallParam = new AsyncCallParam();
+			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), params);
+			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
+
+			/*
+			 * Instead of member calls: we do not need to clone the proxy here because
+			 * it is being created in this callback (not during initialization)
+			 */
+			asynCallParam->params = persistentArgs;
+			asynCallParam->proxy = proxy;
+			proxy->prepareCall(params);
+			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
+			runner->run();
 		}
 	}
 
@@ -116,7 +119,7 @@ namespace rootJS
 	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
 	{}
 
-	void CallbackHandler::staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
+	void CallbackHandler::staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
 	{
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
@@ -125,56 +128,59 @@ namespace rootJS
 
 		try
 		{
-			name  = resolveCallbackName(args.Data());
-			scope = resolveCallbackScope(args.Data(), false);
+			name  = resolveCallbackName(info.Data());
+			scope = resolveCallbackScope(info.Data(), false);
 		}
 		catch(const std::invalid_argument& e)
 		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
 			Toolbox::throwException(e.what());
-			args.GetReturnValue().Set(v8::Undefined(isolate));
 			return;
 		}
 
 		v8::Local<v8::Function> callback;
-		v8::Local<v8::Array> params = getInfoArgs(&callback, args);
+		v8::Local<v8::Array> params = getInfoArgs(&callback, info);
 
 
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, params);
-		if(proxy != nullptr)
+		if(proxy == nullptr)
 		{
-			proxy->prepareCall(params);
-			ObjectProxy *resultProxy = proxy->call();
-			if(proxy) {
-				args.GetReturnValue().Set(resultProxy->get());
-				delete resultProxy;
-			}
-			//TODO: Callback!
-			delete proxy;
-		}
-		else
-		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
 			Toolbox::throwException("The method could not be determined.");
+			return;
 		}
+
+		//TODO: Callback!
+		// if(callback.IsEmpty()) ...
+
+		proxy->prepareCall(params);
+		ObjectProxy *resultProxy = proxy->call();
+		if(proxy)
+		{
+			info.GetReturnValue().Set(resultProxy->get());
+			delete resultProxy;
+		}
+
+		delete proxy;
 	}
 
 
 	void CallbackHandler::ctorCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
 	{
-		return; //TODO!!!
 		v8::Isolate* isolate = info.GetIsolate();
 		v8::Local<v8::Object> instance = info.This();
 
 		if(instance->InternalFieldCount() < 1)
 		{
-			Toolbox::throwException("Unexpected internal field count.");
 			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("Unexpected internal field count.");
 			return;
 		}
 
 		if (!info.IsConstructCall())
 		{
-			Toolbox::throwException("Can not call this constructor as plain function. Use the new operator.");
 			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("Can not call this constructor as plain function. Use the new operator.");
 			return;
 		}
 
@@ -187,15 +193,15 @@ namespace rootJS
 		}
 		catch(const std::invalid_argument& e)
 		{
-			Toolbox::throwException(e.what());
 			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException(e.what());
 			return;
 		}
 
-		v8::Local<v8::Function> *callback = nullptr;
-		v8::Local<v8::Array> args = getInfoArgs(callback, info);
+		v8::Local<v8::Function> callback;
+		v8::Local<v8::Array> args = getInfoArgs(&callback, info);
 
-		if(callback == nullptr)	// create object on current thread
+		if(callback.IsEmpty())	// create object on current thread
 		{
 			// try
 			void *address = FunctionProxyFactory::createInstance(name, clazz, args);
@@ -203,18 +209,14 @@ namespace rootJS
 
 			if(address == nullptr)
 			{
-				std::string msg("No suitable constructor found for the supplied arguments. Could not create a new: ");
-				msg.append(clazz->GetName());
-				msg.append(".");
-
-				Toolbox::throwException(msg);
 				info.GetReturnValue().Set(v8::Undefined(isolate));
+				Toolbox::throwException("No suitable constructor found for the supplied arguments. Could not create a new '" + std::string(clazz->GetName()) + "'.");
 				return;
 			}
 
 			//try
 			/* ObjectProxy proxy* = */ ObjectProxyFactory::createObjectProxy(address, clazz, instance); /*address, type, holder*/
-			//catc
+			//catch
 
 			info.GetReturnValue().Set(instance);
 			return;
@@ -235,63 +237,96 @@ namespace rootJS
 
 	void CallbackHandler::memberFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
 	{
-		v8::Local<v8::Object> instance = info.This();
-		std::string name  = resolveCallbackName(info.Data());
-		std::map<std::string, Proxy*> map =
-		    *((std::map<std::string, Proxy*>*)instance->GetAlignedPointerFromInternalField(0));
-		std::map<std::string, Proxy*>::const_iterator proxySearch
-		    = map.find(name);
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::Local<v8::Object> instance = info.This();	// info.Holder() ???
+
+
+		if(instance->InternalFieldCount() < 1)
+		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("Unexpected internal field count.");
+			return;
+		}
+
+		std::string name;
+		try
+		{
+			name  = resolveCallbackName(info.Data());
+		}
+		catch(const std::invalid_argument& e)
+		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException(e.what());
+			return;
+		}
+
+		std::map<std::string, Proxy*> *map = (std::map<std::string, Proxy*>*)(instance->GetAlignedPointerFromInternalField(0));
+		std::map<std::string, Proxy*>::const_iterator proxySearch = map->find(name);
 
 		FunctionProxy *proxy = nullptr;
-		if(proxySearch != map.end()) {
+		if(proxySearch != map->end())
+		{
 			proxy = (FunctionProxy*)proxySearch->second;
+		}
+
+		if(proxy == nullptr)
+		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("The method could not be determined.");
+			return;
 		}
 
 		v8::Local<v8::Function> callback;
 		v8::Local<v8::Array> params = getInfoArgs(&callback, info);
 
-		if(!proxy->determineOverload(params)) {
+		if(!proxy->determineOverload(params))
+		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
 			Toolbox::throwException("These parameters are not supported.");
 			return;
 		}
 
-		if(proxy != nullptr) {
-			if(callback.IsEmpty()) {
-				proxy->prepareCall(params);
-				ObjectProxy *resultProxy = proxy->call();
-				if(resultProxy) {
-					info.GetReturnValue().Set(resultProxy->get());
-					delete resultProxy;
-				}
-			} else {
-				AsyncCallParam *asynCallParam = new AsyncCallParam();
-				v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), params);
-				v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
-
-				/*
-				 * Clone the FunctionProxy because when the same function is called multiple times
-				 * prepareCall might be called with new data before the old call finished,
-				 * which leads to unexpected results (while testing: multiple frees of the param buffer)
-				 */
-				FunctionProxy* cloneProxy = proxy->clone();
-
-				asynCallParam->params = persistentArgs;
-				asynCallParam->proxy = cloneProxy;
-				cloneProxy->prepareCall(params);
-				AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
-				runner->run();
+		if(callback.IsEmpty())
+		{
+			proxy->prepareCall(params);
+			ObjectProxy *resultProxy = proxy->call();
+			if(resultProxy)
+			{
+				info.GetReturnValue().Set(resultProxy->get());
+				delete resultProxy;
 			}
-		} else {
-			Toolbox::throwException("The method could not be determined.");
+		}
+		else
+		{
+			AsyncCallParam *asynCallParam = new AsyncCallParam();
+			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), params);
+			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
+
+			/*
+			 * Clone the FunctionProxy because when the same function is called multiple times
+			 * prepareCall might be called with new data before the old call finished,
+			 * which leads to unexpected results (while testing: multiple frees of the param buffer)
+			 */
+			FunctionProxy* cloneProxy = proxy->clone();
+
+			asynCallParam->params = persistentArgs;
+			asynCallParam->proxy = cloneProxy;
+			cloneProxy->prepareCall(params);
+			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
+			runner->run();
 		}
 	}
 
-	void CallbackHandler::asyncMemberCall(AsyncRunner* runner, void* param) {
+	void CallbackHandler::asyncMemberCall(AsyncRunner *runner, void *param)
+	{
 		AsyncCallParam *asynCallParam = (AsyncCallParam*)param;
+
 		std::vector<ObjectProxy*> resultVector;
 		ObjectProxy* resultProxy = asynCallParam->proxy->call();
+
 		resultVector.push_back(resultProxy);
 		runner->setResult(resultVector);
+
 		delete asynCallParam->proxy;
 		delete asynCallParam;
 	}
@@ -354,12 +389,12 @@ namespace rootJS
 		}
 		else
 		{
-			throw std::invalid_argument(std::string("No Delimiter in " + scopeName + " was found."));
+			throw std::invalid_argument(std::string("No Delimiter in '" + scopeName + "' was found."));
 		}
 
 		if(dictPtr == nullptr)
 		{
-			throw std::invalid_argument(std::string("No scope named " + scopeName + " was found."));
+			throw std::invalid_argument(std::string("No scope named '" + scopeName + "' was found."));
 		}
 
 		TClass *scope = dictPtr();
@@ -368,11 +403,11 @@ namespace rootJS
 		{
 			if(scope == nullptr)
 			{
-				throw std::invalid_argument(std::string("The scope named " + scopeName + " is null."));
+				throw std::invalid_argument(std::string("The scope named '" + scopeName + "' is null."));
 			}
 			else if(scope->IsLoaded())
 			{
-				throw std::invalid_argument(std::string("The scope named " + scopeName + " is not loaded."));
+				throw std::invalid_argument(std::string("The scope named '" + scopeName + "' is not loaded."));
 			}
 		}
 
