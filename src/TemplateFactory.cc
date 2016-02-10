@@ -102,19 +102,19 @@ namespace rootJS
 
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createNamespaceTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
-		throw std::invalid_argument(std::string("Not implemented yet."));
+		throw std::invalid_argument("Not implemented yet.");
 	}
 
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createEnumTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
-		throw std::invalid_argument(std::string("Not implemented yet."));
+		throw std::invalid_argument("Not implemented yet.");
 	}
 
 	v8::Local<v8::FunctionTemplate> TemplateFactory::createStructTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
 		if(!isValid(clazz))
 		{
-			throw std::invalid_argument(std::string("Specified TClass is null or not loaded."));
+			throw std::invalid_argument("Specified TClass is null or not loaded.");
 		}
 
 		if(!(clazz->Property() & kIsStruct))
@@ -220,7 +220,7 @@ namespace rootJS
 			Long_t property = method->Property();
 			if ((property & kIsPureVirtual)) // (property & kIsAbstract)
 			{
-				Toolbox::log("Skipped pure virtual method '" + methodName + "' in '" + className + "'.");
+				// Toolbox::log("Skipped pure virtual method '" + methodName + "' in '" + className + "'.");
 				continue;
 			}
 
