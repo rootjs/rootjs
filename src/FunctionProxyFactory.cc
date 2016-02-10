@@ -1,8 +1,7 @@
-#include "FunctionProxy.h"
 #include "FunctionProxyFactory.h"
 #include "Toolbox.h"
-#include "Types.h"
 
+#include "FunctionProxy.h"
 #include <vector>
 #include <map>
 
@@ -111,7 +110,7 @@ namespace rootJS
 
 		for(TFunction* value: validFuncs)
 		{
-			if((int)args->Length() < value->GetNargs() || (int)args->Length() > value->GetNargsOpt())
+			if(value->GetNargs() != (int)args->Length())
 			{
 				continue;
 			}
@@ -147,32 +146,7 @@ namespace rootJS
 
 	bool FunctionProxyFactory::paramMatches(const char* type, v8::Local<v8::Value> arg)
 	{
-		if (Types::isV8Primitive(*arg))
-		{
-			std::map<std::string, v8BasicTypes>::iterator it = basicTypeMap.find(std::string(type));
-			if(it != basicTypeMap.end())
-			{
-				switch(it->second)
-				{
-				case v8BasicTypes::STRING:
-					return Types::isV8String(*arg);
-				case v8BasicTypes::NUMBER:
-					return Types::isV8Number(*arg);
-				case v8BasicTypes::BOOLEAN:
-					return Types::isV8Boolean(*arg);
-				case v8BasicTypes::ARRAY:
-					//TODO: CHeck array contents...
-					return false;
-				case v8BasicTypes::OBJECT:
-					//TODO: Check object type
-					return false;
-				default:
-					v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
-					return false;
-				}
-			}
-		}
-		else
+		if (arg->IsObject())
 		{
 			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
 			if (objectArg->InternalFieldCount() > 0)
@@ -183,6 +157,31 @@ namespace rootJS
 			else
 			{
 				Toolbox::throwException(std::string("v8::Object contains no InternalField entries"));
+			}
+		}
+		else
+		{
+			std::map<std::string, v8BasicTypes>::iterator it = basicTypeMap.find(std::string(type));
+			if(it != basicTypeMap.end())
+			{
+				switch(it->second)
+				{
+				case v8BasicTypes::STRING:
+					return arg->IsString();
+				case v8BasicTypes::NUMBER:
+					return arg->IsNumber() || arg->IsNumberObject();
+				case v8BasicTypes::BOOLEAN:
+					return arg->IsBoolean() || arg->IsBooleanObject();
+				case v8BasicTypes::ARRAY:
+					//TODO: CHeck array contents...
+					return false;
+				case v8BasicTypes::OBJECT:
+					//TODO: Check object type
+					return false;
+				default:
+					v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
+					return false;
+				}
 			}
 		}
 
