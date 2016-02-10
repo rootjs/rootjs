@@ -210,7 +210,7 @@ namespace rootJS
 		{
 			if (method == nullptr || !method->IsValid())
 			{
-				Toolbox::log("Invalid method found in '" + className + "'.");
+				Toolbox::logInfo("Invalid method found in '" + className + "'.");
 				continue;
 			}
 
@@ -219,7 +219,7 @@ namespace rootJS
 			// Skip template functions
 			if(isTemplateFunction(methodName))
 			{
-				// Toolbox::log("Skipped template method '" + methodName + "' in '" + className + "'.");
+				// Toolbox::logInfo("Skipped template method '" + methodName + "' in '" + className + "'.");
 				continue;
 			}
 
@@ -227,14 +227,14 @@ namespace rootJS
 			Long_t property = method->Property();
 			if ((property & kIsPureVirtual)) // (property & kIsAbstract)
 			{
-				// Toolbox::log("Skipped pure virtual method '" + methodName + "' in '" + className + "'.");
+				// Toolbox::logInfo("Skipped pure virtual method '" + methodName + "' in '" + className + "'.");
 				continue;
 			}
 
 			// make overridden or overloaded methods only occur once
 			if (methods.count(methodName))
 			{
-				// Toolbox::log("Already set method '" + methodName + "' as property in '" + className + "'.");
+				// Toolbox::logInfo("Already set method '" + methodName + "' as property in '" + className + "'.");
 				continue;
 			}
 			else
@@ -251,7 +251,7 @@ namespace rootJS
 				break;
 			case kIsOperator:
 				// TODO: handle operators
-				// Toolbox::log("Operator '" + methodName + "' found in '" + className + "'.");
+				// Toolbox::logInfo("Operator '" + methodName + "' found in '" + className + "'.");
 				break;
 			default:
 
@@ -279,7 +279,7 @@ namespace rootJS
 		{
 			if (member == nullptr || !member->IsValid())
 			{
-				Toolbox::log("Invalid member found in '" + className + "'.");
+				Toolbox::logInfo("Invalid member found in '" + className + "'.");
 				continue;
 			}
 

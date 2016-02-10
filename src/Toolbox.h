@@ -24,12 +24,20 @@ namespace rootJS
 			static void throwException(const std::string &message);
 
 			/**
-			 *	Log the specified message.
+			 *	Log the specified message at info level.
 			 *
 			 *	@param
 			 *		the message to log
 			 */
-			static void log(const std::string &message);
+			static void logInfo(const std::string &message);
+
+			/**
+			 *	Log the specified message at error level.
+			 *
+			 *	@param
+			 *		the message to log
+			 */
+			static void logError(const std::string &message);
 	};
 }
 
