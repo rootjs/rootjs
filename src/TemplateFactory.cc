@@ -196,7 +196,7 @@ namespace rootJS
 
 		// add non-static functions and members to the instance template
 		v8::Local<v8::ObjectTemplate> instance = tmplt->InstanceTemplate();
-		instance->SetInternalFieldCount(1); // each instance stores a map containing the property proxies
+		instance->SetInternalFieldCount(Toolbox::INTERNAL_FIELD_COUNT); // each instance stores a map containing the property proxies
 
 		/**
 		 *	Add public methods as properties

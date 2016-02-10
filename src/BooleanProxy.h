@@ -9,12 +9,12 @@
 namespace rootJS
 {
 	/**
-	 * Maps C++ ROOT boolean to JavaScript boolean.
+	 * Maps a C++/ROOT boolean to JavaScript boolean.
 	 */
 	class BooleanProxy: public PrimitiveProxy
 	{
 		private:
-			bool backedUp = false;
+			bool backedUp = false; /** Checks if the boolean is backed up. */
 		public:
 			/**
 			 * Check if the type is a boolean type.
@@ -50,10 +50,16 @@ namespace rootJS
 			virtual v8::Local<v8::Value> get();
 
 			/**
-			 * Sets the boolen in memory, using the data passed via JS
+			 * Sets the boolen in memory, using the data passed via JavaScript
+			 *
+			 * @param value
+			 *              The value to be set
 			 */
 			virtual void setValue(v8::Local<v8::Value> value);
 
+            /**
+             * Saves the value to the heap
+             */
 			virtual void backup();
 	};
 }

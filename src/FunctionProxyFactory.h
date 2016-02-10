@@ -29,8 +29,48 @@ namespace rootJS
 
 			FunctionProxyFactory(void);
 		public:
+            /**
+             * Create a new FunctionProxy of the given function
+			 *
+			 * @param function
+			 * 			the function to be proxied
+			 *
+			 * @param scope
+			 * 			the type of the instance that will be created
+			 *
+			 * @return the pointer to the newly created FunctionProxy
+			 */
 			static FunctionProxy* createFunctionProxy(TFunction *function, TClass *scope);
+			/**
+             * Uses the parameters to determine which function is to be called up
+			 *
+			 * @param name
+			 * 			the name of the function
+			 *
+			 * @param scope
+			 * 			the type of the instance that will be created
+			 *
+             * @param args
+			 * 			the arguments of the function
+			 *
+			 * @return the pointer to the function which was determined
+			 */
 			static TFunction* determineFunction(std::string name, TClass *scope, const v8::Local<v8::Array> args);
+
+			/**
+             * Determines which overloaded function should be called up
+			 *
+			 * @param name
+			 * 			the name of the function
+			 *
+			 * @param scope
+			 * 			the type of the instance that will be created
+			 *
+             * @param args
+			 * 			the arguments of the function
+			 *
+			 * @return the pointer to the function proxy of the overloaded function
+			 */
 			static FunctionProxy* fromArgs(std::string name, TClass *scope, v8::Local<v8::Array> args);
 
 			/**

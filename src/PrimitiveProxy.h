@@ -5,6 +5,9 @@
 
 namespace rootJS
 {
+    /**
+	 * Maps a C++/ROOT primitive to a JavaScript primitive
+	 */
 	class PrimitiveProxy: public ObjectProxy
 	{
 		public:

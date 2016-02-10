@@ -75,33 +75,67 @@ namespace rootJS {
 			 */
 			ObjectProxy* call();
 
+            /**
+			 * Check if this proxy encapsulates a constant.
+			 *
+			 * @return true if this ProxyObject encapsulates a constant
+			 */
 			virtual bool isConst()
 			{
 				return true;
 			};
-
+            /**
+			 * Check if this proxy encapsulates a global.
+			 *
+			 * @return true if this ProxyObject encapsulates a global
+			 */
 			virtual bool isGlobal()
 			{
 				return true; /*TODO*/
 			};
-
+            /**
+			 * Check if this proxy encapsulates a static.
+			 *
+			 * @return true if this ProxyObject encapsulates a static
+			 */
 			virtual bool isStatic()
 			{
 				return true; /*TODO*/
 			};
-
+            /**
+			 * Check if this proxy encapsulates a template.
+			 *
+			 * @return true if this ProxyObject encapsulates a template
+			 */
 			virtual bool isTemplate()
 			{
 				return false; /*TODO*/
 			};
 
+            /**
+             * Determines which overloaded function is wanted
+             * @param info
+             *              The info of the overloaded function
+             * @return true if the overloaded function is found
+             */
 			bool determineOverload(const v8::Local<v8::Array>& info);
 
+            /**
+             * Sets the address of the function
+             *
+             * @param addr
+             *              The address the function will be set to
+             */
 			void setSelfAddress(void* addr)
 			{
 				selfAddress = addr;
 			}
 
+            /**
+             * Makes a clone of the current FunctionProxy
+             *
+             * @return A pointer to the clone
+             */
 			FunctionProxy* clone();
 
 
