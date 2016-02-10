@@ -68,7 +68,7 @@ namespace rootJS
 			v8::Local<v8::Object> nodeObject = proxy.getProxy();
 			NODE_SET_METHOD(nodeObject, method->GetName(), CallbackHandler::memberFunctionCallback);
 		}
-}*/
+	}*/
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope)
 	{

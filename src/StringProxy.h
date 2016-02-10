@@ -15,7 +15,7 @@ namespace rootJS
 	{
 		private:
 			enum class StringType {
-			    CHAR, STRING, TSTRING
+				CHAR, STRING, TSTRING
 			};
 
 			/**
