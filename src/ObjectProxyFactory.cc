@@ -1,25 +1,21 @@
 #include "ObjectProxyFactory.h"
+
 #include "Proxy.h"
-#include <iostream>
-#include <map>
-#include <node.h>
-#include <TClass.h>
-#include <TClassRef.h>
+#include "NumberProxy.h"
+#include "StringProxy.h"
+#include "BooleanProxy.h"
+
+#include "MemberInfo.h"
+#include "GlobalInfo.h"
+
+#include "TemplateFactory.h"
+#include "CallbackHandler.h"
+
 #include <TClassTable.h>
 #include <TDataMember.h>
 #include <TDataType.h>
 #include <TList.h>
 #include <TMethod.h>
-
-#include "GlobalInfo.h"
-#include "MemberInfo.h"
-/* Includes for proxyMap */
-#include "NumberProxy.h"
-#include "StringProxy.h"
-#include "BooleanProxy.h"
-
-#include "TemplateFactory.h"
-#include "CallbackHandler.h"
 
 namespace rootJS {
 
