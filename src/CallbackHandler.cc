@@ -1,11 +1,11 @@
 #include "CallbackHandler.h"
 
+#include "Types.h"
 #include "Toolbox.h"
 
-#include "Rtypes.h"
-#include "TClass.h"
-#include "TClassRef.h"
-#include "TClassTable.h"
+#include <Rtypes.h>
+#include <TClass.h>
+#include <TClassTable.h>
 
 #include <vector>
 #include <TROOT.h>
@@ -292,7 +292,7 @@ namespace rootJS
 			{
 				info.GetReturnValue().Set(resultProxy->get());
 
-				if(resultProxy->isPrimitive() || !resultProxy->get()->IsObject()) {
+				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
 					delete resultProxy;
 				}
 			}
