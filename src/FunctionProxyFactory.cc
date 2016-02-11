@@ -17,13 +17,13 @@ namespace rootJS
 {
 
 	std::map<std::string, v8BasicTypes> FunctionProxyFactory::basicTypeMap = {
-	            {"char", v8BasicTypes::STRING},
-	            {"TStringasdf", v8BasicTypes::STRING},
-	            {"Int_t", v8BasicTypes::NUMBER},
-	            {"int", v8BasicTypes::NUMBER},
-	            {"Double_t", v8BasicTypes::NUMBER},
-	            {"Bool_t", v8BasicTypes::BOOLEAN}
-	        };
+		{"char", v8BasicTypes::STRING},
+		{"TStringasdf", v8BasicTypes::STRING},
+		{"Int_t", v8BasicTypes::NUMBER},
+		{"int", v8BasicTypes::NUMBER},
+		{"Double_t", v8BasicTypes::NUMBER},
+		{"Bool_t", v8BasicTypes::BOOLEAN}
+	};
 
 	FunctionProxyFactory::FunctionProxyFactory()
 	{
