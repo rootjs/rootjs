@@ -212,7 +212,7 @@ namespace rootJS
 		{
 			if (method == nullptr || !method->IsValid())
 			{
-				Toolbox::logInfo("Invalid method found in '" + className + "'.");
+				Toolbox::logError("Invalid method found in '" + className + "'.");
 				continue;
 			}
 
@@ -281,7 +281,7 @@ namespace rootJS
 		{
 			if (member == nullptr || !member->IsValid())
 			{
-				Toolbox::logInfo("Invalid member found in '" + className + "'.");
+				Toolbox::logError("Invalid member found in '" + className + "'.");
 				continue;
 			}
 
