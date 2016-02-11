@@ -9,10 +9,11 @@
 #include <string>
 
 #include <TROOT.h>
-#include <TClass.h>
-#include <Rtypes.h>
-#include <TClassTable.h>
 #include <TInterpreter.h>
+#include <TFunction.h>
+#include <TGlobal.h>
+#include <TClass.h>
+#include <TClassTable.h>
 
 namespace rootJS
 {
@@ -22,8 +23,6 @@ namespace rootJS
 
 	void NodeHandler::initialize(v8::Local<v8::Object> exports, v8::Local<v8::Object> module)
 	{
-		// assert(sizeof(Long_t) == sizeof(void*));
-
 		if(!initialized)
 		{
 			NodeApplication::CreateNodeApplication();
@@ -44,6 +43,8 @@ namespace rootJS
 
 	void NodeHandler::exposeROOT()
 	{
+		gInterpreter->SetClassAutoloading(kTRUE);
+
 		try
 		{
 			exposeGlobals();
@@ -87,7 +88,8 @@ namespace rootJS
 		TIter next(functions);
 		while(TFunction *function = (TFunction*) next())
 		{
-			if(!function->IsValid()) {
+			if(!function->IsValid())
+			{
 				Toolbox::logError("Invalid global function found.");
 				continue;
 			}
@@ -100,12 +102,8 @@ namespace rootJS
 
 	void NodeHandler::exposeClasses() throw(std::invalid_argument)
 	{
-		gInterpreter->SetClassAutoloading(kTRUE); // maybe not necessary
-
 		for (int i = 0; i < gClassTable->Classes(); i++)
 		{
-
-
 			DictFuncPtr_t funcPtr = gClassTable->GetDict(gClassTable->At(i));
 			if (funcPtr == nullptr)
 			{
