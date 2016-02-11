@@ -124,6 +124,12 @@ namespace rootJS
 			 * docs do not link this type). :(
 			 */
 
+			/*
+			 * Workaround ;)
+			 * TString* string = (TString*) gROOT->ProcessLineFast("new TString(\"test\");");
+			 *	Toolbox::logInfo(std::string(string->Data()));
+			 */
+
 
 			if ( ! gInterpreter->CallFunc_IsValid( callf ) )
 			{

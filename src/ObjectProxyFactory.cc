@@ -14,18 +14,22 @@
 #include "TemplateFactory.h"
 #include "CallbackHandler.h"
 
+#include <TROOT.h>
 #include <TClassTable.h>
 #include <TDataMember.h>
 #include <TDataType.h>
 #include <TList.h>
 #include <TMethod.h>
+#include <TEnum.h>
+#include <Rtypes.h>
+#include <RtypesCore.h>
 
 namespace rootJS
 {
 
 	std::map<std::string, ProxyInitializator> ObjectProxyFactory::proxyMap;
 
-	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope) throw(std::invalid_argument)
+	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope /*, ObjectProxy  *holder*/) throw(std::invalid_argument)
 	{
 		std::map<std::string, ObjectProxy*> *propertyMap = new std::map<std::string, ObjectProxy*>();
 
@@ -33,19 +37,6 @@ namespace rootJS
 		{
 			return nullptr;
 		}
-
-		/*
-		const TList *methodList = clazz->GetListOfAllPublicMethods();
-		TIter nextMethod(methodList);
-		TMethod *method;
-
-		while ((method = (TMethod*)nextMethod()))
-		{
-			FunctionProxy *proxy = FunctionProxyFactory::createFunctionProxy(method, clazz);
-			(*result)[std::string(method->GetName())] = proxy;
-			proxy->setSelfAddress(info.getAddress());
-	}
-		*/
 
 		TIter memberIter((TList*)scope->GetListOfAllPublicDataMembers(kTRUE));
 		TDataMember *member = nullptr;
@@ -58,10 +49,22 @@ namespace rootJS
 			}
 
 			if(!(member->Property() & kIsStatic))
-			{
+			{	/*
+				Toolbox::logInfo("Encapsulating '" + std::string(member->GetName()) + "' from '" + std::string(scope->GetName()) + "'.");
+				Toolbox::logInfo("");
+
+				Toolbox::logInfo("GetTypeName()     '" + std::string(member->GetTypeName()) + "'.");
+				Toolbox::logInfo("GetFullTypeName() '" + std::string(member->GetFullTypeName()) + "'.");
+				Toolbox::logInfo("GetTrueTypeName() '" + std::string(member->GetTrueTypeName()) + "'.");
+
+				Toolbox::logInfo("GetDataType()->GetTypeName() '" + std::string(member->GetDataType()->GetTypeName()) + "'.");
+
+				Toolbox::logInfo("------------------------------------------------------------");
+				Toolbox::logInfo("");
+				*/
 				MemberInfo memberInfo(*member, info.getAddress());
 				// ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(memberInfo, scope);
-				(*propertyMap)[std::string(member->GetName())] = nullptr;
+				(*propertyMap)[std::string(member->GetName())] = nullptr; // = memberProxy;
 			}
 		}
 
@@ -79,10 +82,15 @@ namespace rootJS
 
 		std::string typeName(info.getTypeName());
 		TClass *type = getClass(typeName);
+
 		if(type == nullptr)
-		{
-			return nullptr;
+		{	/*
+						Toolbox::logInfo("No TClass for '" + typeName + "' found.");
+						Toolbox::logInfo("------------------------------------------------------------");
+						Toolbox::logInfo("");
+						*/
 			// throw std::invalid_argument("Type '" + typeName + "' is not supported.");
+			return nullptr;
 		}
 
 		v8::Local<v8::Object> instance = TemplateFactory::getInstance(type);
@@ -104,21 +112,35 @@ namespace rootJS
 			return nullptr;
 		}
 
+		/*
+		if(!(global.Property() & kIsEnum))
+		{
+			Toolbox::logInfo("Encapsulating global '" + std::string(global.GetName()) + "'.");
+			Toolbox::logInfo("");
+
+			Toolbox::logInfo("GetTypeName()     '" + std::string(global.GetTypeName()) + "'.");
+			Toolbox::logInfo("GetFullTypeName() '" + std::string(global.GetFullTypeName()) + "'.");
+
+			Toolbox::logInfo("------------------------------------------------------------");
+			Toolbox::logInfo("");
+	    }
+		*/
+
 		GlobalInfo info(global);
 		return createObjectProxy(info, nullptr);
 	}
 
+	/*
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(TDataMember const& type, TClass *scope, ObjectProxy &holder)
-	{
-		/*
-		 * It is not possible to do pointer arithmetic on void pointers.
-		 * To add the offset to the object we cast the pointer to char* before.
-		 */
+{
+
+		// It is not possible to do pointer arithmetic on void pointers.
+		// To add the offset to the object we cast the pointer to char* before.
 		void *object = static_cast<void*>((static_cast<char*>(holder.getAddress()) + type.GetOffsetCint()));
 
 		MemberInfo info(type, object);
 		return createObjectProxy(info, scope);
-	}
+} */
 
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy)
@@ -126,17 +148,6 @@ namespace rootJS
 		// TODO: populate proxy
 		PointerInfo info(address, type->GetName());
 		return createObjectProxy(info, type);
-	}
-
-	ObjectProxy* ObjectProxyFactory::createPrimitiveProxy(MetaInfo &info, TClass* clazz)
-	{
-		std::string typeString = std::string(info.getTypeName());
-		if(proxyMap.find(typeString) == proxyMap.end())
-		{
-			return nullptr;
-		}
-
-		return proxyMap[typeString](info, clazz);
 	}
 
 	TClass* ObjectProxyFactory::getClass(std::string const& typeName)
@@ -150,8 +161,49 @@ namespace rootJS
 		return dictFunc();
 	}
 
+
+	TEnumConstant* ObjectProxyFactory::getEnumConstant(std::string const& typeName)
+	{
+		// gROOT->GetListOfEnums()->Find();
+
+		return nullptr;
+	}
+
+	ObjectProxy* ObjectProxyFactory::createPrimitiveProxy(MetaInfo &info, TClass* clazz)
+	{
+		/*
+		TDataType* type = (TDataType*) (gROOT->GetListOfTypes(kTRUE)->FindObject(info.getTypeName()));
+
+		if(type == nullptr) {
+			return nullptr;
+		}
+
+		std::string typeString(type->GetTypeName((EDataType) type->GetType()));
+		*/
+
+		std::string typeString = std::string(info.getTypeName());
+		if(proxyMap.find(typeString) == proxyMap.end())
+		{
+			return nullptr;
+		}
+
+		return proxyMap[typeString](info, clazz);
+	}
+
 	void ObjectProxyFactory::initializeProxyMap()
 	{
+		/*
+		kChar_t   = 1,  kUChar_t  = 11, kShort_t    = 2,  kUShort_t = 12,
+		kInt_t    = 3,  kUInt_t   = 13, kLong_t     = 4,  kULong_t  = 14,
+		kFloat_t  = 5,  kDouble_t =  8, kDouble32_t = 9,  kchar     = 10,
+		kBool_t   = 18, kLong64_t = 16, kULong64_t  = 17, kOther_t  = -1,
+		kNoType_t = 0,  kFloat16_t= 19,
+		kCounter  =  6, kCharStar = 7,  kBits     = 15  for compatibility with TStreamerInfo ,
+		kVoid_t   = 20,
+		*/
+
+		// TODO: remove typedefs and use only datatypes listed above...
+
 		proxyMap["Int_t"]              = &NumberProxy::intConstruct;
 		proxyMap["int"]                = &NumberProxy::intConstruct;
 		proxyMap["Seek_t"]             = &NumberProxy::intConstruct;
