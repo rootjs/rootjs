@@ -37,36 +37,37 @@ namespace rootJS
 
 	TFunction* FunctionProxyFactory::determineFunction(std::string const& name, TClass *scope, const v8::Local<v8::Array> args)
 	{
-		std::vector<TFunction*> validFuncs;
-		TFunction *callableFunction = nullptr;
+		std::vector<TFunction*> options;	// list of overridden / overloaded options
+		TFunction *validFunction = nullptr;
 
 		if(scope == nullptr)
-		{	// Global function has been called
+		{
+			// Global function has been called
 			TCollection *globals = gROOT->GetListOfGlobalFunctions(kTRUE);
-			TFunction *func;
+			TFunction *function;
 
 			TIter next(globals);
-			while((func = (TFunction*)next()))
+			while((function = (TFunction*)next()))
 			{
-				if(strcmp(func->GetName(), name.c_str()) == 0)
+				if(strcmp(function->GetName(), name.c_str()) == 0)
 				{
-					validFuncs.push_back(func);
+					options.push_back(function);
 				}
 			}
 		}
 		else
 		{
-			validFuncs = FunctionProxy::getMethodsFromName(scope, name);
+			options = FunctionProxy::getMethodsFromName(scope, name);
 		}
 
-		for(TFunction* value: validFuncs)
+		for(TFunction* function : options)
 		{
-			if(value->GetNargs() != (int)args->Length())
+			if(function->GetNargs() != (int) args->Length())
 			{
 				continue;
 			}
 
-			TList *funcArgs = value->GetListOfMethodArgs();
+			TList *funcArgs = function->GetListOfMethodArgs();
 			bool argsMatch = true;
 
 			for(int i = 0; i < (int)args->Length(); i++)
@@ -80,17 +81,12 @@ namespace rootJS
 
 			if(argsMatch)
 			{
-				callableFunction = value;
+				validFunction = function;
 				break;
 			}
 		}
 
-		if(callableFunction)
-		{
-			return callableFunction;
-		}
-
-		return nullptr;
+		return validFunction;
 	}
 
 	FunctionProxy* FunctionProxyFactory::fromArgs(std::string const& name, TClass *scope, const v8::Local<v8::Array> args)
@@ -105,26 +101,19 @@ namespace rootJS
 		return createFunctionProxy(function, scope);
 	}
 
-	void* FunctionProxyFactory::createInstance(std::string const& name, TClass *scope, const v8::Local<v8::Array> args)
-	{
-		// TODO
-		return nullptr;
-	}
-
-	bool FunctionProxyFactory::paramMatches(const char* type, v8::Local<v8::Value> arg)
+	bool FunctionProxyFactory::paramMatches(const char *type, v8::Local<v8::Value> arg)
 	{
 		if (arg->IsObject())
 		{
 			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
-			if (objectArg->InternalFieldCount() > 0)
+			if (objectArg->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
 			{
-				ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr));
-				return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
+				Toolbox::logError("Supplied JavaScript object contains an unexpected number of internal fields.");
+				return false;
 			}
-			else
-			{
-				Toolbox::throwException(std::string("v8::Object contains no InternalField entries"));
-			}
+
+			ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
 		}
 		else
 		{
@@ -136,17 +125,17 @@ namespace rootJS
 				case v8BasicTypes::STRING:
 					return arg->IsString();
 				case v8BasicTypes::NUMBER:
-					return arg->IsNumber() || arg->IsNumberObject();
+					return arg->IsNumber()  || arg->IsNumberObject();
 				case v8BasicTypes::BOOLEAN:
 					return arg->IsBoolean() || arg->IsBooleanObject();
 				case v8BasicTypes::ARRAY:
-					//TODO: CHeck array contents...
+					//TODO: Check array contents...
 					return false;
 				case v8BasicTypes::OBJECT:
 					//TODO: Check object type
 					return false;
 				default:
-					v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
+					Toolbox::throwException("Jonas was too lazy to implement this...");
 					return false;
 				}
 			}
