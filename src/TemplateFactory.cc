@@ -42,29 +42,23 @@ namespace rootJS
 		else if (clazz->Property() & kIsClass)
 		{
 			return createClassTemplate(clazz)->InstanceTemplate()->NewInstance(); // creation without ctor callback
-			// return createClassTemplate(clazz)->GetFunction()->NewInstance();   // creation with ctor callback
-			// return getConstructor(clazz)->NewInstance();						  // creation with ctor callback
 		}
 		else if (clazz->Property() & kIsStruct)
 		{
 			return createStructTemplate(clazz)->InstanceTemplate()->NewInstance(); // creation without ctor callback
-			// return createStructTemplate(clazz)->GetFunction()->NewInstance();   // creation with ctor callback
-			// return getConstructor(clazz)->NewInstance();						   // creation with ctor callback
+		}
+		else if (clazz->Property() & kIsUnion)
+		{
+			return createUnionTemplate(clazz)->InstanceTemplate()->NewInstance(); // creation without ctor callback
 		}
 		else if (clazz->Property() & kIsEnum)
 		{
 			return createEnumTemplate(clazz)->NewInstance();
 		}
-		/*
-		 * else if (clazz->Property() & kIsUnion)
-		 * {
-		 * 	return createUnionTemplate(clazz)->Instance();
-		 * }
-		 * 	else if (clazz->Property() & kIsArray)
-		 * 	{
-		 * 		return createArrayTemplate(clazz)->Instance();
-		 * 	}
-		 */
+		else if (clazz->Property() & kIsArray)
+		{
+			return createArrayTemplate(clazz)->NewInstance();
+		}
 		else
 		{
 			throw std::invalid_argument("The type of the specified TClass '" + std::string(clazz->GetName()) + "'is not supported.");
@@ -86,19 +80,15 @@ namespace rootJS
 		{
 			return createStructTemplate(clazz)->GetFunction();
 		}
+		else if (clazz->Property() & kIsUnion)
+		{
+			return createUnionTemplate(clazz)->GetFunction();
+		}
 		else
 		{
 			throw std::invalid_argument("The type of the specified TClass '" + std::string(clazz->GetName()) + "'is not supported.");
 		}
 	}
-
-	/*
-	 * v8::Local<v8::ObjectTemplate> TemplateFactory::createUnionTemplate(TClass *clazz) throw(std::invalid_argument)
-	 * {}
-	 *
-	 * v8::Local<v8::ObjectTemplate> TemplateFactory::createArrayTemplate(TClass *clazz) throw(std::invalid_argument)
-	 * {}
-	*/
 
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createNamespaceTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
@@ -107,6 +97,16 @@ namespace rootJS
 	}
 
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createEnumTemplate(TClass *clazz) throw(std::invalid_argument)
+	{
+		throw std::invalid_argument("Not implemented yet.");
+	}
+
+	v8::Local<v8::ObjectTemplate> TemplateFactory::createArrayTemplate(TClass *clazz) throw(std::invalid_argument)
+	{
+		throw std::invalid_argument("Not implemented yet.");
+	}
+
+	v8::Local<v8::FunctionTemplate> TemplateFactory::createUnionTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
 		throw std::invalid_argument("Not implemented yet.");
 	}
@@ -311,7 +311,7 @@ namespace rootJS
 		return false;
 	}
 
-	bool TemplateFactory::isValid(TClass* clazz)
+	bool TemplateFactory::isValid(TClass *clazz)
 	{
 		return ((clazz != nullptr) && clazz->IsLoaded());
 	}
