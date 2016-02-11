@@ -44,44 +44,57 @@ namespace rootJS
 
 	void NodeHandler::exposeROOT()
 	{
-		exposeGlobals();
-		exposeGlobalFunctions();
-		exposeClasses();
+		try
+		{
+			exposeGlobals();
+			exposeGlobalFunctions();
+			exposeMacros();
+			exposeClasses();
+		}
+		catch(const std::invalid_argument& e)
+		{
+			Toolbox::throwException(e.what());
+			return;
+		}
 	}
 
-	void NodeHandler::exposeGlobals()
+	void NodeHandler::exposeMacros() throw(std::invalid_argument)
+	{
+		// TODO
+	}
+
+	void NodeHandler::exposeGlobals() throw(std::invalid_argument)
 	{
 		TCollection *globals = gROOT->GetListOfGlobals(kTRUE);
-
 		TIter next(globals);
-		while(TObject *global = next())
+
+		while(TGlobal *global = (TGlobal*) next())
 		{
-			/*
-			 * As we iterate through TObjects all these items can be pumped through
-			 * the ObjectProxyFactory
-			 * TODO: Implement something for scalar globals (often constants)
-			 */
-			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(*((TGlobal*)global));
+			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(*global);
 			if(proxy != nullptr)
 			{
-				v8::Local<v8::String> name = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName());
-
 				CallbackHandler::registerGlobalObject(std::string(global->GetName()), proxy);
-				// this->exports->Set(name, proxy->get());
-				this->exports->SetAccessor(name, CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
+				this->exports->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()),
+				                           CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
 			}
 		}
 	}
 
-	void NodeHandler::exposeGlobalFunctions()
+	void NodeHandler::exposeGlobalFunctions() throw(std::invalid_argument)
 	{
-		TCollection *globals = gROOT->GetListOfGlobalFunctions(kTRUE);
+		TCollection *functions = gROOT->GetListOfGlobalFunctions(kTRUE);
 
-		TIter next(globals);
-		while(TObject *global = next())
+		TIter next(functions);
+		while(TFunction *function = (TFunction*) next())
 		{
-			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(global->GetName(), nullptr);
-			exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()), v8::Function::New(v8::Isolate::GetCurrent(), CallbackHandler::globalFunctionCallback, data));
+			if(!function->IsValid()) {
+				Toolbox::logError("Invalid global function found.");
+				continue;
+			}
+
+			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(function->GetName(), nullptr);
+			exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), function->GetName()),
+			             v8::Function::New(v8::Isolate::GetCurrent(), CallbackHandler::globalFunctionCallback, data));
 		}
 	}
 

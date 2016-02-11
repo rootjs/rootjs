@@ -1,10 +1,12 @@
 #ifndef NODE_HANDLER_H
 #define NODE_HANDLER_H
 
-#include <v8.h>
-#include <node.h>
-#include <stdexcept>
 #include "TemplateFactory.h"
+
+#include <stdexcept>
+
+#include <node.h>
+#include <v8.h>
 
 namespace rootJS
 {
@@ -32,9 +34,9 @@ namespace rootJS
 			NodeHandler(v8::Local<v8::Object>);
 
 			void exposeROOT();
-			void exposeGlobalFunctions();
-			void exposeGlobals();
-			void exposeMacros();
+			void exposeGlobals() throw(std::invalid_argument);
+			void exposeGlobalFunctions() throw(std::invalid_argument);
+			void exposeMacros() throw(std::invalid_argument);
 			void exposeClasses() throw(std::invalid_argument);
 
 		public:
@@ -48,4 +50,4 @@ namespace rootJS
 	NODE_MODULE(rootjs, NodeHandler::initialize);
 }
 
-#endif /* NODE_HANDLER_H */
+#endif
