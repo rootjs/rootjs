@@ -170,6 +170,13 @@ namespace rootJS
 		v8::Isolate* isolate = info.GetIsolate();
 		v8::Local<v8::Object> instance = info.This();
 
+		if(instance->InternalFieldCount() < 1)
+		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("Unexpected internal field count.");
+			return;
+		}
+
 		if (!info.IsConstructCall())
 		{
 			info.GetReturnValue().Set(v8::Undefined(isolate));
@@ -210,7 +217,9 @@ namespace rootJS
 			funcProxy->prepareCall(args);
 			ObjectProxy *proxy = funcProxy->call(true);
 
-			if(proxy == nullptr) {
+			if(proxy == nullptr)
+			{
+				info.GetReturnValue().Set(v8::Undefined(isolate));
 				Toolbox::throwException("Constructor failed, resulting class could not be mapped to a JavaScript object.");
 				return;
 			}
@@ -237,8 +246,7 @@ namespace rootJS
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		v8::Local<v8::Object> instance = info.This();	// info.Holder() ???
 
-
-		if(instance->InternalFieldCount() < 1)
+		if(instance->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
 		{
 			info.GetReturnValue().Set(v8::Undefined(isolate));
 			Toolbox::throwException("Unexpected internal field count.");
@@ -246,9 +254,11 @@ namespace rootJS
 		}
 
 		std::string name;
+		TClass *scope = nullptr;
 		try
 		{
 			name  = resolveCallbackName(info.Data());
+			scope = resolveCallbackScope(info.Data(), false);
 		}
 		catch(const std::invalid_argument& e)
 		{
@@ -257,31 +267,25 @@ namespace rootJS
 			return;
 		}
 
-		std::map<std::string, Proxy*> *map = (std::map<std::string, Proxy*>*)(instance->GetAlignedPointerFromInternalField(0));
-		std::map<std::string, Proxy*>::const_iterator proxySearch = map->find(name);
-
-		FunctionProxy *proxy = nullptr;
-		if(proxySearch != map->end())
-		{
-			proxy = (FunctionProxy*)proxySearch->second;
-		}
-
-		if(proxy == nullptr)
+		ObjectProxy* holder = (ObjectProxy*) instance->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr);
+		if(holder == nullptr)
 		{
 			info.GetReturnValue().Set(v8::Undefined(isolate));
-			Toolbox::throwException("The method could not be determined.");
+			Toolbox::throwException("Could not resolve holder proxy.");
 			return;
 		}
 
 		v8::Local<v8::Function> callback;
 		v8::Local<v8::Array> params = getInfoArgs(&callback, info);
 
-		if(!proxy->determineOverload(params))
+		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, params);
+		if(proxy == nullptr)
 		{
 			info.GetReturnValue().Set(v8::Undefined(isolate));
-			Toolbox::throwException("These parameters are not supported.");
+			Toolbox::throwException("The method could not be determined.");
 			return;
 		}
+		proxy->setSelfAddress(holder->getAddress());
 
 		if(callback.IsEmpty())
 		{

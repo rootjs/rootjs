@@ -5,6 +5,8 @@
 #include "StringProxy.h"
 #include "BooleanProxy.h"
 
+#include "Toolbox.h"
+
 #include "MemberInfo.h"
 #include "GlobalInfo.h"
 #include "PointerInfo.h"
@@ -23,15 +25,16 @@ namespace rootJS
 
 	std::map<std::string, ProxyInitializator> ObjectProxyFactory::proxyMap;
 
-	std::map<std::string, Proxy*> *ObjectProxyFactory::createObjectProxyVector(MetaInfo &info, TClass *clazz)
+	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope) throw(std::invalid_argument)
 	{
-		std::map<std::string, Proxy*> *result = new std::map<std::string, Proxy*>();
+		std::map<std::string, ObjectProxy*> *propertyMap = new std::map<std::string, ObjectProxy*>();
 
-		if(clazz == nullptr)
+		if(scope == nullptr)
 		{
 			return nullptr;
 		}
 
+		/*
 		const TList *methodList = clazz->GetListOfAllPublicMethods();
 		TIter nextMethod(methodList);
 		TMethod *method;
@@ -41,63 +44,55 @@ namespace rootJS
 			FunctionProxy *proxy = FunctionProxyFactory::createFunctionProxy(method, clazz);
 			(*result)[std::string(method->GetName())] = proxy;
 			proxy->setSelfAddress(info.getAddress());
-		}
-
-		return result;
 	}
+		*/
 
-	/*void ObjectProxyFactory::traverseClass(TClassRef & classRef, ObjectProxy & proxy) {
-		TClass *klass = classRef.GetClass();
+		TIter memberIter((TList*)scope->GetListOfAllPublicDataMembers(kTRUE));
+		TDataMember *member = nullptr;
 
-		TList *propertyList = klass->GetListOfAllPublicDataMembers();
-		TIter nextProperty(propertyList);
-		TDataMember *member;
+		while ( (member = (TDataMember*) memberIter()))
+		{
+			if (member == nullptr || !member->IsValid())
+			{
+				continue;
+			}
 
-		while ((member = (TDataMember*)nextProperty())) {
-			v8::Local<v8::Object> nodeObject = proxy.getProxy();
-			ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(*member, classRef, proxy);
-			if(memberProxy != nullptr) {
-				nodeObject->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName()), memberProxy->get());
+			if(!(member->Property() & kIsStatic))
+			{
+				MemberInfo memberInfo(*member, info.getAddress());
+				// ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(memberInfo, scope);
+				(*propertyMap)[std::string(member->GetName())] = nullptr;
 			}
 		}
 
-		const TList *methodList = klass->GetListOfAllPublicMethods();
-		TIter nextMethod(methodList);
-		TMethod *method;
+		return propertyMap;
+	}
 
-		while ((method = (TMethod*)nextMethod())) {
-			v8::Local<v8::Object> nodeObject = proxy.getProxy();
-			NODE_SET_METHOD(nodeObject, method->GetName(), CallbackHandler::memberFunctionCallback);
-		}
-	}*/
-
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope) throw(std::invalid_argument)
 	{
-		ObjectProxy* nonObjectProxy = determineProxy(info, scope);
+		ObjectProxy* proxy = createPrimitiveProxy(info, scope);
 
-		if(nonObjectProxy)
+		if(proxy != nullptr)
 		{
-			return nonObjectProxy;
+			return proxy;
 		}
 
-
-		std::string className = info.getTypeName();
-		DictFuncPtr_t dictFunc = gClassTable->GetDict(className.c_str());
-		if(dictFunc == nullptr)
-		{
-			return nullptr;
-		}
-		TClass *clazz = dictFunc();
-
-		v8::Local<v8::Object> instance = TemplateFactory::getInstance(clazz);
-		if(instance.IsEmpty())
+		std::string typeName(info.getTypeName());
+		TClass *type = getClass(typeName);
+		if(type == nullptr)
 		{
 			return nullptr;
+			// throw std::invalid_argument("Type '" + typeName + "' is not supported.");
 		}
-		instance->SetAlignedPointerInInternalField(0, createObjectProxyVector(info, clazz));
 
-		ObjectProxy* proxy = new ObjectProxy(info, scope);
+		v8::Local<v8::Object> instance = TemplateFactory::getInstance(type);
+		proxy = new ObjectProxy(info, scope);
 		proxy->setProxy(instance);
+
+		std::map<std::string, ObjectProxy*>* propertyMap = createPropertyMap(info, type);
+
+		instance->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, proxy);
+		instance->SetAlignedPointerInInternalField(Toolbox::PropertyMapPtr, propertyMap);
 
 		return proxy;
 	}
@@ -109,8 +104,8 @@ namespace rootJS
 			return nullptr;
 		}
 
-		GlobalInfo gMode(global);
-		return createObjectProxy(gMode, nullptr);
+		GlobalInfo info(global);
+		return createObjectProxy(info, nullptr);
 	}
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(TDataMember const& type, TClass *scope, ObjectProxy &holder)
@@ -121,18 +116,19 @@ namespace rootJS
 		 */
 		void *object = static_cast<void*>((static_cast<char*>(holder.getAddress()) + type.GetOffsetCint()));
 
-		MemberInfo mode(type, object);
-		return createObjectProxy(mode, scope);
+		MemberInfo info(type, object);
+		return createObjectProxy(info, scope);
 	}
 
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *clazz, v8::Local<v8::Object> proxy)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy)
 	{
-		PointerInfo mode(address, clazz->GetName());
-		return createObjectProxy(mode, clazz);
+		// TODO: populate proxy
+		PointerInfo info(address, type->GetName());
+		return createObjectProxy(info, type);
 	}
 
-	ObjectProxy* ObjectProxyFactory::determineProxy(MetaInfo &info, TClass* clazz)
+	ObjectProxy* ObjectProxyFactory::createPrimitiveProxy(MetaInfo &info, TClass* clazz)
 	{
 		std::string typeString = std::string(info.getTypeName());
 		if(proxyMap.find(typeString) == proxyMap.end())
@@ -141,6 +137,17 @@ namespace rootJS
 		}
 
 		return proxyMap[typeString](info, clazz);
+	}
+
+	TClass* ObjectProxyFactory::getClass(std::string const& typeName)
+	{
+		DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());
+		if(dictFunc == nullptr)
+		{
+			return nullptr;
+		}
+
+		return dictFunc();
 	}
 
 	void ObjectProxyFactory::initializeProxyMap()
@@ -202,7 +209,7 @@ namespace rootJS
 
 		proxyMap["std::string"]        = &StringProxy::stringConstruct;
 
-		//proxyMap["TString"]            = &StringProxy::tStringConstruct;
+		// proxyMap["TString"]            = &StringProxy::tStringConstruct;
 
 		proxyMap["Bool_t"]             = &BooleanProxy::boolConstruct;
 		proxyMap["bool"]               = &BooleanProxy::boolConstruct;
