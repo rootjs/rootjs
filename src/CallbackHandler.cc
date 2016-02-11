@@ -1,11 +1,11 @@
 #include "CallbackHandler.h"
 
+#include "Types.h"
 #include "Toolbox.h"
 
-#include "Rtypes.h"
-#include "TClass.h"
-#include "TClassRef.h"
-#include "TClassTable.h"
+#include <Rtypes.h>
+#include <TClass.h>
+#include <TClassTable.h>
 
 #include <vector>
 #include <TROOT.h>
@@ -61,19 +61,19 @@ namespace rootJS
 		}
 
 		v8::Local<v8::Function> callback;
-		v8::Local<v8::Array> params = getInfoArgs(&callback, info);
+		v8::Local<v8::Array> args = getInfoArgs(&callback, info);
 
-		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, params);
+		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
 		if(proxy == nullptr)
 		{
 			info.GetReturnValue().Set(v8::Undefined(isolate));
-			Toolbox::throwException("The method could not be determined.");
+			Toolbox::throwException("No suitable global method named '" + name + "' found for the supplied arguments.");
 			return;
 		}
 
 		if(callback.IsEmpty())
 		{
-			proxy->prepareCall(params);
+			proxy->prepareCall(args);
 			ObjectProxy *resultProxy = proxy->call();
 			if(resultProxy)
 			{
@@ -85,7 +85,7 @@ namespace rootJS
 		else
 		{
 			AsyncCallParam *asynCallParam = new AsyncCallParam();
-			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), params);
+			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), args);
 			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
 
 			/*
@@ -94,7 +94,7 @@ namespace rootJS
 			 */
 			asynCallParam->params = persistentArgs;
 			asynCallParam->proxy = proxy;
-			proxy->prepareCall(params);
+			proxy->prepareCall(args);
 			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
 			runner->run();
 		}
@@ -139,21 +139,20 @@ namespace rootJS
 		}
 
 		v8::Local<v8::Function> callback;
-		v8::Local<v8::Array> params = getInfoArgs(&callback, info);
+		v8::Local<v8::Array> args = getInfoArgs(&callback, info);
 
-
-		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, params);
+		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
 		if(proxy == nullptr)
 		{
 			info.GetReturnValue().Set(v8::Undefined(isolate));
-			Toolbox::throwException("The method could not be determined.");
+			Toolbox::throwException("No suitable method named '" + name + "' found for the supplied arguments in '" + std::string(scope->GetName()) + "'.");
 			return;
 		}
 
 		//TODO: Callback!
 		// if(callback.IsEmpty()) ...
 
-		proxy->prepareCall(params);
+		proxy->prepareCall(args);
 		ObjectProxy *resultProxy = proxy->call();
 		if(proxy)
 		{
@@ -169,6 +168,13 @@ namespace rootJS
 	{
 		v8::Isolate* isolate = info.GetIsolate();
 		v8::Local<v8::Object> instance = info.This();
+
+		if(instance->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
+		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("Unexpected internal field count.");
+			return;
+		}
 
 		if (!info.IsConstructCall())
 		{
@@ -196,9 +202,7 @@ namespace rootJS
 
 		if(callback.IsEmpty())	// create object on current thread
 		{
-			// try
 			FunctionProxy *funcProxy = FunctionProxyFactory::fromArgs(name, clazz, args);
-			// catch
 
 			if(funcProxy == nullptr)
 			{
@@ -210,8 +214,10 @@ namespace rootJS
 			funcProxy->prepareCall(args);
 			ObjectProxy *proxy = funcProxy->call(true);
 
-			if(proxy == nullptr) {
-				Toolbox::throwException("Constructor failed, resulting class could not be mapped to a JavaScript object.");
+			if(proxy == nullptr)
+			{
+				info.GetReturnValue().Set(v8::Undefined(isolate));
+				Toolbox::throwException("Constructor call failed. Could not create a new '" + std::string(clazz->GetName()) + "'.");
 				return;
 			}
 
@@ -235,10 +241,9 @@ namespace rootJS
 	void CallbackHandler::memberFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
 	{
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-		v8::Local<v8::Object> instance = info.This();	// info.Holder() ???
+		v8::Local<v8::Object> instance = info.This();
 
-
-		if(instance->InternalFieldCount() < 1)
+		if(instance->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
 		{
 			info.GetReturnValue().Set(v8::Undefined(isolate));
 			Toolbox::throwException("Unexpected internal field count.");
@@ -246,9 +251,11 @@ namespace rootJS
 		}
 
 		std::string name;
+		TClass *scope = nullptr;
 		try
 		{
 			name  = resolveCallbackName(info.Data());
+			scope = resolveCallbackScope(info.Data(), false);
 		}
 		catch(const std::invalid_argument& e)
 		{
@@ -257,46 +264,43 @@ namespace rootJS
 			return;
 		}
 
-		std::map<std::string, Proxy*> *map = (std::map<std::string, Proxy*>*)(instance->GetAlignedPointerFromInternalField(0));
-		std::map<std::string, Proxy*>::const_iterator proxySearch = map->find(name);
-
-		FunctionProxy *proxy = nullptr;
-		if(proxySearch != map->end())
-		{
-			proxy = (FunctionProxy*)proxySearch->second;
-		}
-
-		if(proxy == nullptr)
+		ObjectProxy* holder = (ObjectProxy*) instance->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr);
+		if(holder == nullptr)
 		{
 			info.GetReturnValue().Set(v8::Undefined(isolate));
-			Toolbox::throwException("The method could not be determined.");
+			Toolbox::throwException("Could not resolve enclosing '" + std::string(scope->GetName()) + "' instance to call '" + name + "' on.");
 			return;
 		}
 
 		v8::Local<v8::Function> callback;
-		v8::Local<v8::Array> params = getInfoArgs(&callback, info);
+		v8::Local<v8::Array> args = getInfoArgs(&callback, info);
 
-		if(!proxy->determineOverload(params))
+		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
+		if(proxy == nullptr)
 		{
 			info.GetReturnValue().Set(v8::Undefined(isolate));
-			Toolbox::throwException("These parameters are not supported.");
+			Toolbox::throwException("No suitable method named '" + name + "' found for the supplied arguments in '" + std::string(scope->GetName()) + "'.");
 			return;
 		}
+		proxy->setSelfAddress(holder->getAddress());
 
 		if(callback.IsEmpty())
 		{
-			proxy->prepareCall(params);
+			proxy->prepareCall(args);
 			ObjectProxy *resultProxy = proxy->call();
 			if(resultProxy)
 			{
 				info.GetReturnValue().Set(resultProxy->get());
-				delete resultProxy;
+
+				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
+					delete resultProxy;
+				}
 			}
 		}
 		else
 		{
 			AsyncCallParam *asynCallParam = new AsyncCallParam();
-			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), params);
+			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), args);
 			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
 
 			/*
@@ -308,7 +312,7 @@ namespace rootJS
 
 			asynCallParam->params = persistentArgs;
 			asynCallParam->proxy = cloneProxy;
-			cloneProxy->prepareCall(params);
+			cloneProxy->prepareCall(args);
 			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
 			runner->run();
 		}

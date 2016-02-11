@@ -3,6 +3,7 @@
 
 #include "Proxy.h"
 #include "ObjectProxy.h"
+
 #include <map>
 #include <string>
 #include <vector>
@@ -15,11 +16,13 @@
 #include <TMethodArg.h>
 #include "FunctionInfo.h"
 
-namespace rootJS {
+namespace rootJS
+{
 	enum class mappedTypes
 	{
-	    CHAR, INT, DOUBLE, BOOL, TSTRING
+			CHAR, INT, DOUBLE, BOOL, TSTRING
 	};
+
 	/**
 	 * Represents a ROOT callable and provides functionality to invoke those callables.
 	 * Also acts as a static cache for already created FunctionProxy objects.
@@ -27,14 +30,6 @@ namespace rootJS {
 	class FunctionProxy: public Proxy
 	{
 		public:
-			/**
-			 * Get a pointer to a CallFunc object, which encapsulates the ROOT function in memory.
-			 *
-			 * @param method the callable whose CallFunc object shall be returned
-			 * @return a pointer to the CallFunc object provided by cling
-			 */
-			static CallFunc_t* getCallFunc(const TClassRef& klass, TFunction* method);
-
 			/**
 			 * Get all methods of the specified class with the specified name.
 			 *
@@ -53,17 +48,20 @@ namespace rootJS {
 			 */
 			FunctionProxy(void *address, FunctionInfo &mode, TFunction *function, TClass *scope);
 
+			/**
+			 * Makes a clone of the current FunctionProxy
+			 *
+			 * @return a pointer to the clone
+			 */
+			FunctionProxy* clone();
 
 			/**
-			 * Check whether the arguments encapsulated in the FunctionCallbackInfo
-			 * are valid arguments to the function. The parameters are then wrapped
-			 * in proxies so they can be<char> v; used by the call method.
+			 * Get a pointer to a CallFunc object, which encapsulates the ROOT function in memory.
 			 *
-			 * @param args contains the arguments which shall be validated
-			 * @return an array of proxies for the validated arguments
+			 * @param method the callable whose CallFunc object shall be returned
+			 * @return a pointer to the CallFunc object provided by cling
 			 */
-			std::vector<ObjectProxy*> validateArgs(v8::FunctionCallbackInfo<v8::Value> args);
-
+			static CallFunc_t* getCallFunc(const TClassRef& klass, TFunction* method);
 
 			void prepareCall(const v8::Local<v8::Array>& args);
 
@@ -76,49 +74,22 @@ namespace rootJS {
 			ObjectProxy* call(bool isConstructorCall = false);
 
 			/**
-			 * Check if this proxy encapsulates a constant.
+			 * TODO: verify
 			 *
-			 * @return true if this ProxyObject encapsulates a constant
-			 */
-			virtual bool isConst()
-			{
-				return true;
-			};
-			/**
-			 * Check if this proxy encapsulates a global.
+			 * Check whether the arguments encapsulated in the FunctionCallbackInfo
+			 * are valid arguments to the function. The parameters are then wrapped
+			 * in proxies so they can be<char> v; used by the call method.
 			 *
-			 * @return true if this ProxyObject encapsulates a global
-			 */
-			virtual bool isGlobal()
-			{
-				return true; /*TODO*/
-			};
-			/**
-			 * Check if this proxy encapsulates a static.
-			 *
-			 * @return true if this ProxyObject encapsulates a static
-			 */
-			virtual bool isStatic()
-			{
-				return true; /*TODO*/
-			};
-			/**
-			 * Check if this proxy encapsulates a template.
-			 *
-			 * @return true if this ProxyObject encapsulates a template
-			 */
-			virtual bool isTemplate()
-			{
-				return false; /*TODO*/
-			};
+			 * @param args contains the arguments which shall be validated
+			 * @return an array of proxies for the validated arguments
+			std::vector<ObjectProxy*> validateArgs(v8::FunctionCallbackInfo<v8::Value> args);
 
-			/**
+			**
 			 * Determines which overloaded function is wanted
-			 * @param info
-			 *              The info of the overloaded function
+			 * @param info The info of the overloaded function
 			 * @return true if the overloaded function is found
-			 */
 			bool determineOverload(const v8::Local<v8::Array>& info);
+			 */
 
 			/**
 			 * Sets the address of the function
@@ -132,20 +103,67 @@ namespace rootJS {
 			}
 
 			/**
-			 * Makes a clone of the current FunctionProxy
+			 * Check if this proxy encapsulates a constant.
 			 *
-			 * @return A pointer to the clone
+			 * @return true if this ProxyObject encapsulates a constant
 			 */
-			FunctionProxy* clone();
+			virtual bool isConst()
+			{
+				return true;
+			};
 
+			/**
+			 * Check if this proxy encapsulates a global.
+			 *
+			 * @return true if this ProxyObject encapsulates a global
+			 */
+			virtual bool isGlobal()
+			{
+				return true; /*TODO*/
+			};
+
+			/**
+			 * Check if this proxy encapsulates a static.
+			 *
+			 * @return true if this ProxyObject encapsulates a static
+			 */
+			virtual bool isStatic()
+			{
+				return true; /*TODO*/
+			};
+
+			/**
+			 * Check if this proxy encapsulates a template.
+			 *
+			 * @return true if this ProxyObject encapsulates a template
+			 */
+			virtual bool isTemplate()
+			{
+				return false; /*TODO*/
+			};
 
 		private:
-			void *address;
+			static std::map<TFunction*, CallFunc_t*> functions;
+			static std::map<std::string, mappedTypes> typeMap;
+
 			TInterpreter::CallFuncIFacePtr_t facePtr;
 			TFunction* function;
 			std::vector<void*> buf;
-			void* selfAddress = 0;
 
+			void *address;
+			void *selfAddress = 0;
+
+			static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg);
+
+			static char*    argToChar   (v8::Local<v8::Value> originalArg);
+			static double*  argToDouble (v8::Local<v8::Value> originalArg);
+			static int*     argToInt    (v8::Local<v8::Value> originalArg);
+			static bool*    argToBool   (v8::Local<v8::Value> originalArg);
+			static TString* argToTString(v8::Local<v8::Value> originalArg);
+
+			static double   getDoubleFromArg(v8::Local<v8::Value> originalArg);
+
+			/*
 			static bool processCall(TFunction* method, void* args, void* self, void* result);
 
 			static void* callConstructor(TFunction* method, TClassRef type, void* args);
@@ -154,14 +172,11 @@ namespace rootJS {
 
 			static void* callObject(TFunction* method, void* self, void* args, TClassRef resType);
 
-			static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg);
-
 			template <typename T>
 			static T callPrimitive(TFunction* method, void* self, void* args);
+			*/
 
-			static std::map<TFunction*, CallFunc_t*> functions;
-			static std::map<std::string, mappedTypes> typeMap;
 	};
 }
 
-#endif // FUNCTION_PROXY_H
+#endif

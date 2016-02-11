@@ -5,15 +5,15 @@
 #include "MetaInfo.h"
 
 #include <string>
+#include <stdexcept>
 #include <map>
 
 #include <v8.h>
 
 #include <TGlobal.h>
 #include <TDataMember.h>
-#include <TClassRef.h>
+#include <TEnumConstant.h>
 #include <TClass.h>
-#include <TMap.h>
 
 namespace rootJS
 {
@@ -24,14 +24,17 @@ namespace rootJS
 		private:
 			static std::map<std::string, ProxyInitializator> proxyMap;
 
-			static std::map<std::string, Proxy*> *createObjectProxyVector(MetaInfo &info, TClass *clazz);
+			static std::map<std::string, ObjectProxy*>* createPropertyMap(MetaInfo &info, TClass *clazz) throw(std::invalid_argument);
+			static TClass* getClass(std::string const& typeName);
+			static TEnumConstant* getEnumConstant(std::string const& typeName);
+
 			ObjectProxyFactory();
 
 		public:
 			static ObjectProxy* createObjectProxy(TGlobal &global);
-			static ObjectProxy* createObjectProxy(TDataMember const& type, TClass *scope, ObjectProxy &holder);
+			// static ObjectProxy* createObjectProxy(TDataMember const& type, TClass *scope, ObjectProxy &holder);
 
-			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope);
+			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope) throw(std::invalid_argument);
 
 			/**
 			 *	Encapsulate the data at the specified address into the specified JavaScript object.
@@ -49,7 +52,7 @@ namespace rootJS
 			 */
 			static ObjectProxy* createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy);
 
-			static ObjectProxy* determineProxy(MetaInfo &info, TClass *clazz);
+			static ObjectProxy* createPrimitiveProxy(MetaInfo &info, TClass *clazz);
 
 			static void initializeProxyMap(void);
 	};

@@ -1,5 +1,6 @@
 #include "FunctionProxyFactory.h"
 #include "Toolbox.h"
+#include "Types.h"
 
 #include "FunctionProxy.h"
 #include <vector>
@@ -35,36 +36,41 @@ namespace rootJS
 		return new FunctionProxy(FunctionProxy::getCallFunc(scope, function), mode, function, scope);
 	}
 
-	TFunction* FunctionProxyFactory::determineFunction(std::string name, TClass *scope, const v8::Local<v8::Array> args) {
-		std::vector<TFunction*> validFuncs;
-		TFunction *callableFunction = nullptr;
+	TFunction* FunctionProxyFactory::determineFunction(std::string const& name, TClass *scope, const v8::Local<v8::Array> args)
+	{
+		std::vector<TFunction*> options;	// list of overridden / overloaded options
+		TFunction *validFunction = nullptr;
+
 		if(scope == nullptr)
-		{	// Global function has been called
+		{
+			// Global function has been called
 			TCollection *globals = gROOT->GetListOfGlobalFunctions(kTRUE);
-			TFunction *func;
+			TFunction *function;
 
 			TIter next(globals);
-			while((func = (TFunction*)next()))
+			while((function = (TFunction*)next()))
 			{
-				if(strcmp(func->GetName(), name.c_str()) == 0)
+				if(strcmp(function->GetName(), name.c_str()) == 0)
 				{
-					validFuncs.push_back(func);
+					options.push_back(function);
 				}
 			}
 		}
 		else
 		{
-			validFuncs = FunctionProxy::getMethodsFromName(scope, name);
+			options = FunctionProxy::getMethodsFromName(scope, name);
 		}
 
-		for(TFunction* value: validFuncs)
+		for(TFunction* function : options)
 		{
-			if(value->GetNargs() != (int)args->Length())
+			if((int)args->Length() < function->GetNargs() || (int)args->Length() > (function->GetNargs() + function->GetNargsOpt()))
 			{
 				continue;
 			}
-			TList *funcArgs = value->GetListOfMethodArgs();
+
+			TList *funcArgs = function->GetListOfMethodArgs();
 			bool argsMatch = true;
+
 			for(int i = 0; i < (int)args->Length(); i++)
 			{
 				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i)))
@@ -73,93 +79,32 @@ namespace rootJS
 					break;
 				}
 			}
+
 			if(argsMatch)
 			{
-				callableFunction = value;
+				validFunction = function;
 				break;
 			}
 		}
-		if(callableFunction) {
-			return callableFunction;
-		}
-		return nullptr;
+
+		return validFunction;
 	}
 
-	FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClass *scope, v8::Local<v8::Array> args)
+	FunctionProxy* FunctionProxyFactory::fromArgs(std::string const& name, TClass *scope, const v8::Local<v8::Array> args)
 	{
-		std::vector<TFunction*> validFuncs;
-		TFunction *callableFunction = nullptr;
-		if(scope == nullptr)
-		{	// Global function has been called
-			TCollection *globals = gROOT->GetListOfGlobalFunctions(kTRUE);
-			TFunction *func;
+		TFunction* function = determineFunction(name, scope, args);
 
-			TIter next(globals);
-			while((func = (TFunction*)next()))
-			{
-				if(strcmp(func->GetName(), name.c_str()) == 0)
-				{
-					validFuncs.push_back(func);
-				}
-			}
-		}
-		else
+		if(function == nullptr)
 		{
-			validFuncs = FunctionProxy::getMethodsFromName(scope, name);
+			return nullptr;
 		}
 
-		for(TFunction* value: validFuncs)
-		{
-			if(value->GetNargs() != (int)args->Length())
-			{
-				continue;
-			}
-			TList *funcArgs = value->GetListOfMethodArgs();
-			bool argsMatch = true;
-			for(int i = 0; i < (int)args->Length(); i++)
-			{
-				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i)))
-				{
-					argsMatch = false;
-					break;
-				}
-			}
-			if(argsMatch)
-			{
-				callableFunction = value;
-				break;
-			}
-		}
-		if(callableFunction)
-		{
-			return createFunctionProxy(callableFunction, scope);
-		}
-
-		return nullptr;
+		return createFunctionProxy(function, scope);
 	}
 
-	void* FunctionProxyFactory::createInstance(std::string name, TClass *scope, v8::Local<v8::Array> args)
+	bool FunctionProxyFactory::paramMatches(const char *type, v8::Local<v8::Value> arg)
 	{
-		// TODO
-		return nullptr;
-	}
-
-	bool FunctionProxyFactory::paramMatches(const char* type, v8::Local<v8::Value> arg)
-	{
-		if (arg->IsObject())
-		{
-			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
-			if (objectArg->InternalFieldCount() > 0)
-			{
-				ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr));
-				return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
-			}
-			else
-			{
-				Toolbox::throwException(std::string("v8::Object contains no InternalField entries"));
-			}
-		}
-		else
+		if (Types::isV8Primitive(arg))
 		{
 			std::map<std::string, v8BasicTypes>::iterator it = basicTypeMap.find(std::string(type));
 			if(it != basicTypeMap.end())
@@ -167,22 +112,34 @@ namespace rootJS
 				switch(it->second)
 				{
 				case v8BasicTypes::STRING:
-					return arg->IsString();
+					return Types::isV8String(arg);
 				case v8BasicTypes::NUMBER:
-					return arg->IsNumber() || arg->IsNumberObject();
+					return Types::isV8Number(arg);
 				case v8BasicTypes::BOOLEAN:
-					return arg->IsBoolean() || arg->IsBooleanObject();
+					return Types::isV8Boolean(arg);
 				case v8BasicTypes::ARRAY:
-					//TODO: CHeck array contents...
+					//TODO: Check array contents...
 					return false;
 				case v8BasicTypes::OBJECT:
 					//TODO: Check object type
 					return false;
 				default:
-					v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Jonas was too lazy to implement this..."));
+					Toolbox::throwException("Jonas was too lazy to implement this...");
 					return false;
 				}
 			}
+		}
+		else
+		{
+			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
+			if (objectArg->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
+			{
+				Toolbox::logError("Supplied JavaScript object contains an unexpected number of internal fields.");
+				return false;
+			}
+
+			ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
 		}
 
 		return false;
