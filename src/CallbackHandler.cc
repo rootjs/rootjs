@@ -292,7 +292,7 @@ namespace rootJS
 			{
 				info.GetReturnValue().Set(resultProxy->get());
 
-				if(resultProxy->getProxy()->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT) {
+				if(resultProxy->isPrimitive() || !resultProxy->get()->IsObject()) {
 					delete resultProxy;
 				}
 			}
