@@ -16,13 +16,13 @@ namespace rootJS
 {
 
 	std::map<std::string, v8BasicTypes> FunctionProxyFactory::basicTypeMap = {
-		{"char", v8BasicTypes::STRING},
-		{"TStringasdf", v8BasicTypes::STRING},
-		{"Int_t", v8BasicTypes::NUMBER},
-		{"int", v8BasicTypes::NUMBER},
-		{"Double_t", v8BasicTypes::NUMBER},
-		{"Bool_t", v8BasicTypes::BOOLEAN}
-	};
+	            {"char", v8BasicTypes::STRING},
+	            {"TStringasdf", v8BasicTypes::STRING},
+	            {"Int_t", v8BasicTypes::NUMBER},
+	            {"int", v8BasicTypes::NUMBER},
+	            {"Double_t", v8BasicTypes::NUMBER},
+	            {"Bool_t", v8BasicTypes::BOOLEAN}
+	        };
 
 	FunctionProxyFactory::FunctionProxyFactory()
 	{
@@ -35,60 +35,11 @@ namespace rootJS
 		return new FunctionProxy(FunctionProxy::getCallFunc(scope, function), mode, function, scope);
 	}
 
-	TFunction* FunctionProxyFactory::determineFunction(std::string name, TClass *scope, const v8::Local<v8::Array> args) {
-		std::vector<TFunction*> validFuncs;
-		TFunction *callableFunction = nullptr;
-		if(scope == nullptr)
-		{	// Global function has been called
-			TCollection *globals = gROOT->GetListOfGlobalFunctions(kTRUE);
-			TFunction *func;
-
-			TIter next(globals);
-			while((func = (TFunction*)next()))
-			{
-				if(strcmp(func->GetName(), name.c_str()) == 0)
-				{
-					validFuncs.push_back(func);
-				}
-			}
-		}
-		else
-		{
-			validFuncs = FunctionProxy::getMethodsFromName(scope, name);
-		}
-
-		for(TFunction* value: validFuncs)
-		{
-			if(value->GetNargs() != (int)args->Length())
-			{
-				continue;
-			}
-			TList *funcArgs = value->GetListOfMethodArgs();
-			bool argsMatch = true;
-			for(int i = 0; i < (int)args->Length(); i++)
-			{
-				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i)))
-				{
-					argsMatch = false;
-					break;
-				}
-			}
-			if(argsMatch)
-			{
-				callableFunction = value;
-				break;
-			}
-		}
-		if(callableFunction) {
-			return callableFunction;
-		}
-		return nullptr;
-	}
-
-	FunctionProxy* FunctionProxyFactory::fromArgs(std::string name, TClass *scope, v8::Local<v8::Array> args)
+	TFunction* FunctionProxyFactory::determineFunction(std::string const& name, TClass *scope, const v8::Local<v8::Array> args)
 	{
 		std::vector<TFunction*> validFuncs;
 		TFunction *callableFunction = nullptr;
+
 		if(scope == nullptr)
 		{	// Global function has been called
 			TCollection *globals = gROOT->GetListOfGlobalFunctions(kTRUE);
@@ -114,8 +65,10 @@ namespace rootJS
 			{
 				continue;
 			}
+
 			TList *funcArgs = value->GetListOfMethodArgs();
 			bool argsMatch = true;
+
 			for(int i = 0; i < (int)args->Length(); i++)
 			{
 				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i)))
@@ -124,21 +77,35 @@ namespace rootJS
 					break;
 				}
 			}
+
 			if(argsMatch)
 			{
 				callableFunction = value;
 				break;
 			}
 		}
+
 		if(callableFunction)
 		{
-			return createFunctionProxy(callableFunction, scope);
+			return callableFunction;
 		}
 
 		return nullptr;
 	}
 
-	void* FunctionProxyFactory::createInstance(std::string name, TClass *scope, v8::Local<v8::Array> args)
+	FunctionProxy* FunctionProxyFactory::fromArgs(std::string const& name, TClass *scope, const v8::Local<v8::Array> args)
+	{
+		TFunction* function = determineFunction(name, scope, args);
+
+		if(function == nullptr)
+		{
+			return nullptr;
+		}
+
+		return createFunctionProxy(function, scope);
+	}
+
+	void* FunctionProxyFactory::createInstance(std::string const& name, TClass *scope, const v8::Local<v8::Array> args)
 	{
 		// TODO
 		return nullptr;

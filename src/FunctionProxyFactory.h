@@ -13,11 +13,11 @@ namespace rootJS
 {
 	enum class v8BasicTypes
 	{
-	    BOOLEAN,
-	    STRING,
-	    NUMBER,
-	    ARRAY,
-	    OBJECT
+			BOOLEAN,
+			STRING,
+			NUMBER,
+			ARRAY,
+			OBJECT
 	};
 
 	class FunctionProxyFactory
@@ -55,7 +55,7 @@ namespace rootJS
 			 *
 			 * @return the pointer to the function which was determined
 			 */
-			static TFunction* determineFunction(std::string name, TClass *scope, const v8::Local<v8::Array> args);
+			static TFunction* determineFunction(std::string const& name, TClass *scope, const v8::Local<v8::Array> args);
 
 			/**
 			 * Determines which overloaded function should be called up
@@ -71,7 +71,7 @@ namespace rootJS
 			 *
 			 * @return the pointer to the function proxy of the overloaded function
 			 */
-			static FunctionProxy* fromArgs(std::string name, TClass *scope, v8::Local<v8::Array> args);
+			static FunctionProxy* fromArgs(std::string const& name, TClass *scope, const v8::Local<v8::Array> args);
 
 			/**
 			 * Create a new instance of the specified type using the constructor suitable to the supplied arguments.
@@ -87,7 +87,7 @@ namespace rootJS
 			 *
 			 * @return the address to the newly created instance of the specified type or nullptr if no suitable constructor was found
 			 */
-			static void* createInstance(std::string name, TClass *scope, v8::Local<v8::Array> args);
+			static void* createInstance(std::string const& name, TClass *scope, const v8::Local<v8::Array> args);
 	};
 }
 
