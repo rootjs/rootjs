@@ -64,8 +64,4 @@ namespace rootJS {
 	void ObjectProxy::setValue(v8::Local<v8::Value> value) {
 		return;
 	}
-
-	void ObjectProxy::backup() {
-		//Nothing to do here, PointerInfo should only be used for heap pointers
-	}
 }

@@ -36,7 +36,7 @@ namespace rootJS {
 			ObjectProxy(MetaInfo &info, TClass *scope);
 
 			~ObjectProxy();
-			
+
 			/**
 			 * Return the name of the type
 			 * @return the name of the type
@@ -114,11 +114,6 @@ namespace rootJS {
 			 * @return true if this ProxyObject encapsulates a static
 			 */
 			virtual bool isStatic();
-
-			/**
-			 * Saves the value to the heap
-			 */
-			virtual void backup();
 
 		protected:
 			v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */

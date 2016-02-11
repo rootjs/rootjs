@@ -15,20 +15,7 @@ namespace rootJS
 	}
 
 	StringProxy::~StringProxy() {
-		if(backedUp) {
-			switch(strType) {
-			case StringType::CHAR:
-				free(*(char**)getAddress());
-				break;
-			case StringType::STRING:
-				delete (*(std::string**)getAddress());
-				break;
-			case StringType::TSTRING:
-				delete (*(TString**)getAddress());
-				break;
-			}
-			free(getAddress());
-		}
+
 	}
 
 	v8::Local<v8::Value> StringProxy::get() {
@@ -119,33 +106,5 @@ namespace rootJS
 			break;
 		}
 		}
-	}
-
-	void StringProxy::backup() {
-		void **ptrptr = (void**)malloc(sizeof(void*));
-		switch(strType) {
-		case StringType::CHAR: {
-			char* backupPtr = (char*)malloc(strlen(*(char**)getAddress()) + 1);
-			strncpy(backupPtr, *(char**)getAddress(), strlen(*(char**)getAddress()));
-			backupPtr[strlen(*(char**)getAddress())] = '\0';
-			*ptrptr = backupPtr;
-			break;
-		}
-		case StringType::STRING: {
-			std::string *backupStr = new std::string(*(std::string*)getAddress());
-			*ptrptr = backupStr;
-			break;
-		}
-		case StringType::TSTRING: {
-			TString *backupTStr = new TString(*(TString*)getAddress());
-			*ptrptr = backupTStr;
-			break;
-		}
-		}
-
-		const char* typeName = info->getTypeName();
-		delete info;
-		info = new PointerInfo(ptrptr, typeName);
-		backedUp = true;
 	}
 }

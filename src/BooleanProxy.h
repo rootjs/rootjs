@@ -13,8 +13,6 @@ namespace rootJS
 	 */
 	class BooleanProxy: public PrimitiveProxy
 	{
-		private:
-			bool backedUp = false; /** Checks if the boolean is backed up. */
 		public:
 			/**
 			 * Check if the type is a boolean type.
@@ -56,11 +54,6 @@ namespace rootJS
 			 *              The value to be set
 			 */
 			virtual void setValue(v8::Local<v8::Value> value);
-
-			/**
-			 * Saves the value to the heap
-			 */
-			virtual void backup();
 	};
 }
 
