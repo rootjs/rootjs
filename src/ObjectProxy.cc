@@ -13,6 +13,9 @@ namespace rootJS {
 
 	ObjectProxy::~ObjectProxy()
 	{
+		for(void* ptr : boundMallocs) {
+			free(ptr);
+		}
 	}
 
 	const char* ObjectProxy::getTypeName() {
@@ -63,5 +66,9 @@ namespace rootJS {
 
 	void ObjectProxy::setValue(v8::Local<v8::Value> value) {
 		return;
+	}
+
+	void ObjectProxy::registerMallocedSpace(void *allocated) {
+		boundMallocs.push_back(allocated);
 	}
 }

@@ -115,8 +115,13 @@ namespace rootJS {
 			 */
 			virtual bool isStatic();
 
+			void registerMallocedSpace(void*);
+
 		protected:
 			v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
+
+		private:
+			std::vector<void*> boundMallocs;
 	};
 }
 
