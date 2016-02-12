@@ -1,6 +1,6 @@
 #include "ObjectProxy.h"
 
-#include "PointerInfo.h"
+#include "Toolbox.h"
 
 #include <TObject.h>
 #include <TGlobal.h>
@@ -9,18 +9,28 @@
 namespace rootJS {
 
 	ObjectProxy::ObjectProxy(MetaInfo &info, TClass *scope) : Proxy(info, scope) {
-
+		if(!proxy.IsEmpty()) {
+			proxy.SetWeak(this, weakCallback);
+		}
 	}
 
 	ObjectProxy::~ObjectProxy()
 	{
 		DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
 		if(dictPtr != nullptr) {
-			dictPtr()->Destructor(getAddress(), true);
+			dictPtr()->Destructor(*(void**)getAddress(), true);
 		}
+
 		for(void* ptr : boundMallocs) {
 			free(ptr);
 		}
+	}
+
+	void ObjectProxy::weakCallback(v8::WeakCallbackData<v8::Object, ObjectProxy> const& data) {
+		ObjectProxy *objectProxy = data.GetParameter();
+		objectProxy->proxy.Reset();
+
+		delete objectProxy;
 	}
 
 	const char* ObjectProxy::getTypeName() {
@@ -75,5 +85,10 @@ namespace rootJS {
 
 	void ObjectProxy::registerMallocedSpace(void *allocated) {
 		boundMallocs.push_back(allocated);
+	}
+
+	v8::Persistent<v8::Object> &ObjectProxy::getWeakPeristent() {
+		proxy.SetWeak(this, weakCallback);
+		return proxy;
 	}
 }

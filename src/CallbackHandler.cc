@@ -77,8 +77,12 @@ namespace rootJS
 			ObjectProxy *resultProxy = proxy->call();
 			if(resultProxy)
 			{
-				info.GetReturnValue().Set(resultProxy->get());
-				delete resultProxy;
+				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
+					info.GetReturnValue().Set(resultProxy->get());
+					delete resultProxy;
+				} else {
+					info.GetReturnValue().Set(resultProxy->getWeakPeristent());
+				}
 			}
 			delete proxy;
 		}
@@ -156,8 +160,12 @@ namespace rootJS
 		ObjectProxy *resultProxy = proxy->call();
 		if(proxy)
 		{
-			info.GetReturnValue().Set(resultProxy->get());
-			delete resultProxy;
+			if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
+				info.GetReturnValue().Set(resultProxy->get());
+				delete resultProxy;
+			} else {
+				info.GetReturnValue().Set(resultProxy->getWeakPeristent());
+			}
 		}
 
 		delete proxy;
@@ -221,7 +229,7 @@ namespace rootJS
 				return;
 			}
 
-			info.GetReturnValue().Set(proxy->get());
+			info.GetReturnValue().Set(proxy->getWeakPeristent());
 			return;
 		}
 
@@ -290,10 +298,11 @@ namespace rootJS
 			ObjectProxy *resultProxy = proxy->call();
 			if(resultProxy)
 			{
-				info.GetReturnValue().Set(resultProxy->get());
-
 				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
+					info.GetReturnValue().Set(resultProxy->get());
 					delete resultProxy;
+				} else {
+					info.GetReturnValue().Set(resultProxy->getWeakPeristent());
 				}
 			}
 		}
