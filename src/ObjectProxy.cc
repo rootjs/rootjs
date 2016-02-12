@@ -4,6 +4,7 @@
 
 #include <TObject.h>
 #include <TGlobal.h>
+#include <TClassTable.h>
 
 namespace rootJS {
 
@@ -13,6 +14,10 @@ namespace rootJS {
 
 	ObjectProxy::~ObjectProxy()
 	{
+		DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
+		if(dictPtr != nullptr) {
+			dictPtr()->Destructor(getAddress(), true);
+		}
 		for(void* ptr : boundMallocs) {
 			free(ptr);
 		}
