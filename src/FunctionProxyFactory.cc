@@ -1,5 +1,6 @@
 #include "FunctionProxyFactory.h"
 #include "Toolbox.h"
+#include "Types.h"
 
 #include "FunctionProxy.h"
 #include <vector>
@@ -16,13 +17,13 @@ namespace rootJS
 {
 
 	std::map<std::string, v8BasicTypes> FunctionProxyFactory::basicTypeMap = {
-	            {"char", v8BasicTypes::STRING},
-	            {"TStringasdf", v8BasicTypes::STRING},
-	            {"Int_t", v8BasicTypes::NUMBER},
-	            {"int", v8BasicTypes::NUMBER},
-	            {"Double_t", v8BasicTypes::NUMBER},
-	            {"Bool_t", v8BasicTypes::BOOLEAN}
-	        };
+		{"char", v8BasicTypes::STRING},
+		{"TStringasdf", v8BasicTypes::STRING},
+		{"Int_t", v8BasicTypes::NUMBER},
+		{"int", v8BasicTypes::NUMBER},
+		{"Double_t", v8BasicTypes::NUMBER},
+		{"Bool_t", v8BasicTypes::BOOLEAN}
+	};
 
 	FunctionProxyFactory::FunctionProxyFactory()
 	{
@@ -62,7 +63,7 @@ namespace rootJS
 
 		for(TFunction* function : options)
 		{
-			if(function->GetNargs() != (int) args->Length())
+			if((int)args->Length() > function->GetNargs() || (int)args->Length() < (function->GetNargs() - function->GetNargsOpt()))
 			{
 				continue;
 			}
@@ -103,19 +104,7 @@ namespace rootJS
 
 	bool FunctionProxyFactory::paramMatches(const char *type, v8::Local<v8::Value> arg)
 	{
-		if (arg->IsObject())
-		{
-			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
-			if (objectArg->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
-			{
-				Toolbox::logError("Supplied JavaScript object contains an unexpected number of internal fields.");
-				return false;
-			}
-
-			ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
-			return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
-		}
-		else
+		if (Types::isV8Primitive(arg))
 		{
 			std::map<std::string, v8BasicTypes>::iterator it = basicTypeMap.find(std::string(type));
 			if(it != basicTypeMap.end())
@@ -123,11 +112,11 @@ namespace rootJS
 				switch(it->second)
 				{
 				case v8BasicTypes::STRING:
-					return arg->IsString();
+					return Types::isV8String(arg);
 				case v8BasicTypes::NUMBER:
-					return arg->IsNumber()  || arg->IsNumberObject();
+					return Types::isV8Number(arg);
 				case v8BasicTypes::BOOLEAN:
-					return arg->IsBoolean() || arg->IsBooleanObject();
+					return Types::isV8Boolean(arg);
 				case v8BasicTypes::ARRAY:
 					//TODO: Check array contents...
 					return false;
@@ -139,6 +128,18 @@ namespace rootJS
 					return false;
 				}
 			}
+		}
+		else
+		{
+			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
+			if (objectArg->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
+			{
+				Toolbox::logError("Supplied JavaScript object contains an unexpected number of internal fields.");
+				return false;
+			}
+
+			ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
 		}
 
 		return false;

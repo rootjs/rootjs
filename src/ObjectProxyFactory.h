@@ -12,6 +12,7 @@
 
 #include <TGlobal.h>
 #include <TDataMember.h>
+#include <TEnumConstant.h>
 #include <TClass.h>
 
 namespace rootJS
@@ -25,12 +26,13 @@ namespace rootJS
 
 			static std::map<std::string, ObjectProxy*>* createPropertyMap(MetaInfo &info, TClass *clazz) throw(std::invalid_argument);
 			static TClass* getClass(std::string const& typeName);
+			static TEnumConstant* getEnumConstant(std::string const& typeName);
 
 			ObjectProxyFactory();
 
 		public:
 			static ObjectProxy* createObjectProxy(TGlobal &global);
-			static ObjectProxy* createObjectProxy(TDataMember const& type, TClass *scope, ObjectProxy &holder);
+			// static ObjectProxy* createObjectProxy(TDataMember const& type, TClass *scope, ObjectProxy &holder);
 
 			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope) throw(std::invalid_argument);
 

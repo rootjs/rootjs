@@ -31,7 +31,6 @@ namespace rootJS
 
 
 			StringType strType; /** Enum value representing the type */
-			bool backedUp = false; /** Checks if the string is backed up. */
 		public:
 			/**
 			 * Create a new StringProxy.
@@ -90,11 +89,6 @@ namespace rootJS
 			 *              The value to be set
 			 */
 			virtual void setValue(v8::Local<v8::Value> value);
-
-			/**
-			* Saves the value to the heap
-			*/
-			virtual void backup();
 	};
 }
 

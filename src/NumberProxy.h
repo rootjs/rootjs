@@ -39,7 +39,6 @@ namespace rootJS
 			 * @return the number casted into a double
 			 */
 			Double_t castToDouble(void*);
-			bool backedUp = false;
 		public:
 			/**
 			 * Check if the type is a number type.
@@ -61,11 +60,6 @@ namespace rootJS
 			NumberProxy(MetaInfo &info, TClass *scope);
 
 			~NumberProxy();
-
-			/**
-			 * Saves the value to the heap
-			 */
-			virtual void backup();
 
 #define ROOTJS_NUMBER_PROXY_DECLARE(datatype)                   \
             static ObjectProxy* datatype##Construct(MetaInfo &info, TClass *scope);
