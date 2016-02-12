@@ -8,6 +8,7 @@
 #include <queue>
 #include "ClassExposer.h"
 #include "TROOT.h"
+#include "TemplateFactory.h"
 #include <TGlobal.h>
 #include <TClass.h>
 #include <TClassTable.h>
@@ -39,14 +40,25 @@ void ClassExposer::expose(TClass* clazz,v8::Local<v8::Object> exports) {
 	v8::Local<v8::Object> obj;
 		while(!nameque.empty()){
 			obj = exports->Get(	v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),nameque.front().c_str()));
-			if(obj.IsEmpty()){
-				DictFuncPtr_t funcPtr = gClassTable->GetDict(pathque.front().c_str());
+			if(obj.IsEmpty()){ //if there was no object set yet create one and set it
+				DictFuncPtr_t funcPtr(gClassTable->GetDict(pathque.front().c_str()));
 				if(funcPtr = nullptr) {
 					//TODO throw something
 				}
-				
-			}
-
+				TClass* clazz = funcPtr();
+				if(clazz->Property() & kIsNamespace) {
+					exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()),
+								 TemplateFactory::getInstance(clazz));
+				}
+				if(clazz->Property() & kIsClass) {
+					exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()),
+								 TemplateFactory::getConstructor(clazz));
+				}
+				//TODO figure out if there are other cases as well
+				}
+			exports = obj;
+			pathque.pop();
+			nameque.pop();
 		}
 
 
