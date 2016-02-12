@@ -161,6 +161,7 @@ namespace rootJS
 			//TODO Handle this, should not segfault (maybe throw something...)
 		}
 		this->facePtr = gCling->CallFunc_IFacePtr( callFunc );
+		gCling->CallFunc_Delete(callFunc);
 
 		buf = std::vector<void*>( args->Length() );
 		for(int i = 0; i < (int)args->Length(); i++)
