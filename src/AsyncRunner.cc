@@ -23,7 +23,7 @@ namespace rootJS {
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		std::vector<v8::Local<v8::Value>> passParams;
 
-		for(int i = 0; i < runner->result.size(); i++) {
+		for(int i = 0; i < (int)runner->result.size(); i++) {
 			if(runner->result[i] == nullptr) {
 				continue;
 			}
