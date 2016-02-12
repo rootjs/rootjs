@@ -86,3 +86,9 @@ node_modules
 # vim
 *.swp
 .ycm_extra_conf.py*
+
+# CLion
+.idea/*
+CMakeLists.txt
+
+
