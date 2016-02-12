@@ -100,13 +100,11 @@ void NodeHandler::exposeGlobalFunctions() throw (std::invalid_argument) {
 void NodeHandler::exposeClasses() throw (std::invalid_argument) {
 	for (int i = 0; i < gClassTable->Classes(); i++) {
 		DictFuncPtr_t funcPtr = gClassTable->GetDict(gClassTable->At(i));
-		Toolbox::logInfo(std::string("loading class").append(clazz->GetName()));
 		if (funcPtr == nullptr) {
 			throw std::invalid_argument(
 					std::string("Specified class is null."));
 		}
 		TClass *clazz = funcPtr(); // call dictionary function on class
-
 
 		if (clazz == nullptr || !clazz->IsLoaded()) {
 			throw std::invalid_argument(
@@ -114,11 +112,13 @@ void NodeHandler::exposeClasses() throw (std::invalid_argument) {
 		}
 		if (((std::string) clazz->GetName()).find(":") == std::string::npos) {
 			if ((clazz->Property() & kIsClass)) {
+				Toolbox::logInfo(std::string("loading class ").append(clazz->GetName()));
 				this->exports->Set(
-					v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), clazz->GetName()), TemplateFactory::getConstructor(clazz));
+				v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), clazz->GetName()), TemplateFactory::getConstructor(clazz));
 				continue;
 		}
 			if((clazz->Property() & kIsNamespace)){
+				Toolbox::logInfo(std::string("loading namespace ").append(clazz->GetName()));
 				this->exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName()),TemplateFactory::getInstance(clazz));
 				continue;
 			}

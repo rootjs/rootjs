@@ -10,6 +10,7 @@
 #include "stdexcept"
 #include "TROOT.h"
 #include "TemplateFactory.h"
+#include "Toolbox.h"
 #include <TGlobal.h>
 #include <TClass.h>
 #include <TClassTable.h>
@@ -49,15 +50,18 @@ void ClassExposer::expose(TClass* clazz,v8::Local<v8::Object> exports)  throw(st
 			if (!scope->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()))) {
 				DictFuncPtr_t funcPtr(gClassTable->GetDict(pathque.front().c_str()));
 				if (funcPtr == nullptr) {
+					Toolbox::logInfo(std::string("creating stub namespace: ").append(pathque.front()));
 					scope->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj->New(v8::Isolate::GetCurrent()));
 				} else{
 				try {
 					TClass *curclazz = funcPtr();
 					if (curclazz->Property() & kIsNamespace) {
+						Toolbox::logInfo(std::string("loading namespace ").append(curclazz->GetName()));
 						obj = TemplateFactory::getInstance(curclazz);
 						scope->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj);
 					}
 					if (curclazz->Property() & kIsClass) {
+						Toolbox::logInfo(std::string("loading class ").append(curclazz->GetName()));
 						obj = TemplateFactory::getConstructor(curclazz);
 						scope->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj);
 					}
