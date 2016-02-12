@@ -117,11 +117,14 @@ namespace rootJS {
 
 			void registerMallocedSpace(void*);
 
+			v8::Persistent<v8::Object> &getWeakPeristent();
+
 		protected:
 			v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
 
 		private:
 			std::vector<void*> boundMallocs;
+			static void weakCallback(v8::WeakCallbackData<v8::Object, ObjectProxy> const& data);
 	};
 }
 

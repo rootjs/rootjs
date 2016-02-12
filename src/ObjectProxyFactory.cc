@@ -123,7 +123,7 @@ namespace rootJS
 
 			Toolbox::logInfo("------------------------------------------------------------");
 			Toolbox::logInfo("");
-	    }
+		}
 		*/
 
 		GlobalInfo info(global);
@@ -132,7 +132,7 @@ namespace rootJS
 
 	/*
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(TDataMember const& type, TClass *scope, ObjectProxy &holder)
-{
+	{
 
 		// It is not possible to do pointer arithmetic on void pointers.
 		// To add the offset to the object we cast the pointer to char* before.
@@ -140,7 +140,7 @@ namespace rootJS
 
 		MemberInfo info(type, object);
 		return createObjectProxy(info, scope);
-} */
+	} */
 
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy)
