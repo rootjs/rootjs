@@ -1,18 +1,18 @@
-#ifndef SRC_MEMBERINFO_H_
-#define SRC_MEMBERINFO_H_
+#ifndef MEMBERINFO_H_
+#define MEMBERINFO_H_
 
-#include <v8.h>
-#include <TDataMember.h>
-#include <TClassRef.h>
-#include <TGlobal.h>
 #include "MetaInfo.h"
 
-namespace rootJS {
+#include <TDataMember.h>
+
+namespace rootJS
+{
 
 	/**
 	 * This class contains the info for a TDataMember
 	 */
-	class MemberInfo : public MetaInfo {
+	class MemberInfo : public MetaInfo
+	{
 		public:
 			MemberInfo(const TDataMember &, void* baseAddress);
 			~MemberInfo();
@@ -22,14 +22,17 @@ namespace rootJS {
 
 			virtual bool isConst();
 			virtual bool isStatic();
+
 			virtual const char* getTypeName();
+			virtual const char* getName();
 
 			/** The type the MemberInfo is holding.  */
 			const TDataMember &currentObject;
-			virtual MetaInfo* clone() {
+
+			virtual MetaInfo* clone()
+			{
 				return new MemberInfo(currentObject, baseAddress);
 			};
-		protected:
 	};
 }
 #endif

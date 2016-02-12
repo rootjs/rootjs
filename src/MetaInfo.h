@@ -1,17 +1,17 @@
 #ifndef SRC_METAINFO_H_
 #define SRC_METAINFO_H_
-#include <RConfig.h>
-#include <TDataMember.h>
-#include <TClassRef.h>
-#include <TGlobal.h>
-#include <RConfig.h>
-namespace rootJS {
+
+#include <RtypesCore.h>
+
+namespace rootJS
+{
 
 	/**
 	 * This class encapsulates the differences in behaviour between TMember and
 	 * TGlobal
 	 * */
-	class MetaInfo {
+	class MetaInfo
+	{
 		protected:
 			/**
 			 * The base address of the specific TObject
@@ -21,16 +21,20 @@ namespace rootJS {
 			/**
 			 * Creates MetaInfo with a specific TObject and its base address
 			 */
-			MetaInfo(const TObject &foo, void *baseAddress) {
+			MetaInfo(void *baseAddress)
+			{
 				this->baseAddress = baseAddress;
 			};
-			virtual ~MetaInfo() {};
+			virtual ~MetaInfo()
+			{}
+			;
 
 			/**
 			 * Checks if the TObject is global.
 			 * @return If the TObject is global
 			 */
-			virtual bool isGlobal() {
+			virtual bool isGlobal()
+			{
 				return false;
 			};
 
@@ -39,7 +43,8 @@ namespace rootJS {
 			 * the TDataMember::GetOffset() function.
 			 * @return The offset
 			 */
-			virtual Long_t getOffset() {
+			virtual Long_t getOffset()
+			{
 				return 0;
 			};
 
@@ -62,10 +67,20 @@ namespace rootJS {
 			virtual const char* getTypeName() = 0;
 
 			/**
+			 * Returns the name of the TObject.
+			 * @return name of the TObject
+			 */
+			virtual const char* getName()
+			{
+				return "undefined";
+			};
+
+			/**
 			 * Returns the base address of the TObject.
 			 * @return Base address of the TObject
 			 */
-			virtual void* getBaseAddress() {
+			virtual void* getBaseAddress()
+			{
 				return baseAddress;
 			};
 
@@ -73,19 +88,17 @@ namespace rootJS {
 			 * Returns the address of the TObject.
 			 * @return Address of the TObject
 			 */
-			virtual void* getAddress() {
+			virtual void* getAddress()
+			{
 				return (void*)((char*)getBaseAddress() + getOffset());
-			}
+			};
 
 			/**
 			 * Makes a clone of the MetaInfo instance.
 			 * @return Pointer to the cloned MetaInfo instance
 			 */
 			virtual MetaInfo* clone() = 0;
-
-		protected:
-		private:
 	};
 }
 
-#endif /* SRC_METAINFO_H_ */
+#endif

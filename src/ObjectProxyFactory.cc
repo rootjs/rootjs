@@ -27,7 +27,7 @@
 namespace rootJS
 {
 
-	std::map<std::string, ProxyInitializator> ObjectProxyFactory::proxyMap;
+	std::map<std::string, ProxyInitializator> ObjectProxyFactory::primitiveProxyMap;
 
 	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope /*, ObjectProxy  *holder*/) throw(std::invalid_argument)
 	{
@@ -49,19 +49,21 @@ namespace rootJS
 			}
 
 			if(!(member->Property() & kIsStatic))
-			{	/*
-				Toolbox::logInfo("Encapsulating '" + std::string(member->GetName()) + "' from '" + std::string(scope->GetName()) + "'.");
-				Toolbox::logInfo("");
-
-				Toolbox::logInfo("GetTypeName()     '" + std::string(member->GetTypeName()) + "'.");
-				Toolbox::logInfo("GetFullTypeName() '" + std::string(member->GetFullTypeName()) + "'.");
-				Toolbox::logInfo("GetTrueTypeName() '" + std::string(member->GetTrueTypeName()) + "'.");
-
-				Toolbox::logInfo("GetDataType()->GetTypeName() '" + std::string(member->GetDataType()->GetTypeName()) + "'.");
-
-				Toolbox::logInfo("------------------------------------------------------------");
-				Toolbox::logInfo("");
+			{
+				/*
+				 * Toolbox::logInfo("Encapsulating '" + std::string(member->GetName()) + "' from '" + std::string(scope->GetName()) + "'.");
+				 * Toolbox::logInfo("");
+				 *
+				 * Toolbox::logInfo("GetTypeName()     '" + std::string(member->GetTypeName()) + "'.");
+				 * Toolbox::logInfo("GetFullTypeName() '" + std::string(member->GetFullTypeName()) + "'.");
+				 * Toolbox::logInfo("GetTrueTypeName() '" + std::string(member->GetTrueTypeName()) + "'.");
+				 *
+				 * Toolbox::logInfo("GetDataType()->GetTypeName() '" + std::string(member->GetDataType()->GetTypeName()) + "'.");
+				 *
+				 * Toolbox::logInfo("------------------------------------------------------------");
+				 * Toolbox::logInfo("");
 				*/
+
 				MemberInfo memberInfo(*member, info.getAddress());
 				// ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(memberInfo, scope);
 				(*propertyMap)[std::string(member->GetName())] = nullptr; // = memberProxy;
@@ -84,11 +86,13 @@ namespace rootJS
 		TClass *type = getClass(typeName);
 
 		if(type == nullptr)
-		{	/*
-						Toolbox::logInfo("No TClass for '" + typeName + "' found.");
-						Toolbox::logInfo("------------------------------------------------------------");
-						Toolbox::logInfo("");
-						*/
+		{
+			/*
+			* Toolbox::logInfo("No TClass for '" + typeName + "' found.");
+			* Toolbox::logInfo("------------------------------------------------------------");
+			* Toolbox::logInfo("");
+			*/
+
 			// throw std::invalid_argument("Type '" + typeName + "' is not supported.");
 			return nullptr;
 		}
@@ -123,25 +127,12 @@ namespace rootJS
 
 			Toolbox::logInfo("------------------------------------------------------------");
 			Toolbox::logInfo("");
-		}
+		   }
 		*/
 
 		GlobalInfo info(global);
 		return createObjectProxy(info, nullptr);
 	}
-
-	/*
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(TDataMember const& type, TClass *scope, ObjectProxy &holder)
-	{
-
-		// It is not possible to do pointer arithmetic on void pointers.
-		// To add the offset to the object we cast the pointer to char* before.
-		void *object = static_cast<void*>((static_cast<char*>(holder.getAddress()) + type.GetOffsetCint()));
-
-		MemberInfo info(type, object);
-		return createObjectProxy(info, scope);
-	} */
-
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy)
 	{
@@ -171,100 +162,85 @@ namespace rootJS
 
 	ObjectProxy* ObjectProxyFactory::createPrimitiveProxy(MetaInfo &info, TClass* clazz)
 	{
-		/*
-		TDataType* type = (TDataType*) (gROOT->GetListOfTypes(kTRUE)->FindObject(info.getTypeName()));
+		std::string stdTypeName(info.getTypeName());
 
-		if(type == nullptr) {
-			return nullptr;
+		// check if typeName starts with const
+		std::size_t idx = stdTypeName.find("const ");
+		if(idx != std::string::npos && idx == 0)
+		{
+			stdTypeName = stdTypeName.substr(6); // remove 'const '
+			// Toolbox::logInfo("stdtypeName =" + stdTypeName);
 		}
 
-		std::string typeString(type->GetTypeName((EDataType) type->GetType()));
-		*/
-
-		std::string typeString = std::string(info.getTypeName());
-		if(proxyMap.find(typeString) == proxyMap.end())
+		TDataType* type = (TDataType*) (gROOT->GetListOfTypes(kTRUE)->FindObject(stdTypeName.c_str()));
+		if(type == nullptr)
 		{
 			return nullptr;
 		}
 
-		return proxyMap[typeString](info, clazz);
+		TString typeName = type->GetTypeName().Data();
+		if(typeName.IsNull())
+		{
+			return nullptr;
+		}
+
+		stdTypeName = std::string(typeName.Data());
+		if(primitiveProxyMap.find(stdTypeName) == primitiveProxyMap.end())
+		{
+			/*
+			Toolbox::logError("Could not resolve basic type '" + stdTypeName
+			                  + "' from '" + std::string(info.getName())
+			                  + "' with type '" + std::string(info.getTypeName())
+			                  + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
+			*/
+			return nullptr;
+		}
+		else
+		{/*
+			Toolbox::logInfo("Resolved '" + stdTypeName
+			                 + "' from '" + std::string(info.getName())
+			                 + "' with type '" + std::string(info.getTypeName())
+			                 + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
+		*/
+		}
+
+		return primitiveProxyMap[stdTypeName](info, clazz);
 	}
 
 	void ObjectProxyFactory::initializeProxyMap()
 	{
-		/*
-		kChar_t   = 1,  kUChar_t  = 11, kShort_t    = 2,  kUShort_t = 12,
-		kInt_t    = 3,  kUInt_t   = 13, kLong_t     = 4,  kULong_t  = 14,
-		kFloat_t  = 5,  kDouble_t =  8, kDouble32_t = 9,  kchar     = 10,
-		kBool_t   = 18, kLong64_t = 16, kULong64_t  = 17, kOther_t  = -1,
-		kNoType_t = 0,  kFloat16_t= 19,
-		kCounter  =  6, kCharStar = 7,  kBits     = 15  for compatibility with TStreamerInfo ,
-		kVoid_t   = 20,
-		*/
 
-		// TODO: remove typedefs and use only datatypes listed above...
+		primitiveProxyMap["int"]                = &NumberProxy::intConstruct;
+		primitiveProxyMap["unsigned int"]       = &NumberProxy::uintConstruct;
 
-		proxyMap["Int_t"]              = &NumberProxy::intConstruct;
-		proxyMap["int"]                = &NumberProxy::intConstruct;
-		proxyMap["Seek_t"]             = &NumberProxy::intConstruct;
-		proxyMap["Ssiz_t"]             = &NumberProxy::intConstruct;
+		primitiveProxyMap["double"]             = &NumberProxy::doubleConstruct;
+		primitiveProxyMap["long double"]        = &NumberProxy::ldoubleConstruct;
 
-		proxyMap["UInt_t"]             = &NumberProxy::uintConstruct;
-		proxyMap["unsigned int"]       = &NumberProxy::uintConstruct;
+		primitiveProxyMap["short"]              = &NumberProxy::shortConstruct;
+		primitiveProxyMap["unsigned short"]     = &NumberProxy::ushortConstruct;
 
-		proxyMap["double"]             = &NumberProxy::doubleConstruct;
-		proxyMap["Axis_t"]             = &NumberProxy::doubleConstruct;
-		proxyMap["Double_t"]           = &NumberProxy::doubleConstruct;
-		proxyMap["Stat_t"]             = &NumberProxy::doubleConstruct;
-		proxyMap["Coord_t"]            = &NumberProxy::doubleConstruct;
+		primitiveProxyMap["long"]               = &NumberProxy::longConstruct;
+		primitiveProxyMap["long long"]          = &NumberProxy::llongConstruct;
 
-		proxyMap["long double"]        = &NumberProxy::ldoubleConstruct;
-		proxyMap["LongDouble_t"]       = &NumberProxy::ldoubleConstruct;
+		primitiveProxyMap["unsigned long"]      = &NumberProxy::ulongConstruct;
+		primitiveProxyMap["unsigned long long"] = &NumberProxy::ullongConstruct;
 
-		proxyMap["Short_t"]            = &NumberProxy::shortConstruct;
-		proxyMap["short"]              = &NumberProxy::shortConstruct;
-		proxyMap["Version_t"]          = &NumberProxy::shortConstruct;
-		proxyMap["Font_t"]             = &NumberProxy::shortConstruct;
-		proxyMap["Style_t"]            = &NumberProxy::shortConstruct;
-		proxyMap["Marker_t"]           = &NumberProxy::shortConstruct;
-		proxyMap["Width_t"]            = &NumberProxy::shortConstruct;
-		proxyMap["Color_t"]            = &NumberProxy::shortConstruct;
-		proxyMap["SCoord_t"]           = &NumberProxy::shortConstruct;
+		primitiveProxyMap["float"]              = &NumberProxy::floatConstruct;
 
-		proxyMap["UShort_t"]           = &NumberProxy::ushortConstruct;
-		proxyMap["unsigned short"]     = &NumberProxy::ushortConstruct;
+		primitiveProxyMap["char"]               = &StringProxy::charConstruct;
+		primitiveProxyMap["unsigned char"]      = &StringProxy::charConstruct;
+		primitiveProxyMap["char*"]              = &StringProxy::charConstruct;
 
-		proxyMap["Long_t"]             = &NumberProxy::longConstruct;
-		proxyMap["long"]               = &NumberProxy::longConstruct;
+		primitiveProxyMap["string"]             = &StringProxy::stringConstruct;	// = std::string
 
-		proxyMap["Long64_t"]           = &NumberProxy::llongConstruct;
-		proxyMap["long long"]          = &NumberProxy::llongConstruct;
-		proxyMap["__int64"]            = &NumberProxy::llongConstruct;
+		primitiveProxyMap["bool"]               = &BooleanProxy::boolConstruct;
 
-		proxyMap["ULong_t"]            = &NumberProxy::ulongConstruct;
-		proxyMap["unsigned long"]      = &NumberProxy::ulongConstruct;
-		proxyMap["ULong64_t"]          = &NumberProxy::ullongConstruct;
-		proxyMap["unsigned long long"] = &NumberProxy::ullongConstruct;
-		proxyMap["unsigned __int64"]   = &NumberProxy::ullongConstruct;
+		// Special typedefs
+		primitiveProxyMap["Double32_t"]         = &NumberProxy::doubleConstruct;
+		primitiveProxyMap["Float16_t"]          = &NumberProxy::floatConstruct;
+		primitiveProxyMap["Long64_t"]           = &NumberProxy::llongConstruct;
+		primitiveProxyMap["ULong64_t"]          = &NumberProxy::ullongConstruct;
 
-		proxyMap["Float_t"]            = &NumberProxy::floatConstruct;
-		proxyMap["float"]              = &NumberProxy::floatConstruct;
-		proxyMap["Real_t"]             = &NumberProxy::floatConstruct;
-		proxyMap["Angle_t"]            = &NumberProxy::floatConstruct;
-		proxyMap["Size_t"]             = &NumberProxy::floatConstruct;
-
-		proxyMap["char"]               = &StringProxy::charConstruct;
-		proxyMap["char*"]              = &StringProxy::charConstruct;
-		proxyMap["const char*"]        = &StringProxy::charConstruct;
-		proxyMap["Text_t"]             = &StringProxy::charConstruct;
-		proxyMap["Option_t"]           = &StringProxy::charConstruct;
-
-		proxyMap["std::string"]        = &StringProxy::stringConstruct;
-
-		// proxyMap["TString"]            = &StringProxy::tStringConstruct;
-
-		proxyMap["Bool_t"]             = &BooleanProxy::boolConstruct;
-		proxyMap["bool"]               = &BooleanProxy::boolConstruct;
 	}
 
 }

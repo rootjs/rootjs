@@ -1,40 +1,62 @@
-#ifndef SRC_FUNCTION_INFO_H_
-#define SRC_FUNCTION_INFO_H_
-#include <TFunction.h>
+#ifndef FUNCTION_INFO_H_
+#define FUNCTION_INFO_H_
 
 #include "MetaInfo.h"
 
-namespace rootJS {
+#include <TFunction.h>
+
+namespace rootJS
+{
 
 	/**
 	 * This class contains the info for a TFunction
 	 */
-	class FunctionInfo: public MetaInfo {
+	class FunctionInfo: public MetaInfo
+	{
 		public:
-			FunctionInfo(TFunction* func) : MetaInfo(TObject(), nullptr) {
+			FunctionInfo(TFunction* func) : MetaInfo(nullptr)
+			{
 				this->func = func;
 			};
-			~FunctionInfo() {
-			};
-			virtual bool isGlobal() {
+
+			~FunctionInfo()
+			{}
+			;
+
+			virtual bool isGlobal()
+			{
 				return true;
 			};
-			virtual Long_t GetOffset() {
+
+			virtual Long_t GetOffset()
+			{
 				return 0;
 			};
 
-			virtual bool isConst() {
+			virtual bool isConst()
+			{
 				return true;
 			};
-			virtual bool isStatic() {
+
+			virtual bool isStatic()
+			{
 				return true;
 			};
-			virtual const char* getTypeName() {
+
+			virtual const char* getTypeName()
+			{
+				return func->GetReturnTypeName();
+			};
+
+			virtual const char* getName() {
 				return func->GetName();
-			};
-			virtual MetaInfo* clone() {
+			}
+
+			virtual MetaInfo* clone()
+			{
 				return new FunctionInfo(func);
 			};
+
 		protected:
 			/**
 			 * The function the FunctionInfo is holding.
@@ -43,4 +65,4 @@ namespace rootJS {
 	};
 }
 
-#endif /* SRC_POINTER_MODE_H_ */
+#endif
