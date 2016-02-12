@@ -1,30 +1,44 @@
 #include "GlobalInfo.h"
 
-namespace rootJS {
-	GlobalInfo::GlobalInfo(const  TGlobal& type)
-		: MetaInfo(type, nullptr), currentObject(type) {
+namespace rootJS
+{
+	GlobalInfo::GlobalInfo(const  TGlobal& type) : MetaInfo(nullptr), currentObject(type)
+	{
 		baseAddress = type.GetAddress();
 	}
-	bool GlobalInfo::isGlobal() {
+
+	GlobalInfo::~GlobalInfo()
+	{}
+
+	bool GlobalInfo::isGlobal()
+	{
 		return true;
 	}
 
-	GlobalInfo::~GlobalInfo() {
-	}
-
-	Long_t GlobalInfo::GetOffset() {
+	Long_t GlobalInfo::GetOffset()
+	{
 		return 0;
 	}
 
-	bool GlobalInfo::isConst() {
-		if(currentObject.Property() & kIsConstant) {
+	bool GlobalInfo::isConst()
+	{
+		if(currentObject.Property() & kIsConstant)
+		{
 			return true;
-		} else {
+		}
+		else
+		{
 			return false;
 		}
 	}
 
-	const char* GlobalInfo::getTypeName() {
+	const char* GlobalInfo::getTypeName()
+	{
 		return currentObject.GetTypeName();
+	}
+
+	const char* GlobalInfo::getName()
+	{
+		return currentObject.GetName();
 	}
 }
