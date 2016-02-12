@@ -26,6 +26,7 @@ void ClassExposer::expose(TClass* clazz,v8::Local<v8::Object> exports)  throw(st
 	std::string name(clazz->GetName());
 	if(name.find('<') != std::string::npos){
 		//TODO Handle templates
+		Toolbox::logInfo(std::string("omitting template ").append(clazz->GetName()));
 		return;
 	}
 	splitClassName(name, vec);
