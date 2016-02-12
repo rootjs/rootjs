@@ -230,7 +230,7 @@ namespace rootJS
 			if ((property & kIsPureVirtual)) // (property & kIsAbstract)
 			{
 				// Toolbox::logInfo("Skipped pure virtual method '" + methodName + "' in '" + className + "'.");
-				continue;
+				//TODO? continue;
 			}
 
 			// make overridden or overloaded methods only occur once

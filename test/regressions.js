@@ -13,4 +13,11 @@ describe('Functions', function() {
 		 root.gSystem.InControl().should.equal(false);
 	 });
   });
+  describe('pure virtuals', function() {
+	  it('should be possible to call gCling.ProcessLine', function() {
+		  (function() {
+			  root.gCling.ProcessLine("Printf(\"test\");");
+		  }).should.not.throw();
+	  });
+  });
 });
