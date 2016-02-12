@@ -23,6 +23,7 @@
 				'src/BooleanProxy.cc',
 				'src/NumberProxy.cc',
 				'src/FunctionProxyFactory.cc',
+				'src/ClassExposer.cc',
 				'src/CallbackHandler.cc',
 				'src/NodeApplication.cc',
 				'src/AsyncRunner.cc',
