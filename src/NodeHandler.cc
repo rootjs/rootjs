@@ -110,7 +110,7 @@ void NodeHandler::exposeClasses() throw (std::invalid_argument) {
 			throw std::invalid_argument(
 					std::string("Specified class is not loaded."));
 		}
-		const char* name = clazz->GetName();
+		const char* name = clazz->GetName();//TODO remove this line
 		if (((std::string) clazz->GetName()).find(":") == std::string::npos) {
 			if ((clazz->Property() & kIsClass)) {
 				this->exports->Set(

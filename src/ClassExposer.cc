@@ -12,6 +12,8 @@
 #include <TGlobal.h>
 #include <TClass.h>
 #include <TClassTable.h>
+#include <iostream>
+
 namespace rootJS {
 
 ClassExposer::~ClassExposer() {
@@ -50,12 +52,12 @@ void ClassExposer::expose(TClass* clazz,v8::Local<v8::Object> exports) {
 				}
 				TClass* curclazz = funcPtr();
 				if(curclazz->Property() & kIsNamespace) {
-					exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()),
-								 TemplateFactory::getInstance(curclazz));
+					obj = TemplateFactory::getInstance(curclazz);
+					exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj);
 				}
 				if(curclazz->Property() & kIsClass) {
-					exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()),
-								 TemplateFactory::getConstructor(curclazz));
+					obj = TemplateFactory::getConstructor(curclazz);
+					exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj );
 				}
 				//TODO figure out if there are other cases as well
 				}
