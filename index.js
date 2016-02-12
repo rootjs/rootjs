@@ -1,3 +1,7 @@
 module.exports = require('./build/Release/rootjs.node');
 
-// TODO: Add code to refresh UI
+var uicallback = function() {
+	module.exports.gSystem.ProcessEvents();
+	setTimeout(uicallback, 100);
+}
+uicallback();
