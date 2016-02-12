@@ -39,20 +39,20 @@ void ClassExposer::expose(TClass* clazz,v8::Local<v8::Object> exports) {
 
 	v8::Local<v8::Object> obj;
 		while(!nameque.empty()){
-			obj = exports->Get(	v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),nameque.front().c_str()));
+			obj = v8::Local<v8::Object>::Cast(exports->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),nameque.front().c_str())));
 			if(obj.IsEmpty()){ //if there was no object set yet create one and set it
 				DictFuncPtr_t funcPtr(gClassTable->GetDict(pathque.front().c_str()));
-				if(funcPtr = nullptr) {
+				if(funcPtr == nullptr) {
 					//TODO throw something
 				}
-				TClass* clazz = funcPtr();
-				if(clazz->Property() & kIsNamespace) {
+				TClass* curclazz = funcPtr();
+				if(curclazz->Property() & kIsNamespace) {
 					exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()),
-								 TemplateFactory::getInstance(clazz));
+								 TemplateFactory::getInstance(curclazz));
 				}
-				if(clazz->Property() & kIsClass) {
+				if(curclazz->Property() & kIsClass) {
 					exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()),
-								 TemplateFactory::getConstructor(clazz));
+								 TemplateFactory::getConstructor(curclazz));
 				}
 				//TODO figure out if there are other cases as well
 				}
