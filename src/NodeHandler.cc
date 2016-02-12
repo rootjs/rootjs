@@ -100,17 +100,18 @@ void NodeHandler::exposeGlobalFunctions() throw (std::invalid_argument) {
 void NodeHandler::exposeClasses() throw (std::invalid_argument) {
 	for (int i = 0; i < gClassTable->Classes(); i++) {
 		DictFuncPtr_t funcPtr = gClassTable->GetDict(gClassTable->At(i));
+		Toolbox::logInfo(std::string("loading class").append(clazz->GetName()));
 		if (funcPtr == nullptr) {
 			throw std::invalid_argument(
 					std::string("Specified class is null."));
 		}
-
 		TClass *clazz = funcPtr(); // call dictionary function on class
+
+
 		if (clazz == nullptr || !clazz->IsLoaded()) {
 			throw std::invalid_argument(
 					std::string("Specified class is not loaded."));
 		}
-		const char* name = clazz->GetName();//TODO remove this line
 		if (((std::string) clazz->GetName()).find(":") == std::string::npos) {
 			if ((clazz->Property() & kIsClass)) {
 				this->exports->Set(

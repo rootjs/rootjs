@@ -10,7 +10,7 @@ class ClassExposer {
 public:
 	virtual ~ClassExposer();
 
-	static void expose(TClass*,v8::Local<v8::Object>);
+	static void expose(TClass*,v8::Local<v8::Object>) throw(std::invalid_argument);
 	static std::vector<std::string> splitClassName(std::string name, std::vector<std::string>& vec);
 private:
 	ClassExposer();

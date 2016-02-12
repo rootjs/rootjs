@@ -7,6 +7,7 @@
 #include <vector>
 #include <queue>
 #include "ClassExposer.h"
+#include "stdexcept"
 #include "TROOT.h"
 #include "TemplateFactory.h"
 #include <TGlobal.h>
@@ -19,13 +20,14 @@ namespace rootJS {
 ClassExposer::~ClassExposer() {
 }
 
-void ClassExposer::expose(TClass* clazz,v8::Local<v8::Object> exports) {
+void ClassExposer::expose(TClass* clazz,v8::Local<v8::Object> exports)  throw(std::invalid_argument)  {
 	std::vector<std::string> vec;
 	std::string name(clazz->GetName());
 	if(name.find('<') != std::string::npos){
+		//TODO Handle templates
 		return;
 	}
-	splitClassName(name, vec);//ROOT::Math::Class
+	splitClassName(name, vec);
 		std::queue<std::string> pathque;
 		std::queue<std::string> nameque;
 		std::string buff = vec[0];
@@ -41,27 +43,32 @@ void ClassExposer::expose(TClass* clazz,v8::Local<v8::Object> exports) {
 			pathbuff.append(buff);
 			pathque.push(pathbuff);
 		}
-
-	v8::Local<v8::Object> obj;
-		while(!nameque.empty()){
-			obj = v8::Local<v8::Object>::Cast(exports->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),nameque.front().c_str())));
-			if(obj.IsEmpty()){ //if there was no object set yet create one and set it
+	v8::Local<v8::Object>& scope = exports;
+		while(!nameque.empty()) {
+			v8::Local<v8::Object> obj;
+			if (!scope->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()))) {
 				DictFuncPtr_t funcPtr(gClassTable->GetDict(pathque.front().c_str()));
-				if(funcPtr == nullptr) {
-					//TODO throw something
+				if (funcPtr == nullptr) {
+					scope->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj->New(v8::Isolate::GetCurrent()));
+				} else{
+				try {
+					TClass *curclazz = funcPtr();
+					if (curclazz->Property() & kIsNamespace) {
+						obj = TemplateFactory::getInstance(curclazz);
+						scope->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj);
+					}
+					if (curclazz->Property() & kIsClass) {
+						obj = TemplateFactory::getConstructor(curclazz);
+						scope->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj);
+					}
+				} catch (const std::invalid_argument &e) {
+					throw std::invalid_argument(e);
 				}
-				TClass* curclazz = funcPtr();
-				if(curclazz->Property() & kIsNamespace) {
-					obj = TemplateFactory::getInstance(curclazz);
-					exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj);
-				}
-				if(curclazz->Property() & kIsClass) {
-					obj = TemplateFactory::getConstructor(curclazz);
-					exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj );
 				}
 				//TODO figure out if there are other cases as well
-				}
-			exports = obj;
+			}
+
+			scope = v8::Local<v8::Object>::Cast(scope->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),nameque.front().c_str())));
 			pathque.pop();
 			nameque.pop();
 		}
