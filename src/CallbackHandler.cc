@@ -221,6 +221,7 @@ namespace rootJS
 
 			funcProxy->prepareCall(args);
 			ObjectProxy *proxy = funcProxy->call(true);
+			delete funcProxy;
 
 			if(proxy == nullptr)
 			{
@@ -296,6 +297,7 @@ namespace rootJS
 		{
 			proxy->prepareCall(args);
 			ObjectProxy *resultProxy = proxy->call();
+			delete proxy;
 			if(resultProxy)
 			{
 				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
