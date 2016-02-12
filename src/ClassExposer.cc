@@ -19,16 +19,19 @@ ClassExposer::~ClassExposer() {
 
 void ClassExposer::expose(TClass* clazz,v8::Local<v8::Object> exports) {
 	std::vector<std::string> vec;
-	splitClassName(std::string(clazz->GetName()), vec);//ROOT::Math::Class
+	std::string name(clazz->GetName());
+	if(name.find('<') != std::string::npos){
+		return;
+	}
+	splitClassName(name, vec);//ROOT::Math::Class
 		std::queue<std::string> pathque;
 		std::queue<std::string> nameque;
-
 		std::string buff = vec[0];
 		nameque.push(buff);
 		pathque.push(buff);
 
 		//setting up the names under which the object are exported and their names in ROOT
-		for(int i = 1; i < vec.size();i++){
+		for(uint i = 1; i < vec.size();i++){
 			std::string buff = vec[i];
 			nameque.push(buff);
 			std::string pathbuff = pathque.back();
