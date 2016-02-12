@@ -13,6 +13,9 @@ namespace rootJS {
 
 	ObjectProxy::~ObjectProxy()
 	{
+		for(void* ptr : boundMallocs) {
+			free(ptr);
+		}
 	}
 
 	const char* ObjectProxy::getTypeName() {
@@ -65,7 +68,7 @@ namespace rootJS {
 		return;
 	}
 
-	void ObjectProxy::backup() {
-		//Nothing to do here, PointerInfo should only be used for heap pointers
+	void ObjectProxy::registerMallocedSpace(void *allocated) {
+		boundMallocs.push_back(allocated);
 	}
 }

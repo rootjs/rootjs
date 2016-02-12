@@ -63,7 +63,7 @@ namespace rootJS
 
 		for(TFunction* function : options)
 		{
-			if((int)args->Length() < function->GetNargs() || (int)args->Length() > (function->GetNargs() + function->GetNargsOpt()))
+			if((int)args->Length() > function->GetNargs() || (int)args->Length() < (function->GetNargs() - function->GetNargsOpt()))
 			{
 				continue;
 			}

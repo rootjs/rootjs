@@ -36,7 +36,7 @@ namespace rootJS {
 			ObjectProxy(MetaInfo &info, TClass *scope);
 
 			~ObjectProxy();
-			
+
 			/**
 			 * Return the name of the type
 			 * @return the name of the type
@@ -115,13 +115,13 @@ namespace rootJS {
 			 */
 			virtual bool isStatic();
 
-			/**
-			 * Saves the value to the heap
-			 */
-			virtual void backup();
+			void registerMallocedSpace(void*);
 
 		protected:
 			v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
+
+		private:
+			std::vector<void*> boundMallocs;
 	};
 }
 

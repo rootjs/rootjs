@@ -16,6 +16,7 @@
 #include <TInterpreter.h>
 
 #include <TROOT.h>
+#include <TClassTable.h>
 #include <TCollection.h>
 #include <TFunction.h>
 #include <TIterator.h>
@@ -29,14 +30,14 @@ namespace rootJS
 {
 	std::map<TFunction*, CallFunc_t*> FunctionProxy::functions;
 	std::map<std::string, mappedTypes> FunctionProxy::typeMap = {
-	            {"char", mappedTypes::CHAR},
-	            {"TString", mappedTypes::TSTRING},
-	            {"Int_t", mappedTypes::INT},
-	            {"int", mappedTypes::INT},
-	            {"Double_t", mappedTypes::DOUBLE},
-	            {"Bool_t", mappedTypes::BOOL},
-	            //{"_t", mappedTypes::CHAR}
-	        };
+		{"char", mappedTypes::CHAR},
+		{"TString", mappedTypes::TSTRING},
+		{"Int_t", mappedTypes::INT},
+		{"int", mappedTypes::INT},
+		{"Double_t", mappedTypes::DOUBLE},
+		{"Bool_t", mappedTypes::BOOL},
+		//{"_t", mappedTypes::CHAR}
+	};
 
 	std::vector<TFunction*> FunctionProxy::getMethodsFromName(TClassRef scope, std::string name)
 	{
@@ -172,16 +173,32 @@ namespace rootJS
 
 	ObjectProxy* FunctionProxy::call(bool isConstructorCall /* false */)
 	{
-		void *self = nullptr; //TODO?
-		void *result = nullptr; //TODO?
+		void *self = nullptr;
+		void *result = nullptr;
+		void **resultPtr;
+		resultPtr = &result;
+		void *allocated = nullptr;
+		if(!isConstructorCall) {
+			const char *returnType = function->GetReturnTypeName();
+			DictFuncPtr_t dictFunc = gClassTable->GetDict(returnType);
+			if(dictFunc) {
+				TClass *klass = dictFunc();
+				result = malloc(klass->Size());
+				allocated = result;
+				resultPtr = (void**)result;
+			}
+		}
+
+
+
 
 		switch(facePtr.fKind)
 		{
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
-						facePtr.fGeneric((selfAddress == nullptr) ? self : *(void**)selfAddress, buf.size(), buf.data(), &result);
+			facePtr.fGeneric((selfAddress == nullptr) ? self : *(void**)selfAddress, buf.size(), buf.data(), resultPtr);
 			break;
 		case (TInterpreter::CallFuncIFacePtr_t::kCtor):
-				facePtr.fCtor(buf.data(), &result, buf.size());
+			facePtr.fCtor(buf.data(), &result, buf.size());
 			break;
 		default:
 			Toolbox::throwException("Jonas was too lazy to implement this...");
@@ -194,23 +211,17 @@ namespace rootJS
 		}
 
 		ObjectProxy* proxy;
-		if(isConstructorCall)
-		{
-			void** ptrptr = (void**)malloc(sizeof(void*)); //TODO: This pointer needs to be freed when the JS Local goes out of scope... Figure out how to do this...
-			*ptrptr = result;
-			PointerInfo mode((void*)ptrptr, function->GetReturnTypeName());
-			proxy = ObjectProxyFactory::createObjectProxy(mode, TClassRef());
-		}
-		else
-		{
-			PointerInfo mode((void*)&result, function->GetReturnTypeName());
-			proxy = ObjectProxyFactory::createObjectProxy(mode, TClassRef());
-		}
+		PointerInfo mode(result, function->GetReturnTypeName(), 1);
+		proxy = ObjectProxyFactory::createObjectProxy(mode, TClassRef());
 
 		if(proxy)
 		{
-			proxy->backup();
+			if(allocated) {
+				proxy->registerMallocedSpace(allocated);
+			}
 			return proxy;
+		} else if(allocated) {
+			free(allocated);
 		}
 
 		return nullptr;

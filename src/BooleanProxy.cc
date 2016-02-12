@@ -26,9 +26,6 @@ namespace rootJS
 
 	BooleanProxy::~BooleanProxy()
 	{
-		if(backedUp) {
-			free(getAddress());
-		}
 	}
 
 	ObjectProxy* BooleanProxy::boolConstruct(MetaInfo &info, TClass *scope)
@@ -62,15 +59,5 @@ namespace rootJS
 		{
 			Toolbox::throwException("This element can only store a bool value.");
 		}
-	}
-
-	void BooleanProxy::backup() {
-		bool *boolPtr = (bool*)malloc(sizeof(bool));
-		*boolPtr = *(bool*)getAddress();
-
-		const char* typeName = info->getTypeName();
-		delete info;
-		info = new PointerInfo(boolPtr, typeName);
-		backedUp = true;
 	}
 }
