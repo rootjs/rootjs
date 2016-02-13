@@ -109,8 +109,7 @@ namespace rootJS
 			//Resolve the type
 			TDataType* type = Types::getTypeByName(std::string(typeName));
 			if(type == nullptr) {
-				throw std::invalid_argument(std::string("Could not get type of ") + typeName);
-				return nullptr;
+				return false; //Not primitive...
 			}
 
 			TString typeName = type->GetTypeName();
