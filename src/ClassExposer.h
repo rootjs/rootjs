@@ -12,6 +12,8 @@ public:
 
     /**
      * This method exposes all the contents of the given TClass so that rootJS has access to the contents.
+     * The namespace hierarchy is preserved and mapped to the exported node.js object. Namespaces that don"t
+     * have a TClass are generated as stubs and inserted at the appropriate position.
      *
      * @param clazz
      *              The class which will be exposed

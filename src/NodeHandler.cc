@@ -36,7 +36,10 @@ namespace rootJS
 	NodeHandler::NodeHandler(v8::Local<v8::Object> exports)
 	{
 		this->exports = exports;
+		initialized = true;
 	}
+
+
 	NodeHandler* NodeHandler::getInstance(){
 		if(initialized){
 			return NodeHandler::instance;
@@ -53,7 +56,7 @@ namespace rootJS
 			exposeGlobalFunctions();
 			exposeMacros();
 			exposeClasses();
-			exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"loadlibrary"),v8::Function::New(v8::Isolate::GetCurrent(),NodeHandler::loadlibrary));
+			exposeInterfaceFunctions();
 		}
 		catch (const std::invalid_argument& e)
 		{
@@ -153,7 +156,7 @@ namespace rootJS
 	}
 
 
-	void NodeHandler::loadlibrary(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument) {
+	void NodeHandler::loadlibraryCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument) {
 		v8::Local<v8::Value> arg;
 		if(!((info.Length() == 1) && ((arg = info[0])->IsString())))
 		{
@@ -165,7 +168,22 @@ namespace rootJS
 		NodeHandler::getInstance()->refreshExports();
 	}
 
+	void NodeHandler::refreshExportsCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument){
+		if(info.Length() != 0)
+		{
+			throw std::invalid_argument("Usage: No arguments. Refreshes the exported functions");
+		}
+		NodeHandler::getInstance()->refreshExports();
+	}
+
 	void NodeHandler::refreshExports() {
 
+	}
+
+
+	void NodeHandler::exposeInterfaceFunctions() {
+		exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"loadlibrary"),
+					 v8::Function::New(v8::Isolate::GetCurrent(), NodeHandler::loadlibraryCallback));
+		exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"refreshExports"),v8::Function::New(v8::Isolate::GetCurrent(),NodeHandler::refreshExportsCallback));
 	}
 }

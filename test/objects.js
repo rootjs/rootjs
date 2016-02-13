@@ -5,7 +5,7 @@ var root = require('../index');
 
 describe('Objects', function() {
   describe('methods', function() {
-	  it('should not be possible to call gSystem.Print without the corect args', function() {
+	  it('should not be possible to call gSystem.SizeOf without the corect args', function() {
 		  (function() {
 			  root.gSystem.Sizeof();
 		  }).should.not.throw();

@@ -51,9 +51,12 @@ namespace rootJS
              *              The module to be instantiated
 			 */
 			static void initialize(v8::Local<v8::Object>, v8::Local<v8::Object>);
-			static void loadlibrary(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
-			static NodeHandler* getInstance();
+			static void loadlibraryCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
+			static void refreshExportsCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
 
+		static NodeHandler* getInstance();
+
+		void exposeInterfaceFunctions();
 	};
 
 	NODE_MODULE(rootjs, NodeHandler::initialize)
