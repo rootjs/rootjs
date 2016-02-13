@@ -9,8 +9,14 @@ describe('Bugs', function() {
 		 var tstring = new root.TString("test");
 		 tstring.Copy().Data().should.equal("test");
 	 });
-  });
-describe('#30', function() {
+	});
+	describe('#35', function () {
+		it('should not return null from ROOT::GetClass', function () {
+			var ts = root.ROOT.GetROOT();
+				ts.should.not.be.type('undefined')
+		});
+	});
+  	describe('#30', function() {
 	  it('should be possible to pass objects', function() {
 		  var test = new root.TString("test");
 		  var test2 = new root.TString(test);
