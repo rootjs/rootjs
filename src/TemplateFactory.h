@@ -29,8 +29,9 @@ namespace rootJS
 			static v8::Local<v8::Object> getInstance(TClass *clazz) throw(std::invalid_argument);
 
 			/**
+			 * Finds out the type of the given TClass and calls the correct member function
+			 * to create a v8 constructor of it, then returns the template.
 			 *
-			 * Creates a v8 constructor for a given TClass and returns it.
 			 * @param *clazz Pointer to the TClass 
 			 *
 			 * @return The v8 constructor for the given TClass
