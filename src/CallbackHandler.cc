@@ -159,7 +159,7 @@ namespace rootJS
 
 		proxy->prepareCall(args);
 		ObjectProxy *resultProxy = proxy->call(nullptr);
-		if(proxy)
+		if(resultProxy)
 		{
 			if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
 				info.GetReturnValue().Set(resultProxy->get());
