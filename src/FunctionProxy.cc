@@ -28,6 +28,7 @@
 #include <TClassRef.h>
 #include <TFunction.h>
 #include <TMethodArg.h>
+#include <TClassTable.h>
 
 namespace rootJS
 {
@@ -181,15 +182,22 @@ namespace rootJS
 		}
 	}
 
-	ObjectProxy* FunctionProxy::call(void *self, bool isConstructorCall /* false */)
+	ObjectProxy* FunctionProxy::call(void *self, bool isConstructorCall /* false */, v8::Local<v8::Object> *reuseLocal /* = nullptr */)
 	{
 		void *result = nullptr;
 		void **resultPtr;
 		resultPtr = &result;
 		void *allocated = nullptr;
+
+		std::string returnTypeName(function->GetReturnTypeName());
+		int ptrDepth = std::count(returnTypeName.begin(), returnTypeName.end(), '*');
+		std::string typeName = function->GetReturnTypeNormalizedName();
+		if(typeName.find('*') != std::string::npos) {
+			typeName = typeName.substr(0, typeName.find('*'));
+		}
+
 		if(!isConstructorCall) {
-			const char *returnType = function->GetReturnTypeName();
-			DictFuncPtr_t dictFunc = gClassTable->GetDict(returnType);
+			DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());
 			if(dictFunc) {
 				TClass *klass = dictFunc();
 				result = malloc(klass->Size());
@@ -223,18 +231,19 @@ namespace rootJS
 			}
 		}
 
-		ObjectProxy* proxy;
-		std::string returnTypeName(function->GetReturnTypeName());
-		int ptrDepth = std::count(returnTypeName.begin(), returnTypeName.end(), '*');
-		std::string typeName = function->GetReturnTypeNormalizedName();
-		if(typeName.find('*') != std::string::npos) {
-			typeName = typeName.substr(0, typeName.find('*'));
-		}
+		ObjectProxy* proxy = nullptr;
 
 		PointerInfo mode(result, typeName.c_str(), ptrDepth + 1);
-		proxy = ObjectProxyFactory::createObjectProxy(mode, nullptr);
+		if(reuseLocal != nullptr) {
+			DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());
+			if(dictFunc != nullptr) {
+				proxy = ObjectProxyFactory::createObjectProxy(mode, dictFunc(), *reuseLocal);
+			}
+		} else {
+			proxy = ObjectProxyFactory::createObjectProxy(mode, nullptr);
+		}
 
-		if(proxy)
+		if(proxy != nullptr)
 		{
 			if(allocated) {
 				proxy->registerMallocedSpace(allocated);

@@ -71,7 +71,7 @@ namespace rootJS
 			 * @param args the arguments for the function call.
 			 * @return the function's return value encasulated in an ObjectProxy
 			 */
-			ObjectProxy* call(void *self, bool isConstructorCall = false);
+			ObjectProxy* call(void *self, bool isConstructorCall = false, v8::Local<v8::Object> *reuseLocal = nullptr);
 
 			/**
 			 * TODO: verify
