@@ -106,7 +106,7 @@ describe('Interface', function() {
 			  (function() {
 				  root.kFALSE = true;
 			  }).should.throw();
-			  root.kFalse.should.equal(false);
+			  root.kFALSE.should.equal(false);
 		  });
 	  });
 	  describe('functions', function() {
