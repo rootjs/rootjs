@@ -36,7 +36,6 @@ namespace rootJS
 			void exposeROOT();
 			void exposeGlobals() throw(std::invalid_argument);
 			void exposeGlobalFunctions() throw(std::invalid_argument);
-			void exposeMacros() throw(std::invalid_argument);
 			void exposeClasses() throw(std::invalid_argument);
 
 		public:

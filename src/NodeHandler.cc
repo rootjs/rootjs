@@ -1,7 +1,10 @@
 #include "NodeHandler.h"
+
 #include "NodeApplication.h"
-#include "Toolbox.h"
 #include "ClassExposer.h"
+#include "GlobalInfo.h"
+#include "Toolbox.h"
+
 #include <iostream>
 
 #include <TClassTable.h>
@@ -12,10 +15,8 @@ namespace rootJS
 	NodeHandler *NodeHandler::instance;
 	bool NodeHandler::initialized;
 
-	void NodeHandler::initialize(v8::Local<v8::Object> exports,
-	                             v8::Local<v8::Object> module)
+	void NodeHandler::initialize(v8::Local<v8::Object> exports, v8::Local<v8::Object> module)
 	{
-
 		if (!initialized)
 		{
 
@@ -27,8 +28,7 @@ namespace rootJS
 		}
 		else
 		{
-			Toolbox::throwException(
-			    "The NodeHandler can only be initialized once.");
+			Toolbox::throwException("The NodeHandler can only be initialized once.");
 		}
 	}
 
@@ -45,8 +45,6 @@ namespace rootJS
 		{
 			exposeGlobals();
 			exposeGlobalFunctions();
-			exposeMacros();
-
 			exposeClasses();
 		}
 		catch (const std::invalid_argument& e)
@@ -56,11 +54,6 @@ namespace rootJS
 		}
 	}
 
-	void NodeHandler::exposeMacros() throw (std::invalid_argument)
-	{
-		// TODO
-	}
-
 	void NodeHandler::exposeGlobals() throw (std::invalid_argument)
 	{
 		TCollection *globals = gROOT->GetListOfGlobals(kTRUE);
@@ -68,16 +61,19 @@ namespace rootJS
 
 		while (TGlobal *global = (TGlobal*) next())
 		{
-			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(*global);
+			if( (!global->IsValid()) || (global->GetAddress() == nullptr))
+			{
+				Toolbox::logError("Invalid global instance found.");
+				continue;
+			}
+
+			GlobalInfo info(*global);
+			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, nullptr);
 			if (proxy != nullptr)
 			{
-				CallbackHandler::registerGlobalObject(
-				    std::string(global->GetName()), proxy);
-				this->exports->SetAccessor(
-				    v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
-				                            global->GetName()),
-				    CallbackHandler::globalGetterCallback,
-				    CallbackHandler::globalSetterCallback);
+				CallbackHandler::registerGlobalObject(std::string(global->GetName()), proxy);
+				this->exports->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()),
+				                           CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
 			}
 		}
 	}
@@ -95,13 +91,9 @@ namespace rootJS
 				continue;
 			}
 
-			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(
-			                                function->GetName(), nullptr);
-			exports->Set(
-			    v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
-			                            function->GetName()),
-			    v8::Function::New(v8::Isolate::GetCurrent(),
-			                      CallbackHandler::globalFunctionCallback, data));
+			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(function->GetName(), nullptr);
+			exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), function->GetName()),
+			             v8::Function::New(v8::Isolate::GetCurrent(), CallbackHandler::globalFunctionCallback, data));
 		}
 	}
 
@@ -128,8 +120,7 @@ namespace rootJS
 				if ((clazz->Property() & kIsClass))
 				{
 					// Toolbox::logInfo(std::string("loading class ").append(clazz->GetName()));
-					this->exports->Set(
-					    v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), clazz->GetName()), TemplateFactory::getConstructor(clazz));
+					this->exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), clazz->GetName()), TemplateFactory::getConstructor(clazz));
 					continue;
 				}
 				if((clazz->Property() & kIsNamespace))
