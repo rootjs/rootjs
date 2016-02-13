@@ -146,8 +146,6 @@ namespace rootJS
 				Toolbox::logInfo("Skipped template method '" + methodName + "' in '" + className + "'.");
 				continue;
 			}
-			Long_t property = method->Property();
-
 			// make overridden or overloaded methods only occur once
 			if (methods.count(methodName))
 			{
@@ -172,11 +170,8 @@ namespace rootJS
 				break;
 			default:
 
-				if (property & kIsStatic)
-				{
 					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
 					nspace->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
-				}
 				break;
 			}
 		}
