@@ -20,6 +20,9 @@ public:
      *              If it hasn't been exposed, then the ClassExposer will expose the contents of the class.
      */
 	static void expose(TClass*,v8::Local<v8::Object>) throw(std::invalid_argument);
+
+private:
+	ClassExposer();
 	/**
      * Splits the given class name with the delimiter "::" and inserts the split up parts
      * in a std::vector<std::string>
@@ -28,8 +31,6 @@ public:
      * @param The vector which will have the split up names and then be returned
      */
 	static std::vector<std::string> splitClassName(std::string name, std::vector<std::string>& vec);
-private:
-	ClassExposer();
 };
 
 } /* namespace rootJS */
