@@ -353,9 +353,23 @@ namespace rootJS
 			case kIsConversion:
 				// don't expose
 				break;
-			case kIsOperator:
-				// TODO: handle operators
-				// Toolbox::logInfo("Operator '" + methodName + "' found in '" + className + "'.");
+			case kIsOperator: {
+					std::map<std::string, std::string>::const_iterator opNameIt = operatorNames.find(method->GetName());
+					if(opNameIt == operatorNames.end()) {
+						Printf("Operator: %s", method->GetName());
+					} else {
+						if (property & kIsStatic)
+						{
+							v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
+							prototype->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+						}
+						else
+						{
+							v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
+							instance->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, data));
+						}
+					}
+				}
 				break;
 			default:
 
@@ -417,4 +431,53 @@ namespace rootJS
 	{
 		return ((clazz != nullptr) && clazz->IsLoaded());
 	}
+
+	const std::map<std::string, std::string> TemplateFactory::operatorNames = {
+		{"operator==", "_equals"},
+		{"operator+=", "_setAdd"},
+		{"operator-=", "_setSubstract"},
+		{"operator*=", "_setMultiply"},
+		{"operator/=", "_setDivide"},
+		{"operator++", "_increment"},
+		{"operator--", "_decrement"},
+
+		{"operator+", "_add"},
+		{"operator-", "_substract"},
+		{"operator*", "_multiply"},
+		{"operator/", "_divide"},
+
+		{"operator<<=", "_setLeftshift"},
+		{"operator>>=", "_setRightshift"},
+
+		{"operator<<", "_leftshift"},
+		{"operator>>", "_rightshift"},
+
+		{"operator=", "_set"},
+		{"operator new", "_construct"},
+		{"operator delete", "_destruct"},
+
+		{"operator()", "_call"},
+		{"operator->", "_derefer"},
+
+		{"operator[]", "_at"},
+		{"operator delete[]", "_deleteArray"},
+		{"operator new[]", "_newArray"},
+
+		{"operator&=", "_setAnd"},
+		{"operator!=", "_setNot"},
+		{"operator|=", "_setOr"},
+		{"operator^=", "_setXOR"},
+
+		{"operator&", "_and"},
+		{"operator!", "_not"},
+		{"operator|", "_or"},
+		{"operator^", "_XOR"},
+		{"operator~", "_bitNot"},
+
+		{"delete[]", "_freeArray"},
+		{"delete[]", "_freeArray"},
+		{"delete[]", "_freeArray"},
+		{"delete[]", "_freeArray"},
+		{"delete[]", "_freeArray"},
+	};
 }

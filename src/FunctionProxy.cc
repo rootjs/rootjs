@@ -192,9 +192,7 @@ namespace rootJS
 		std::string returnTypeName(function->GetReturnTypeName());
 		int ptrDepth = std::count(returnTypeName.begin(), returnTypeName.end(), '*');
 		std::string typeName = function->GetReturnTypeNormalizedName();
-		if(typeName.find('*') != std::string::npos) {
-			typeName = typeName.substr(0, typeName.find('*'));
-		}
+		
 
 		if(!isConstructorCall) {
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());
@@ -282,10 +280,11 @@ namespace rootJS
 			return nullptr;
 		}
 
-		copied = true;
+		copied = false;
 		switch(iterator->second)
 		{
 		case mappedTypes::CHAR:
+			copied = true;
 			return argToChar(originalArg);
 		case mappedTypes::INT:
 			return argToInt(originalArg);
@@ -294,9 +293,9 @@ namespace rootJS
 		case mappedTypes::BOOL:
 			return argToBool(originalArg);
 		case mappedTypes::TSTRING:
+			copied = true;
 			return argToTString(originalArg);
 		}
-		copied = false;
 
 		//TODO: This will explode - huge fireball
 		return nullptr;

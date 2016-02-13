@@ -147,7 +147,14 @@ namespace rootJS
 		std::string trueType;
 		if(!resolveTypeName(info, trueType))
 		{
-			return nullptr;
+			if(primitiveProxyMap.find(info.getTypeName()) != primitiveProxyMap.end())
+			{
+				trueType = info.getTypeName();
+			}
+			else
+			{
+				return nullptr;
+			}
 		}
 
 		if(primitiveProxyMap.find(trueType) == primitiveProxyMap.end())
@@ -220,6 +227,8 @@ namespace rootJS
 		primitiveProxyMap["short"]              = &NumberProxy::shortConstruct;
 		primitiveProxyMap["unsigned short"]     = &NumberProxy::ushortConstruct;
 
+		primitiveProxyMap["unsigned char"]      = &NumberProxy::ucharConstruct;
+
 		primitiveProxyMap["long"]               = &NumberProxy::longConstruct;
 		primitiveProxyMap["long long"]          = &NumberProxy::llongConstruct;
 
@@ -228,9 +237,9 @@ namespace rootJS
 
 		primitiveProxyMap["float"]              = &NumberProxy::floatConstruct;
 
-		primitiveProxyMap["char"]               = &StringProxy::charConstruct;
-		primitiveProxyMap["unsigned char"]      = &StringProxy::charConstruct;
+		primitiveProxyMap["char"]               = &StringProxy::singleCharConstruct;
 		primitiveProxyMap["char*"]              = &StringProxy::charConstruct;
+		primitiveProxyMap["char&"]              = &StringProxy::singleCharConstruct;
 
 		primitiveProxyMap["string"]             = &StringProxy::stringConstruct;	// = std::string
 

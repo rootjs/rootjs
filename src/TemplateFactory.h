@@ -40,6 +40,8 @@ namespace rootJS
 			static inline bool isTemplateFunction(std::string const& functionName);
 			static bool isValid(TClass *clazz);
 
+			static const std::map<std::string, std::string> operatorNames;
+
 			TemplateFactory();
 	};
 }
