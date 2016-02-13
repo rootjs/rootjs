@@ -32,8 +32,8 @@ namespace rootJS
 
 	FunctionProxy* FunctionProxyFactory::createFunctionProxy(TFunction *function, TClass *scope)
 	{
-		FunctionInfo mode(function);
-		return new FunctionProxy(FunctionProxy::getCallFunc(scope, function), mode, function, scope);
+		FunctionInfo info(*function, nullptr, (scope == nullptr));
+		return new FunctionProxy(FunctionProxy::getCallFunc(scope, function), info, function, scope);
 	}
 
 	TFunction* FunctionProxyFactory::determineFunction(std::string const& name, TClass *scope, const v8::Local<v8::Array> args)

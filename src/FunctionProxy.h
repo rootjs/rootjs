@@ -46,7 +46,7 @@ namespace rootJS
 			 * @param function the function's reflection object
 			 * @param scope the class that the function belongs to
 			 */
-			FunctionProxy(void *address, FunctionInfo &mode, TFunction *function, TClass *scope);
+			FunctionProxy(void *address, FunctionInfo &info, TFunction *function, TClass *scope);
 
 			/**
 			 * Makes a clone of the current FunctionProxy
@@ -109,7 +109,7 @@ namespace rootJS
 			 */
 			virtual bool isConst()
 			{
-				return true;
+				return info->isConst();
 			};
 
 			/**
@@ -119,7 +119,7 @@ namespace rootJS
 			 */
 			virtual bool isGlobal()
 			{
-				return true; /*TODO*/
+				return info->isGlobal();
 			};
 
 			/**
@@ -129,7 +129,7 @@ namespace rootJS
 			 */
 			virtual bool isStatic()
 			{
-				return true; /*TODO*/
+				return info->isStatic();
 			};
 
 			/**
@@ -162,20 +162,6 @@ namespace rootJS
 			static TString* argToTString(v8::Local<v8::Value> originalArg);
 
 			static double   getDoubleFromArg(v8::Local<v8::Value> originalArg);
-
-			/*
-			static bool processCall(TFunction* method, void* args, void* self, void* result);
-
-			static void* callConstructor(TFunction* method, TClassRef type, void* args);
-
-			static void callDestructor(TClassRef type, void* self);
-
-			static void* callObject(TFunction* method, void* self, void* args, TClassRef resType);
-
-			template <typename T>
-			static T callPrimitive(TFunction* method, void* self, void* args);
-			*/
-
 	};
 }
 
