@@ -39,7 +39,7 @@ namespace rootJS
 			void exposeGlobalFunctions() throw(std::invalid_argument);
 			void exposeMacros() throw(std::invalid_argument);
 			void exposeClasses() throw(std::invalid_argument);
-
+			void refreshExports();
 		public:
 			/**
 			 * The method which starts rootJS. It instantiates a NodeApplication, a proxyMap from ObjectProxyFactory
@@ -51,7 +51,8 @@ namespace rootJS
              *              The module to be instantiated
 			 */
 			static void initialize(v8::Local<v8::Object>, v8::Local<v8::Object>);
-			static void loadlibrary(const v8::FunctionCallbackInfo<v8::Value> &info) ;
+			static void loadlibrary(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
+			static NodeHandler* getInstance();
 
 	};
 

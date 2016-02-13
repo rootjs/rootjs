@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <TClassTable.h>
+#include <TSystem.h>
 
 namespace rootJS
 {
@@ -35,6 +36,11 @@ namespace rootJS
 	NodeHandler::NodeHandler(v8::Local<v8::Object> exports)
 	{
 		this->exports = exports;
+	}
+	NodeHandler* NodeHandler::getInstance(){
+		if(initialized){
+			return NodeHandler::instance;
+		} else {throw std::invalid_argument("NodeHandler not loaded yet"); }
 	}
 
 	void NodeHandler::exposeROOT()
@@ -147,6 +153,19 @@ namespace rootJS
 	}
 
 
-	void NodeHandler::loadlibrary(const v8::FunctionCallbackInfo<v8::Value> &info) {
+	void NodeHandler::loadlibrary(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument) {
+		v8::Local<v8::Value> arg;
+		if(!((info.Length() == 1) && ((arg = info[0])->IsString())))
+		{
+			throw std::invalid_argument("Usage: Pass name of the library");
+		}
+		std::string libname = Toolbox::Stringv8toStd(v8::Local<v8::String>::Cast(arg));
+		int rcode = gSystem->Load(libname.c_str());
+		info.GetReturnValue().Set(rcode);
+		NodeHandler::getInstance()->refreshExports();
+	}
+
+	void NodeHandler::refreshExports() {
+
 	}
 }
