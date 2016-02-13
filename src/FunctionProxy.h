@@ -147,7 +147,7 @@ namespace rootJS
 			static double*  argToDouble (v8::Local<v8::Value> originalArg);
 			static int*     argToInt    (v8::Local<v8::Value> originalArg);
 			static bool*    argToBool   (v8::Local<v8::Value> originalArg);
-			static void* 	argToObj	(v8::Local<v8::Value> originalArg);
+			static void* 	argToObj	(v8::Local<v8::Value> originalArg, int derefCount);
 			static TString* argToTString(v8::Local<v8::Value> originalArg);
 
 			static double   getDoubleFromArg(v8::Local<v8::Value> originalArg);

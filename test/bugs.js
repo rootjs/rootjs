@@ -21,7 +21,11 @@ describe('Bugs', function() {
 		  var browser = new root.TBrowser();
 		  (function() {
 			  browser.Add(object);
+			  browser.Destructor();
+			  /* When we do not run this we get a segfault because the initialization is not complete before the test is done and
+			   * deletion of a TBrowser when it's not fully loaded leads to a crash */
 		  }).should.not.throw();
+
 	  });
   });
 });
