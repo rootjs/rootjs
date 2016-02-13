@@ -176,7 +176,6 @@ namespace rootJS
 
 		v8::Local<v8::FunctionTemplate> tmplt = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
 		tmplt->SetClassName(v8::String::NewFromUtf8(isolate, className.c_str()));
-		tmplt->PrototypeTemplate()->SetInternalFieldCount(1);
 
 		// create template
 		createInstantiableTemplate(clazz, tmplt);
@@ -194,7 +193,6 @@ namespace rootJS
 
 		// add static functions and members to the prototype template
 		v8::Local<v8::ObjectTemplate> prototype = tmplt->PrototypeTemplate();
-		// prototype->SetInternalFieldCount(1);
 
 		// add non-static functions and members to the instance template
 		v8::Local<v8::ObjectTemplate> instance = tmplt->InstanceTemplate();
