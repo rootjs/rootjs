@@ -31,7 +31,62 @@ namespace rootJS
 
 	std::map<std::string, ProxyInitializator> ObjectProxyFactory::primitiveProxyMap;
 
-	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope /*, ObjectProxy  *holder*/) throw(std::invalid_argument)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope) throw(std::invalid_argument)
+	{
+		return createObjectProxy(info, scope, nullptr);
+	}
+
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope, v8::Local<v8::Object> instance) throw(std::invalid_argument)
+	{
+		return createObjectProxy(info, scope, &instance);
+	}
+
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope,  v8::Local<v8::Object>* instancePtr) throw(std::invalid_argument)
+	{
+		ObjectProxy* proxy = createPrimitiveProxy(info, scope);
+		if(proxy != nullptr)
+		{
+			return proxy;
+		}
+
+		proxy = createEnumProxy(info, scope);
+		if(proxy != nullptr)
+		{
+			return proxy;
+		}
+
+		TClass *type = getClass(std::string(info.getTypeName()));
+		if(type == nullptr)
+		{
+			/*
+			* Toolbox::logInfo("No TClass for '" + typeName + "' found.");
+			* Toolbox::logInfo("------------------------------------------------------------");
+			* Toolbox::logInfo("");
+			*/
+
+			// throw std::invalid_argument("Type '" + typeName + "' is not supported.");
+			return nullptr;
+		}
+
+		v8::Local<v8::Object> instance;
+		if(instancePtr != nullptr)
+		{
+			instance = *instancePtr;
+		} else {
+			instance = TemplateFactory::getInstance(type);
+		}
+
+		proxy = new ObjectProxy(info, scope);
+		proxy->setProxy(instance);
+		std::map<std::string, ObjectProxy*>* propertyMap = createPropertyMap(info, type, proxy);
+
+		instance->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, proxy);
+		instance->SetAlignedPointerInInternalField(Toolbox::PropertyMapPtr, propertyMap);
+
+		return proxy;
+	}
+
+	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope, ObjectProxy *holder) throw(std::invalid_argument)
 	{
 		std::map<std::string, ObjectProxy*> *propertyMap = new std::map<std::string, ObjectProxy*>();
 
@@ -52,6 +107,13 @@ namespace rootJS
 
 			if(!(member->Property() & kIsStatic))
 			{
+				if(!holder->getProxy()->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName())))
+				{
+					Toolbox::logError("v8 instance of type '" + std::string(scope->GetName())
+					                  + "' has no property '" + std::string(member->GetName())
+					                  + "' of type '" + std::string(member->GetTypeName()) + "'.");
+				}
+
 				/*
 				 * Toolbox::logInfo("Encapsulating '" + std::string(member->GetName()) + "' from '" + std::string(scope->GetName()) + "'.");
 				 * Toolbox::logInfo("");
@@ -75,72 +137,37 @@ namespace rootJS
 		return propertyMap;
 	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope) throw(std::invalid_argument)
+	ObjectProxy* ObjectProxyFactory::createEnumProxy(MetaInfo &info, TClass* clazz)
 	{
-		ObjectProxy* proxy = createPrimitiveProxy(info, scope);
-
-		if(proxy != nullptr)
-		{
-			return proxy;
-		}
-
-		std::string typeName(info.getTypeName());
-		TClass *type = getClass(typeName);
-
-		if(type == nullptr)
-		{
-			/*
-			* Toolbox::logInfo("No TClass for '" + typeName + "' found.");
-			* Toolbox::logInfo("------------------------------------------------------------");
-			* Toolbox::logInfo("");
-			*/
-
-			// throw std::invalid_argument("Type '" + typeName + "' is not supported.");
-			return nullptr;
-		}
-
-		v8::Local<v8::Object> instance = TemplateFactory::getInstance(type);
-		proxy = new ObjectProxy(info, scope);
-		proxy->setProxy(instance);
-
-		std::map<std::string, ObjectProxy*>* propertyMap = createPropertyMap(info, type);
-
-		instance->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, proxy);
-		instance->SetAlignedPointerInInternalField(Toolbox::PropertyMapPtr, propertyMap);
-
-		return proxy;
+		return nullptr;
 	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(TGlobal &global)
+	ObjectProxy* ObjectProxyFactory::createPrimitiveProxy(MetaInfo &info, TClass* clazz)
 	{
-		if(!global.IsValid() || !global.GetAddress())
+		std::string trueType;
+		if(!resolveTypeName(info, trueType))
 		{
 			return nullptr;
 		}
 
-		/*
-		if(!(global.Property() & kIsEnum))
+		if(primitiveProxyMap.find(trueType) == primitiveProxyMap.end())
 		{
-			Toolbox::logInfo("Encapsulating global '" + std::string(global.GetName()) + "'.");
-			Toolbox::logInfo("");
-
-			Toolbox::logInfo("GetTypeName()     '" + std::string(global.GetTypeName()) + "'.");
-			Toolbox::logInfo("GetFullTypeName() '" + std::string(global.GetFullTypeName()) + "'.");
-
-			Toolbox::logInfo("------------------------------------------------------------");
-			Toolbox::logInfo("");
+			Toolbox::logError("Could not resolve basic type '" + trueType
+			                  + "' from '" + std::string(info.getName())
+			                  + "' with type '" + std::string(info.getTypeName())
+			                  + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
+			return nullptr;
+		}
+		/* else
+		{
+			Toolbox::logInfo("Resolved '" + trueType
+			                 + "' from '" + std::string(info.getName())
+			                 + "' with type '" + std::string(info.getTypeName())
+			                 + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
 		   }
 		*/
 
-		GlobalInfo info(global);
-		return createObjectProxy(info, nullptr);
-	}
-
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy)
-	{
-		// TODO: populate proxy
-		PointerInfo info(address, type->GetName());
-		return createObjectProxy(info, type);
+		return primitiveProxyMap[trueType](info, clazz);
 	}
 
 	TClass* ObjectProxyFactory::getClass(std::string const& typeName)
@@ -162,40 +189,23 @@ namespace rootJS
 		return nullptr;
 	}
 
-	ObjectProxy* ObjectProxyFactory::createPrimitiveProxy(MetaInfo &info, TClass* clazz)
+	bool ObjectProxyFactory::resolveTypeName(MetaInfo &info, std::string &trueType)
 	{
 		std::string stdTypeName(info.getTypeName());
 		TDataType* type = Types::getTypeByName(stdTypeName);
 		if(type == nullptr)
 		{
-			return nullptr;
+			return false;
 		}
 
 		TString typeName = type->GetTypeName().Data();
 		if(typeName.IsNull())
 		{
-			return nullptr;
+			return false;
 		}
 
-		stdTypeName = std::string(typeName.Data());
-		if(primitiveProxyMap.find(stdTypeName) == primitiveProxyMap.end())
-		{
-			Toolbox::logError("Could not resolve basic type '" + stdTypeName
-			                  + "' from '" + std::string(info.getName())
-			                  + "' with type '" + std::string(info.getTypeName())
-			                  + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
-			return nullptr;
-		}
-		/* else
-		{
-			Toolbox::logInfo("Resolved '" + stdTypeName
-			                 + "' from '" + std::string(info.getName())
-			                 + "' with type '" + std::string(info.getTypeName())
-			                 + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
-		   }
-		*/
-
-		return primitiveProxyMap[stdTypeName](info, clazz);
+		trueType = std::string(typeName.Data());
+		return true;
 	}
 
 	void ObjectProxyFactory::initializeProxyMap()
