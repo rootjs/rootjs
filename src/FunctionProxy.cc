@@ -224,7 +224,14 @@ namespace rootJS
 		}
 
 		ObjectProxy* proxy;
-		PointerInfo mode(result, function->GetReturnTypeName(), 1);
+		std::string returnTypeName(function->GetReturnTypeName());
+		int ptrDepth = std::count(returnTypeName.begin(), returnTypeName.end(), '*');
+		std::string typeName = function->GetReturnTypeNormalizedName();
+		if(typeName.find('*') != std::string::npos) {
+			typeName = typeName.substr(0, typeName.find('*'));
+		}
+
+		PointerInfo mode(result, typeName.c_str(), ptrDepth + 1);
 		proxy = ObjectProxyFactory::createObjectProxy(mode, nullptr);
 
 		if(proxy)
