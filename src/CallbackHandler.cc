@@ -221,7 +221,7 @@ namespace rootJS
 			}
 
 			funcProxy->prepareCall(args);
-			ObjectProxy *proxy = funcProxy->call(nullptr, true);
+			ObjectProxy *proxy = funcProxy->call(nullptr, true, &instance);
 			delete funcProxy;
 
 			if(proxy == nullptr)
