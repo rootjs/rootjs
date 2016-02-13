@@ -165,11 +165,19 @@ namespace rootJS
 		gCling->CallFunc_Delete(callFunc);
 
 		buf = std::vector<void*>( args->Length() );
+		bufCopied = std::vector<bool>( args->Length() );
 		for(int i = 0; i < (int)args->Length(); i++)
 		{
 			void** bufEl = (void**)malloc(sizeof(void*));
-			*bufEl = bufferParam((TMethodArg*)(function->GetListOfMethodArgs()->At(i)), args->Get(i));
-			buf[i] = bufEl;
+			bool copied = false;
+			*bufEl = bufferParam((TMethodArg*)(function->GetListOfMethodArgs()->At(i)), args->Get(i), copied);
+			bufCopied[i] = copied;
+			if(!copied) {
+				buf[i] = *bufEl;
+				free(bufEl);
+			} else {
+				buf[i] = bufEl;
+			}
 		}
 	}
 
@@ -208,8 +216,11 @@ namespace rootJS
 
 		for(int i = 0; i < (int)buf.size(); i++)
 		{
-			free(*((void**)buf[i]));
-			free((void*)buf[i]);
+			if(bufCopied[i])
+			{
+				free(*((void**)buf[i]));
+				free((void*)buf[i]);
+			}
 		}
 
 		ObjectProxy* proxy;
@@ -229,7 +240,7 @@ namespace rootJS
 		return nullptr;
 	}
 
-	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg)
+	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg, bool& copied)
 	{
 		TDataType* type = Types::getTypeByName(std::string(arg->GetTypeName()));
 		if(type == nullptr) {
@@ -240,6 +251,7 @@ namespace rootJS
 				throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + arg->GetTypeName());
 				return nullptr;
 			}
+			copied = false;
 			return argToObj(originalArg);
 		}
 
@@ -252,6 +264,8 @@ namespace rootJS
 			throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + stdTypeName);
 			return nullptr;
 		}
+
+		copied = true;
 		switch(iterator->second)
 		{
 		case mappedTypes::CHAR:
@@ -265,6 +279,7 @@ namespace rootJS
 		case mappedTypes::TSTRING:
 			return argToTString(originalArg);
 		}
+		copied = false;
 
 		//TODO: This will explode - huge fireball
 		return nullptr;
@@ -318,7 +333,7 @@ namespace rootJS
 		assert(obj->InternalFieldCount() == Toolbox::INTERNAL_FIELD_COUNT);
 
 		ObjectProxy *proxy = (ObjectProxy*)obj->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
-		return *(void**)proxy->getAddress();
+		return *(void**)(proxy->getAddress());
 	}
 
 

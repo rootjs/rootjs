@@ -138,9 +138,10 @@ namespace rootJS
 			TInterpreter::CallFuncIFacePtr_t facePtr;
 			TFunction* function;
 			std::vector<void*> buf;
+			std::vector<bool> bufCopied;
 
 
-			static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg);
+			static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg, bool &copied);
 
 			static char*    argToChar   (v8::Local<v8::Value> originalArg);
 			static double*  argToDouble (v8::Local<v8::Value> originalArg);
