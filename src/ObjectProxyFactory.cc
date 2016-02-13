@@ -4,6 +4,7 @@
 #include "NumberProxy.h"
 #include "StringProxy.h"
 #include "BooleanProxy.h"
+#include "VoidPointerProxy.h"
 
 #include "Toolbox.h"
 #include "Types.h"
@@ -179,22 +180,20 @@ namespace rootJS
 		stdTypeName = std::string(typeName.Data());
 		if(primitiveProxyMap.find(stdTypeName) == primitiveProxyMap.end())
 		{
-			/*
 			Toolbox::logError("Could not resolve basic type '" + stdTypeName
 			                  + "' from '" + std::string(info.getName())
 			                  + "' with type '" + std::string(info.getTypeName())
 			                  + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
-			*/
 			return nullptr;
 		}
-		else
-		{/*
+		/* else
+		{
 			Toolbox::logInfo("Resolved '" + stdTypeName
 			                 + "' from '" + std::string(info.getName())
 			                 + "' with type '" + std::string(info.getTypeName())
 			                 + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
+		   }
 		*/
-		}
 
 		return primitiveProxyMap[stdTypeName](info, clazz);
 	}
@@ -226,6 +225,8 @@ namespace rootJS
 		primitiveProxyMap["string"]             = &StringProxy::stringConstruct;	// = std::string
 
 		primitiveProxyMap["bool"]               = &BooleanProxy::boolConstruct;
+
+		primitiveProxyMap["void"]               = &VoidPointerProxy::voidConstruct;
 
 		// Special typedefs
 		primitiveProxyMap["Double32_t"]         = &NumberProxy::doubleConstruct;
