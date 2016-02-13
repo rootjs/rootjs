@@ -30,4 +30,11 @@ describe('Functions', function() {
 		  root.Compress('these are multiple words').should.equal('thesearemultiplewords');
 	  });
   });
+  describe('parameter types', function() {
+	  it('should be possible to pass objects', function() {
+		  var test = new root.TString("test");
+		  var test2 = new root.TString(test);
+		  test2.Data().should.equal("test");
+	  });
+  });
 });
