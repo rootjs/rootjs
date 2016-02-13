@@ -33,6 +33,7 @@ namespace rootJS
 			/* Private constructor - Singleton */
 			NodeHandler(v8::Local<v8::Object>);
 
+
 			void exposeROOT();
 			void exposeGlobals() throw(std::invalid_argument);
 			void exposeGlobalFunctions() throw(std::invalid_argument);
@@ -50,16 +51,11 @@ namespace rootJS
              *              The module to be instantiated
 			 */
 			static void initialize(v8::Local<v8::Object>, v8::Local<v8::Object>);
+			static void loadlibrary(const v8::FunctionCallbackInfo<v8::Value> &info) ;
 
-            /**
-             * Gets the exports from node.
-             *
-             * @return The exports from node
-             */
-			v8::Local<v8::Object> getExports(void);
 	};
 
-	NODE_MODULE(rootjs, NodeHandler::initialize);
+	NODE_MODULE(rootjs, NodeHandler::initialize)
 }
 
 #endif

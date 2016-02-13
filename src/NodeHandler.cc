@@ -46,8 +46,8 @@ namespace rootJS
 			exposeGlobals();
 			exposeGlobalFunctions();
 			exposeMacros();
-
 			exposeClasses();
+			exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"loadlibrary"),v8::Function::New(v8::Isolate::GetCurrent(),NodeHandler::loadlibrary));
 		}
 		catch (const std::invalid_argument& e)
 		{
@@ -146,4 +146,7 @@ namespace rootJS
 		}
 	}
 
+
+	void NodeHandler::loadlibrary(const v8::FunctionCallbackInfo<v8::Value> &info) {
+	}
 }
