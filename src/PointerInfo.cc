@@ -1,9 +1,21 @@
+#include <stdlib.h>
+#include <string.h>
+
 #include "PointerInfo.h"
 
 namespace rootJS
 {
-	PointerInfo::PointerInfo(void* baseAddr, const char* typeName, int ptrDepth /* = 2 */) : MetaInfo(baseAddr), typeName(typeName), ptrDepth(ptrDepth)
-	{}
+	PointerInfo::PointerInfo(void* baseAddr, const char* typeName, int ptrDepth /* = 2 */) : MetaInfo(baseAddr), ptrDepth(ptrDepth)
+	{
+		int len = strlen(typeName);
+		this->typeName = (char*)malloc(sizeof(char[len+1]));
+		strncpy(this->typeName, typeName, len);
+		this->typeName[len] = '\0';
+	}
+
+	PointerInfo::~PointerInfo() {
+		free(this->typeName);
+	}
 
 	void* PointerInfo::getAddress()
 	{

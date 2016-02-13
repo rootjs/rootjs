@@ -74,7 +74,7 @@ namespace rootJS
 		if(callback.IsEmpty())
 		{
 			proxy->prepareCall(args);
-			ObjectProxy *resultProxy = proxy->call();
+			ObjectProxy *resultProxy = proxy->call(nullptr);
 			if(resultProxy)
 			{
 				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
@@ -88,7 +88,7 @@ namespace rootJS
 		}
 		else
 		{
-			AsyncCallParam *asynCallParam = new AsyncCallParam();
+			AsyncCallParam *asyncCallParam = new AsyncCallParam();
 			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), args);
 			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
 
@@ -96,10 +96,11 @@ namespace rootJS
 			 * Instead of member calls: we do not need to clone the proxy here because
 			 * it is being created in this callback (not during initialization)
 			 */
-			asynCallParam->params = persistentArgs;
-			asynCallParam->proxy = proxy;
+			asyncCallParam->params = persistentArgs;
+			asyncCallParam->proxy = proxy;
+			asyncCallParam->selfAddress = nullptr;
 			proxy->prepareCall(args);
-			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
+			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, persistentCallback);
 			runner->run();
 		}
 	}
@@ -157,7 +158,7 @@ namespace rootJS
 		// if(callback.IsEmpty()) ...
 
 		proxy->prepareCall(args);
-		ObjectProxy *resultProxy = proxy->call();
+		ObjectProxy *resultProxy = proxy->call(nullptr);
 		if(proxy)
 		{
 			if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
@@ -220,7 +221,7 @@ namespace rootJS
 			}
 
 			funcProxy->prepareCall(args);
-			ObjectProxy *proxy = funcProxy->call(true);
+			ObjectProxy *proxy = funcProxy->call(nullptr, true);
 			delete funcProxy;
 
 			if(proxy == nullptr)
@@ -291,12 +292,11 @@ namespace rootJS
 			Toolbox::throwException("No suitable method named '" + name + "' found for the supplied arguments in '" + std::string(scope->GetName()) + "'.");
 			return;
 		}
-		proxy->setSelfAddress(holder->getAddress());
 
 		if(callback.IsEmpty())
 		{
 			proxy->prepareCall(args);
-			ObjectProxy *resultProxy = proxy->call();
+			ObjectProxy *resultProxy = proxy->call(*(void**)holder->getAddress());
 			delete proxy;
 			if(resultProxy)
 			{
@@ -310,7 +310,7 @@ namespace rootJS
 		}
 		else
 		{
-			AsyncCallParam *asynCallParam = new AsyncCallParam();
+			AsyncCallParam *asyncCallParam = new AsyncCallParam();
 			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), args);
 			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
 
@@ -321,26 +321,27 @@ namespace rootJS
 			 */
 			FunctionProxy* cloneProxy = proxy->clone();
 
-			asynCallParam->params = persistentArgs;
-			asynCallParam->proxy = cloneProxy;
+			asyncCallParam->params = persistentArgs;
+			asyncCallParam->proxy = cloneProxy;
+			asyncCallParam->selfAddress = *(void**)holder->getAddress();
 			cloneProxy->prepareCall(args);
-			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asynCallParam, persistentCallback);
+			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, persistentCallback);
 			runner->run();
 		}
 	}
 
 	void CallbackHandler::asyncMemberCall(AsyncRunner *runner, void *param)
 	{
-		AsyncCallParam *asynCallParam = (AsyncCallParam*)param;
+		AsyncCallParam *asyncCallParam = (AsyncCallParam*)param;
 
 		std::vector<ObjectProxy*> resultVector;
-		ObjectProxy* resultProxy = asynCallParam->proxy->call();
+		ObjectProxy* resultProxy = asyncCallParam->proxy->call(asyncCallParam->selfAddress);
 
 		resultVector.push_back(resultProxy);
 		runner->setResult(resultVector);
 
-		delete asynCallParam->proxy;
-		delete asynCallParam;
+		delete asyncCallParam->proxy;
+		delete asyncCallParam;
 	}
 
 

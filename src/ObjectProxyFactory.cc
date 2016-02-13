@@ -7,6 +7,7 @@
 #include "VoidPointerProxy.h"
 
 #include "Toolbox.h"
+#include "Types.h"
 
 #include "MemberInfo.h"
 #include "GlobalInfo.h"
@@ -164,16 +165,7 @@ namespace rootJS
 	ObjectProxy* ObjectProxyFactory::createPrimitiveProxy(MetaInfo &info, TClass* clazz)
 	{
 		std::string stdTypeName(info.getTypeName());
-
-		// check if typeName starts with const
-		std::size_t idx = stdTypeName.find("const ");
-		if(idx != std::string::npos && idx == 0)
-		{
-			stdTypeName = stdTypeName.substr(6); // remove 'const '
-			// Toolbox::logInfo("stdtypeName =" + stdTypeName);
-		}
-
-		TDataType* type = (TDataType*) (gROOT->GetListOfTypes(kTRUE)->FindObject(stdTypeName.c_str()));
+		TDataType* type = Types::getTypeByName(stdTypeName);
 		if(type == nullptr)
 		{
 			return nullptr;
