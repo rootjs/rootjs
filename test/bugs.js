@@ -10,4 +10,12 @@ describe('Bugs', function() {
 		 tstring.Copy().Data().should.equal("test");
 	 });
   });
+  describe('constants', function() {
+	  it('constants should really be constant!', function() {
+		  (function() {
+			  root.kFALSE = true;
+		  }).should.throw();
+		  root.kFALSE.should.equal(false);
+	 });
+  });
 });
