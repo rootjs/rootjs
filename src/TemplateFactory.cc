@@ -5,6 +5,7 @@
 #include "FunctionProxy.h"
 #include "FunctionProxyFactory.h"
 #include "MemberInfo.h"
+#include "PointerInfo.h"
 #include "Toolbox.h"
 
 #include "TClassTable.h"
@@ -37,7 +38,7 @@ namespace rootJS
 
 		if (clazz->Property() & kIsNamespace)
 		{
-			return createNamespaceTemplate(clazz)->NewInstance();
+			return initializeNamespace(clazz);
 		}
 		else if (clazz->Property() & kIsClass)
 		{
@@ -161,9 +162,9 @@ namespace rootJS
 					break;
 			}
 		}
-	/**
-     *	Add public static members as properties
-     */
+		/**
+		  *	Add public static members as properties
+		  */
 		TIter memberIter(clazz->GetListOfAllPublicDataMembers(kTRUE));
 		TDataMember *member;
 		while ( (member = (TDataMember*) memberIter()))
@@ -266,7 +267,7 @@ namespace rootJS
 
 		v8::Local<v8::FunctionTemplate> tmplt = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
 		tmplt->SetClassName(v8::String::NewFromUtf8(isolate, className.c_str()));
-		tmplt->PrototypeTemplate()->SetInternalFieldCount(1);
+
 
 		// create template
 		createInstantiableTemplate(clazz, tmplt);
@@ -284,7 +285,7 @@ namespace rootJS
 
 		// add static functions and members to the prototype template
 		v8::Local<v8::ObjectTemplate> prototype = tmplt->PrototypeTemplate();
-		// prototype->SetInternalFieldCount(1);
+
 
 		// add non-static functions and members to the instance template
 		v8::Local<v8::ObjectTemplate> instance = tmplt->InstanceTemplate();

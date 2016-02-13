@@ -46,7 +46,7 @@ namespace rootJS
 			 * @param function the function's reflection object
 			 * @param scope the class that the function belongs to
 			 */
-			FunctionProxy(void *address, FunctionInfo &mode, TFunction *function, TClass *scope);
+			FunctionProxy(FunctionInfo &info, TFunction *function, TClass *scope);
 
 			/**
 			 * Makes a clone of the current FunctionProxy
@@ -71,7 +71,7 @@ namespace rootJS
 			 * @param args the arguments for the function call.
 			 * @return the function's return value encasulated in an ObjectProxy
 			 */
-			ObjectProxy* call(bool isConstructorCall = false);
+			ObjectProxy* call(void *self, bool isConstructorCall = false);
 
 			/**
 			 * TODO: verify
@@ -92,24 +92,13 @@ namespace rootJS
 			 */
 
 			/**
-			 * Sets the address of the function
-			 *
-			 * @param addr
-			 *              The address the function will be set to
-			 */
-			void setSelfAddress(void* addr)
-			{
-				selfAddress = addr;
-			}
-
-			/**
 			 * Check if this proxy encapsulates a constant.
 			 *
 			 * @return true if this ProxyObject encapsulates a constant
 			 */
 			virtual bool isConst()
 			{
-				return true;
+				return info->isConst();
 			};
 
 			/**
@@ -119,7 +108,7 @@ namespace rootJS
 			 */
 			virtual bool isGlobal()
 			{
-				return true; /*TODO*/
+				return info->isGlobal();
 			};
 
 			/**
@@ -129,7 +118,7 @@ namespace rootJS
 			 */
 			virtual bool isStatic()
 			{
-				return true; /*TODO*/
+				return info->isStatic();
 			};
 
 			/**
@@ -149,33 +138,19 @@ namespace rootJS
 			TInterpreter::CallFuncIFacePtr_t facePtr;
 			TFunction* function;
 			std::vector<void*> buf;
+			std::vector<bool> bufCopied;
 
-			void *address;
-			void *selfAddress = 0;
 
-			static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg);
+			static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg, bool &copied);
 
 			static char*    argToChar   (v8::Local<v8::Value> originalArg);
 			static double*  argToDouble (v8::Local<v8::Value> originalArg);
 			static int*     argToInt    (v8::Local<v8::Value> originalArg);
 			static bool*    argToBool   (v8::Local<v8::Value> originalArg);
+			static void* 	argToObj	(v8::Local<v8::Value> originalArg);
 			static TString* argToTString(v8::Local<v8::Value> originalArg);
 
 			static double   getDoubleFromArg(v8::Local<v8::Value> originalArg);
-
-			/*
-			static bool processCall(TFunction* method, void* args, void* self, void* result);
-
-			static void* callConstructor(TFunction* method, TClassRef type, void* args);
-
-			static void callDestructor(TClassRef type, void* self);
-
-			static void* callObject(TFunction* method, void* self, void* args, TClassRef resType);
-
-			template <typename T>
-			static T callPrimitive(TFunction* method, void* self, void* args);
-			*/
-
 	};
 }
 

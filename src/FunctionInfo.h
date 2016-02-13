@@ -14,54 +14,27 @@ namespace rootJS
 	class FunctionInfo: public MetaInfo
 	{
 		public:
-			FunctionInfo(TFunction* func) : MetaInfo(nullptr)
-			{
-				this->func = func;
-			};
+			FunctionInfo(const TFunction& type, void* baseAddress);
+			FunctionInfo(const TFunction& type, void* baseAddress, bool isGlobal);
+			~FunctionInfo();
 
-			~FunctionInfo()
-			{}
-			;
+			virtual Long_t getOffset();
 
-			virtual bool isGlobal()
-			{
-				return true;
-			};
+			virtual bool isGlobal();
+			virtual bool isConst();
+			virtual bool isStatic();
 
-			virtual Long_t GetOffset()
-			{
-				return 0;
-			};
+			virtual const char* getTypeName();
+			virtual const char* getName();
 
-			virtual bool isConst()
-			{
-				return true;
-			};
+			virtual FunctionInfo* clone();
 
-			virtual bool isStatic()
-			{
-				return true;
-			};
-
-			virtual const char* getTypeName()
-			{
-				return func->GetReturnTypeName();
-			};
-
-			virtual const char* getName() {
-				return func->GetName();
-			}
-
-			virtual MetaInfo* clone()
-			{
-				return new FunctionInfo(func);
-			};
-
-		protected:
+		private:
 			/**
 			 * The function the FunctionInfo is holding.
 			 */
-			TFunction* func;
+			const TFunction &type;
+			const bool mIsGlobal;
 	};
 }
 

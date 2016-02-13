@@ -26,7 +26,7 @@ namespace rootJS
 			 */
 			static NodeHandler *instance;
 			/**
-			 * THe exports object to be sent back to node
+			 * The exports object to be sent back to node
 			 */
 			v8::Local<v8::Object> exports;
 
@@ -41,9 +41,21 @@ namespace rootJS
 
 		public:
 			/**
-			 * The method which starts rootJS.
+			 * The method which starts rootJS. It instantiates a NodeApplication, a proxyMap from ObjectProxyFactory
+             * and a NodeHandler. It also exposes the contents of ROOT.
+             *
+             * @param exports
+             *              The exports sent back to node
+             * @param module
+             *              The module to be instantiated
 			 */
 			static void initialize(v8::Local<v8::Object>, v8::Local<v8::Object>);
+
+            /**
+             * Gets the exports from node.
+             *
+             * @return The exports from node
+             */
 			v8::Local<v8::Object> getExports(void);
 	};
 

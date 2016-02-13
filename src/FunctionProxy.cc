@@ -1,30 +1,33 @@
 #include "FunctionProxy.h"
+
+#include "FunctionProxyFactory.h"
+#include "ObjectProxyFactory.h"
+#include "ObjectProxy.h"
 #include "BooleanProxy.h"
 #include "NumberProxy.h"
-#include "ObjectProxy.h"
-#include "ObjectProxyFactory.h"
 #include "StringProxy.h"
+#include "FunctionInfo.h"
+#include "PointerInfo.h"
 #include "Toolbox.h"
+#include "Types.h"
+
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <assert.h>
 
 #include <v8.h>
 
-#include <TClassRef.h>
-#include <TInterpreter.h>
-
 #include <TROOT.h>
 #include <TClassTable.h>
+#include <TInterpreter.h>
 #include <TCollection.h>
-#include <TFunction.h>
 #include <TIterator.h>
 #include <TList.h>
+#include <TClassRef.h>
+#include <TFunction.h>
 #include <TMethodArg.h>
-#include "FunctionInfo.h"
-#include "FunctionProxyFactory.h"
-#include "PointerInfo.h"
 
 namespace rootJS
 {
@@ -57,18 +60,16 @@ namespace rootJS
 		return methods;
 	}
 
-	FunctionProxy::FunctionProxy(void *address, FunctionInfo &mode, TFunction *function, TClass *scope) : Proxy(mode, scope)
+	FunctionProxy::FunctionProxy(FunctionInfo &info, TFunction *function, TClass *scope) : Proxy(info, scope)
 	{
-		this->address = address;
 		this->function = function;
 	}
 
 	FunctionProxy* FunctionProxy::clone()
 	{
-		FunctionProxy *p = new FunctionProxy(address, *(rootJS::FunctionInfo*)info, function, scope);
+		FunctionProxy *p = new FunctionProxy(*(rootJS::FunctionInfo*)info, function, scope);
 		p->buf = buf;
 		p->facePtr = facePtr;
-		p->selfAddress = selfAddress;
 		return p;
 	}
 
@@ -155,7 +156,7 @@ namespace rootJS
 
 	void FunctionProxy::prepareCall(const  v8::Local<v8::Array>& args)
 	{
-		CallFunc_t* callFunc = (CallFunc_t*)getCallFunc(scope, function);
+		CallFunc_t* callFunc = (CallFunc_t*)info->getAddress();
 		if(!callFunc)
 		{
 			//TODO Handle this, should not segfault (maybe throw something...)
@@ -164,17 +165,24 @@ namespace rootJS
 		gCling->CallFunc_Delete(callFunc);
 
 		buf = std::vector<void*>( args->Length() );
+		bufCopied = std::vector<bool>( args->Length() );
 		for(int i = 0; i < (int)args->Length(); i++)
 		{
 			void** bufEl = (void**)malloc(sizeof(void*));
-			*bufEl = bufferParam((TMethodArg*)(function->GetListOfMethodArgs()->At(i)), args->Get(i));
-			buf[i] = bufEl;
+			bool copied = false;
+			*bufEl = bufferParam((TMethodArg*)(function->GetListOfMethodArgs()->At(i)), args->Get(i), copied);
+			bufCopied[i] = copied;
+			if(!copied) {
+				buf[i] = *bufEl;
+				free(bufEl);
+			} else {
+				buf[i] = bufEl;
+			}
 		}
 	}
 
-	ObjectProxy* FunctionProxy::call(bool isConstructorCall /* false */)
+	ObjectProxy* FunctionProxy::call(void *self, bool isConstructorCall /* false */)
 	{
-		void *self = nullptr;
 		void *result = nullptr;
 		void **resultPtr;
 		resultPtr = &result;
@@ -190,30 +198,34 @@ namespace rootJS
 			}
 		}
 
-
-
-
 		switch(facePtr.fKind)
 		{
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
-			facePtr.fGeneric((selfAddress == nullptr) ? self : *(void**)selfAddress, buf.size(), buf.data(), resultPtr);
+			facePtr.fGeneric(self, buf.size(), buf.data(), resultPtr);
 			break;
 		case (TInterpreter::CallFuncIFacePtr_t::kCtor):
 			facePtr.fCtor(buf.data(), &result, buf.size());
 			break;
-		default:
-			Toolbox::throwException("Jonas was too lazy to implement this...");
+		case (TInterpreter::CallFuncIFacePtr_t::kDtor):
+			throw std::invalid_argument("Destructor calls are not supported, objects will automatically be destructed when they go out of scope.");
+			break;
+		case (TInterpreter::CallFuncIFacePtr_t::kUninitialized):
+			throw std::invalid_argument("Got an uninitialized CallFuncIFacePtr_t, this should not happen and might be a bug.");
+			break;
 		}
 
 		for(int i = 0; i < (int)buf.size(); i++)
 		{
-			free(*((void**)buf[i]));
-			free((void*)buf[i]);
+			if(bufCopied[i])
+			{
+				free(*((void**)buf[i]));
+				free((void*)buf[i]);
+			}
 		}
 
 		ObjectProxy* proxy;
 		PointerInfo mode(result, function->GetReturnTypeName(), 1);
-		proxy = ObjectProxyFactory::createObjectProxy(mode, TClassRef());
+		proxy = ObjectProxyFactory::createObjectProxy(mode, nullptr);
 
 		if(proxy)
 		{
@@ -228,14 +240,32 @@ namespace rootJS
 		return nullptr;
 	}
 
-	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg)
+	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg, bool& copied)
 	{
-		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(std::string(arg->GetTypeName()));
+		TDataType* type = Types::getTypeByName(std::string(arg->GetTypeName()));
+		if(type == nullptr) {
+			//might be an object...
+			DictFuncPtr_t dictFunc = gClassTable->GetDict(arg->GetTypeName());
+			if(dictFunc == nullptr)
+			{
+				throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + arg->GetTypeName());
+				return nullptr;
+			}
+			copied = false;
+			return argToObj(originalArg);
+		}
+
+		TString typeName = type->GetTypeName();
+		std::string stdTypeName(typeName.Data());
+		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(stdTypeName);
 		if(iterator == typeMap.end())
 		{
-			Toolbox::throwException(std::string("bufferParam does not know how to handle ") + arg->GetTypeName());
+			//Might be an object
+			throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + stdTypeName);
 			return nullptr;
 		}
+
+		copied = true;
 		switch(iterator->second)
 		{
 		case mappedTypes::CHAR:
@@ -249,6 +279,7 @@ namespace rootJS
 		case mappedTypes::TSTRING:
 			return argToTString(originalArg);
 		}
+		copied = false;
 
 		//TODO: This will explode - huge fireball
 		return nullptr;
@@ -296,6 +327,16 @@ namespace rootJS
 		return new TString(*string);
 	}
 
+	void* FunctionProxy::argToObj(v8::Local<v8::Value> originalArg)
+	{
+		v8::Local<v8::Object> obj = v8::Local<v8::Object>::Cast(originalArg);
+		assert(obj->InternalFieldCount() == Toolbox::INTERNAL_FIELD_COUNT);
+
+		ObjectProxy *proxy = (ObjectProxy*)obj->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
+		return *(void**)(proxy->getAddress());
+	}
+
+
 	double FunctionProxy::getDoubleFromArg(v8::Local<v8::Value> originalArg)
 	{
 		if(originalArg->IsNumber())
@@ -313,149 +354,3 @@ namespace rootJS
 	}
 
 }
-
-/*
-TODO Verify: validateArgs and determineOverload are combined in FunctionProxyFactory::determineFunction and therefore never used?
-
-std::vector<ObjectProxy*> FunctionProxy::validateArgs(v8::FunctionCallbackInfo<v8::Value> args)
-{
-	std::vector<ObjectProxy*> validatedArgs;
-
-	TFunction method = *function;
-	if (method.GetNargs() <= args.Length() && args.Length() <= method.GetNargsOpt())
-	{
-		TList *expectedArgs = method.GetListOfMethodArgs();
-		for (int i = 0; i < args.Length(); i++)
-		{
-			TMethodArg *expectedArg = static_cast<TMethodArg*>(expectedArgs->At(i));
-
-			// Check if the argument is a JavaScript object
-			if (args[i]->IsObject())
-			{
-				v8::Object *objectArg = static_cast<v8::Object*>(*args[i]);
-				if (objectArg->InternalFieldCount() > 0)
-				{
-					// TODO validate arg
-					void *arg = objectArg->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
-					validatedArgs.push_back(static_cast<ObjectProxy*>(arg));
-				}
-				else
-				{
-					std::ostringstream msgStream;
-					msgStream << "Error while validating arg " << i << ": v8::Object at " << &(*(*args[i])) << " has no internal fields";
-					Toolbox::throwException(msgStream.str());
-				}
-			}
-			else
-			{
-				// Else, it must be a JavaScript primitive
-				if (args[i]->IsBoolean())
-				{
-					// TODO proper type validation
-					if (BooleanProxy::isBoolean(expectedArg->GetTypeName()))
-					{
-						v8::Boolean *booleanArg = static_cast<v8::Boolean*>(*args[i]);
-						bool value = booleanArg->Value();
-						// TODO push_back ObjectProxy*
-					}
-					else
-					{
-						std::ostringstream msgStream;
-						msgStream << "Error while validating arg " << i << ": Expected " << expectedArg->GetTypeNormalizedName() << " but got Boolean instead";
-						Toolbox::throwException(msgStream.str());
-					}
-				}
-				else if (args[i]->IsNumber())
-				{
-					if (NumberProxy::isNumber(expectedArg->GetTypeName()))
-					{
-						// TODO
-					}
-					else
-					{
-						std::ostringstream msgStream;
-						msgStream << "Error while validating arg " << i << ": Expected " << expectedArg->GetTypeNormalizedName() << " but got Number instead";
-						Toolbox::throwException(msgStream.str());
-					}
-				}
-				else if (args[i]->IsString())
-				{
-					if (StringProxy::isString(expectedArg->GetTypeName()))
-					{
-						// TODO
-					}
-					else
-					{
-						std::ostringstream msgStream;
-						msgStream << "Error while validating arg " << i << ": Expected " << expectedArg->GetTypeNormalizedName() << " but got String instead";
-						Toolbox::throwException(msgStream.str());
-					}
-				}
-				else
-				{
-					std::ostringstream msgStream;
-					msgStream << "Error while validating arg " << i << ": v8::Value at " << &(*(*args[i])) << "is neither a v8::Object nor a v8::Primitive";
-					Toolbox::throwException(msgStream.str());
-				}
-			}
-		}
-	}
-	else
-	{
-		std::ostringstream msgStream;
-		msgStream << method.GetName();
-
-		if (method.GetNargs() == method.GetNargsOpt())
-		{
-			msgStream << " takes exactly " << method.GetNargs();
-		}
-		else if (args.Length() < method.GetNargs())
-		{
-			msgStream << " takes at least " << method.GetNargs();
-		}
-		else if (args.Length() > method.GetNargsOpt())
-		{
-			msgStream << " takes at most " << method.GetNargsOpt();
-		}
-
-		msgStream << " arguments (" << args.Length() << " given)";
-		Toolbox::throwException(msgStream.str());
-	}
-
-	return validatedArgs;
-}
-
-bool FunctionProxy::determineOverload(const v8::Local<v8::Array>& info)
-{
-	TFunction* overloadedFunction = FunctionProxyFactory::determineFunction(function->GetName(), scope.GetClass(), info);
-	if(overloadedFunction == nullptr)
-	{
-		return false;
-	}
-	function = overloadedFunction;
-	return true;
-}
-*/
-
-/*
-// TODO
-bool FunctionProxy::processCall(TFunction* method, void* args, void* self, void* result)
-{
-}
-
-void* FunctionProxy::callConstructor(TFunction* method, TClassRef type, void* args)
-{
-}
-
-void FunctionProxy::callDestructor(TClassRef type, void* self)
-{
-}
-
-void* FunctionProxy::callObject(TFunction* method, void* self, void* args, TClassRef resType)
-{
-}
-
-template <typename T>
-T FunctionProxy::callPrimitive(TFunction* method, void* self, void* args)
-{
-}*/

@@ -1,55 +1,46 @@
 #include "MemberInfo.h"
+
 namespace rootJS
 {
 
-	MemberInfo::MemberInfo(const TDataMember& type, void* baseAddress): MetaInfo(baseAddress), currentObject(type)
-	{
-	}
+	MemberInfo::MemberInfo(const TDataMember& type, void* baseAddress): MetaInfo(baseAddress), type(type)
+	{}
 
 	MemberInfo::~MemberInfo()
 	{}
+
+	Long_t MemberInfo::getOffset()
+	{
+		return type.GetOffset();
+	}
 
 	bool MemberInfo::isGlobal()
 	{
 		return false;
 	}
 
-	Long_t MemberInfo::getOffset()
-	{
-		return currentObject.GetOffset();
-	}
-
 	bool MemberInfo::isConst()
 	{
-		if(currentObject.Property() & kIsConstant)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return (type.Property() & kIsConstant);
 	}
 
 	bool MemberInfo::isStatic()
 	{
-		if(currentObject.Property() & kIsStatic)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return (type.Property() & kIsStatic);
 	};
 
 	const char* MemberInfo::getTypeName()
 	{
-		return currentObject.GetTypeName();
+		return type.GetTypeName();
 	}
 
 	const char* MemberInfo::getName()
 	{
-		return currentObject.GetName();
+		return type.GetName();
+	}
+
+	MemberInfo* MemberInfo::clone()
+	{
+		return new MemberInfo(type, baseAddress);
 	}
 }

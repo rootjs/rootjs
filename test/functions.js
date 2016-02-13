@@ -1,3 +1,4 @@
+/*jshint expr: true*/
 require('should');
 var root = require('../index');
 
@@ -27,6 +28,13 @@ describe('Functions', function() {
 			  done();
 		  });
 		  root.Compress('these are multiple words').should.equal('thesearemultiplewords');
+	  });
+  });
+  describe('parameter types', function() {
+	  it('should be possible to pass objects', function() {
+		  var test = new root.TString("test");
+		  var test2 = new root.TString(test);
+		  test2.Data().should.equal("test");
 	  });
   });
 });
