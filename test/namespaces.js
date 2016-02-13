@@ -13,7 +13,8 @@ describe('Namespaces', function() {
 		  (function() {
 			  should.not.equal(root.Detail, undefined);
 		  }).should.not.throw();
-	  })('should have the property ROOT.TStreamerInfoActions', function() {
+	  });
+	  it('should have the property ROOT.TStreamerInfoActions', function() {
 		  (function() {
 			  should.not.equal(root.TStreamerInfoActions, undefined);
 		  }).should.not.throw();
