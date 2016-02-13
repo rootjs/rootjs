@@ -2,6 +2,7 @@
 #define TOOLBOX_H
 
 #include <string>
+#include <v8.h>
 
 namespace rootJS
 {
@@ -40,6 +41,8 @@ namespace rootJS
 			 *		the message to log
 			 */
 			static void logError(const std::string &message);
+
+			static std::string Stringv8toStd(v8::Local<v8::String> vstr);
 	};
 }
 

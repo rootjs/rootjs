@@ -22,4 +22,9 @@ namespace rootJS
 		// TODO: maybe find a way to directly call console.error("...") here
 		std::cerr << message << std::endl;
 	}
+
+	std::string Toolbox::Stringv8ToStd(v8::Local<v8::String> vstr) {
+		std::string str = std::string(*v8::String::Utf8Value(vstr->ToString()));
+		;
+	}
 }
