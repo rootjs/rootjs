@@ -30,6 +30,16 @@ namespace rootJS
 			;
 
 			/**
+			 * Checks if the TObject is an array.
+			 *
+			 * @return if the TObject is an array.
+			 */
+			virtual bool isArray()
+			{
+				return false;
+			}
+
+			/**
 			 * Checks if the TObject is global.
 			 * @return If the TObject is global
 			 */
@@ -59,6 +69,17 @@ namespace rootJS
 			 * @return If the TObject is static
 			 */
 			virtual bool isStatic() = 0;
+
+			/**
+			 * If the object described by this MetaInfo is an array, return its length.
+			 * Else return -1.
+			 *
+			 * @return length of the array
+			 */
+			virtual int getArrayLength()
+			{
+				return -1;
+			}
 
 			/**
 			 * Returns the typename of the TObject.

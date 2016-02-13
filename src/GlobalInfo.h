@@ -20,10 +20,12 @@ namespace rootJS
 
 			virtual Long_t GetOffset();
 
+			virtual bool isArray();
 			virtual bool isGlobal();
 			virtual bool isConst();
 			virtual bool isStatic();
 
+			virtual int getArrayLength();
 			virtual const char* getTypeName();
 			virtual const char* getName();
 

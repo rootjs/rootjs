@@ -14,6 +14,11 @@ namespace rootJS
 		return type.GetOffset();
 	}
 
+	bool MemberInfo::isArray()
+	{
+		return (type.Property() & kIsArray);
+	}
+
 	bool MemberInfo::isGlobal()
 	{
 		return false;
@@ -28,6 +33,12 @@ namespace rootJS
 	{
 		return (type.Property() & kIsStatic);
 	};
+
+	int MemberInfo::getArrayLength()
+	{
+		// TODO see GlobalInfo::getArrayLength
+		return type.GetMaxIndex(0);
+	}
 
 	const char* MemberInfo::getTypeName()
 	{

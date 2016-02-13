@@ -16,6 +16,11 @@ namespace rootJS
 		return 0;
 	}
 
+	bool GlobalInfo::isArray()
+	{
+		return (type.Property() & kIsArray);
+	}
+
 	bool GlobalInfo::isGlobal()
 	{
 		return true;
@@ -29,6 +34,12 @@ namespace rootJS
 	bool GlobalInfo::isStatic()
 	{
 		return (type.Property() & kIsStatic);	// true
+	}
+
+	int GlobalInfo::getArrayLength()
+	{
+		// TODO what about multidimensional arrays?
+		return type.GetMaxIndex(0); // TODO is adding +1 appropriate here?
 	}
 
 	const char* GlobalInfo::getTypeName()
