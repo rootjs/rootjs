@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <assert.h>
 
 #include <v8.h>
 
@@ -213,7 +214,7 @@ namespace rootJS
 
 		ObjectProxy* proxy;
 		PointerInfo mode(result, function->GetReturnTypeName(), 1);
-		proxy = ObjectProxyFactory::createObjectProxy(mode, TClassRef());
+		proxy = ObjectProxyFactory::createObjectProxy(mode, nullptr);
 
 		if(proxy)
 		{
@@ -232,8 +233,14 @@ namespace rootJS
 	{
 		TDataType* type = Types::getTypeByName(std::string(arg->GetTypeName()));
 		if(type == nullptr) {
-			throw std::invalid_argument(std::string("Could not get type of ") + arg->GetTypeName());
-			return nullptr;
+			//might be an object...
+			DictFuncPtr_t dictFunc = gClassTable->GetDict(arg->GetTypeName());
+			if(dictFunc == nullptr)
+			{
+				throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + arg->GetTypeName());
+				return nullptr;
+			}
+			return argToObj(originalArg);
 		}
 
 		TString typeName = type->GetTypeName();
@@ -242,9 +249,7 @@ namespace rootJS
 		if(iterator == typeMap.end())
 		{
 			//Might be an object
-
-
-			throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + arg->GetTypeName());
+			throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + stdTypeName);
 			return nullptr;
 		}
 		switch(iterator->second)
@@ -306,6 +311,16 @@ namespace rootJS
 		v8::String::Utf8Value string(originalArg->ToString());
 		return new TString(*string);
 	}
+
+	void* FunctionProxy::argToObj(v8::Local<v8::Value> originalArg)
+	{
+		v8::Local<v8::Object> obj = v8::Local<v8::Object>::Cast(originalArg);
+		assert(obj->InternalFieldCount() == Toolbox::INTERNAL_FIELD_COUNT);
+
+		ObjectProxy *proxy = (ObjectProxy*)obj->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
+		return *(void**)proxy->getAddress();
+	}
+
 
 	double FunctionProxy::getDoubleFromArg(v8::Local<v8::Value> originalArg)
 	{
