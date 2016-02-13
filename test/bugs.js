@@ -9,11 +9,29 @@ describe('Bugs', function() {
 			var tstring = new root.TString("test");
 			tstring.Copy().Data().should.equal("test");
 		});
-		describe('#35', function () {
-			it('should not return null from ROOT::GetClass', function () {
-				var ts = root.ROOT.GetROOT();
-					ts.should.not.be.type('undefined')
-			});
+	});
+	describe('#35', function () {
+		it('should not return null from ROOT::GetClass', function () {
+			var ts = root.ROOT.GetROOT();
+				ts.should.not.be.type('undefined')
 		});
 	});
+	describe('#30', function() {
+	  it('should be possible to pass objects', function() {
+		  var test = new root.TString("test");
+		  var test2 = new root.TString(test);
+		  test2.Data().should.equal("test");
+	  });
+	  it('should be possible to pass pointers to objects as params', function() {
+		  var object = new root.TObject();
+		  var browser = new root.TBrowser();
+		  (function() {
+			  browser.Add(object);
+			  browser.Destructor();
+			  /* When we do not run this we get a segfault because the initialization is not complete before the test is done and
+			   * deletion of a TBrowser when it's not fully loaded leads to a crash */
+		  }).should.not.throw();
+
+	  });
+  });
 });
