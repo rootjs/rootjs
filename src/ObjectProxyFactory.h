@@ -31,8 +31,27 @@ namespace rootJS
 			ObjectProxyFactory();
 
 		public:
+            /**
+			 *	Encapsulate the data at the specified address into the specified JavaScript object.
+			 *
+			 *	@param global
+			 *			the TGlobal which should be encapsulated
+			 *
+			 *	@return a new ObjectProxy holding the specified JavaScript Object for exposure
+			 */
 			static ObjectProxy* createObjectProxy(TGlobal &global);
 
+            /**
+			 *	Encapsulate the data at the specified address into the specified JavaScript object.
+			 *
+			 *	@param info
+			 *			the info of the Object to be created
+			 *
+			 *	@param scope
+			 *			the type of the data which should be encapsulated
+			 *
+			 *	@return a new ObjectProxy holding the specified JavaScript Object for exposure
+			 */
 			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope) throw(std::invalid_argument);
 
 			/**
@@ -51,8 +70,22 @@ namespace rootJS
 			 */
 			static ObjectProxy* createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy);
 
+            /**
+			 *	Encapsulate the data at the specified address into the specified primitive JavaScript object.
+			 *
+			 *	@param info
+			 *			the info of the Object to be created
+			 *
+			 *	@param clazz
+			 *			the type of the data which should be encapsulated
+			 *
+			 *	@return a new primitive ObjectProxy holding the specified JavaScript Object for exposure
+			 */
 			static ObjectProxy* createPrimitiveProxy(MetaInfo &info, TClass *clazz);
 
+            /**
+             *  Initializes the ProxyMap with standard data types.
+             */
 			static void initializeProxyMap(void);
 	};
 }

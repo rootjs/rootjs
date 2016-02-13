@@ -171,7 +171,7 @@ namespace rootJS
 			 */
 			static void memberFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info);
 
-			/*
+			/**
 			 * Encapsulate the callback data for a function.
 			 *
 			 * @param fucntionName
@@ -185,7 +185,7 @@ namespace rootJS
 			 */
 			static v8::Local<v8::Value> createFunctionCallbackData(std::string functionName, TClass *scope);
 
-			/*
+			/**
 			 * Encapsulate the callback data for a constructor function.
 			 *
 			 * @param scope
