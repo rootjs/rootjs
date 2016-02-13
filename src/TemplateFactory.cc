@@ -155,12 +155,9 @@ namespace rootJS
 					// Toolbox::logInfo("Operator '" + methodName + "' found in '" + className + "'.");
 					break;
 				default:
-
-					if (property & kIsStatic)
-					{
 						v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
 						nspace->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
-					}
+
 					break;
 			}
 		}
