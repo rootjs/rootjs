@@ -102,11 +102,21 @@ namespace rootJS
 		return createFunctionProxy(function, scope);
 	}
 
-	bool FunctionProxyFactory::paramMatches(const char *type, v8::Local<v8::Value> arg)
+	bool FunctionProxyFactory::paramMatches(const char *typeName, v8::Local<v8::Value> arg)
 	{
 		if (Types::isV8Primitive(arg))
 		{
-			std::map<std::string, v8BasicTypes>::iterator it = basicTypeMap.find(std::string(type));
+			//Resolve the type
+			TDataType* type = Types::getTypeByName(std::string(typeName));
+			if(type == nullptr) {
+				throw std::invalid_argument(std::string("Could not get type of ") + typeName);
+				return nullptr;
+			}
+
+			TString typeName = type->GetTypeName();
+			std::string stdTypeName(typeName.Data());
+
+			std::map<std::string, v8BasicTypes>::iterator it = basicTypeMap.find(stdTypeName);
 			if(it != basicTypeMap.end())
 			{
 				switch(it->second)
@@ -139,7 +149,7 @@ namespace rootJS
 			}
 
 			ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
-			return strcmp(type, argProxy->getTypeName()) == 0; // TODO: this will not work
+			return strcmp(typeName, argProxy->getTypeName()) == 0; // TODO: this will not work
 		}
 
 		return false;
