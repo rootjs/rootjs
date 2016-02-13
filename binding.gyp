@@ -21,6 +21,7 @@
 				'src/FunctionProxy.cc',
 				'src/ObjectProxy.cc',
 				'src/PrimitiveProxy.cc',
+				'src/VoidPointerProxy.cc',
 				'src/StringProxy.cc',
 				'src/BooleanProxy.cc',
 				'src/NumberProxy.cc',
