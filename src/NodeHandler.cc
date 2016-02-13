@@ -1,18 +1,9 @@
 #include "NodeHandler.h"
-#include <v8.h>
 #include "NodeApplication.h"
-#include "ObjectProxy.h"
-#include "ObjectProxyFactory.h"
-#include "CallbackHandler.h"
 #include "Toolbox.h"
 #include "ClassExposer.h"
-#include <string>
 #include <iostream>
-#include <TROOT.h>
-#include <TInterpreter.h>
-#include <TFunction.h>
-#include <TGlobal.h>
-#include <TClass.h>
+
 #include <TClassTable.h>
 
 namespace rootJS {

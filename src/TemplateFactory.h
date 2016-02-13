@@ -22,6 +22,7 @@ namespace rootJS
 			static v8::Local<v8::Function> getConstructor(TClass *clazz) throw(std::invalid_argument);
 
 			static v8::Local<v8::ObjectTemplate> createNamespaceTemplate(TClass *clazz) throw(std::invalid_argument);
+			static v8::Local<v8::Object> initializeNamespace(TClass *clazz) throw(std::invalid_argument);
 
 			static v8::Local<v8::ObjectTemplate> createEnumTemplate(TClass *clazz) throw(std::invalid_argument);
 			static v8::Local<v8::ObjectTemplate> createArrayTemplate(TClass *clazz) throw(std::invalid_argument);

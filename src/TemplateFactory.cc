@@ -5,6 +5,7 @@
 #include "FunctionProxy.h"
 #include "FunctionProxyFactory.h"
 #include "MemberInfo.h"
+#include "PointerInfo.h"
 #include "Toolbox.h"
 
 #include "TClassTable.h"
@@ -13,7 +14,7 @@
 
 #include "TCollection.h"
 #include "TList.h"
-
+#include <string>
 #include "RtypesCore.h"
 #include "Rtypes.h"
 
@@ -37,7 +38,7 @@ namespace rootJS
 
 		if (clazz->Property() & kIsNamespace)
 		{
-			return createNamespaceTemplate(clazz)->NewInstance();
+			return initializeNamespace(clazz);
 		}
 		else if (clazz->Property() & kIsClass)
 		{
@@ -46,6 +47,7 @@ namespace rootJS
 		else if (clazz->Property() & kIsStruct)
 		{
 			return createStructTemplate(clazz)->InstanceTemplate()->NewInstance(); // creation without ctor callback
+
 		}
 		else if (clazz->Property() & kIsUnion)
 		{
@@ -90,10 +92,117 @@ namespace rootJS
 		}
 	}
 
+	v8::Local<v8::Object> TemplateFactory::initializeNamespace(TClass *clazz) throw(std::invalid_argument)
+	{
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::EscapableHandleScope handle_scope(isolate);
+
+		v8::Local<v8::Object> nspace = createNamespaceTemplate(clazz)->NewInstance();
+
+		// populate namespace object
+		PointerInfo info(nullptr, clazz->GetName()); // TODO replace with something like ClassInfo / NSpaceInfo
+		nspace->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, new ObjectProxy(info, clazz));
+		nspace->SetAlignedPointerInInternalField(Toolbox::PropertyMapPtr, new std::map<std::string, ObjectProxy*>()); // there are no non-static members
+
+		return handle_scope.Escape(nspace);
+	}
+
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createNamespaceTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
-		v8::Local<v8::ObjectTemplate> namespaceTemplate = v8::ObjectTemplate::New(v8::Isolate::GetCurrent());
-		return namespaceTemplate;
+		if(!isValid(clazz))
+		{
+			throw std::invalid_argument("Specified TClass is null or not loaded.");
+		}
+
+		if(!(clazz->Property() & kIsNamespace))
+		{
+			throw std::invalid_argument("Specified TClass '" + std::string(clazz->GetName()) + "' is not a namespace.");
+		}
+
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::Local<v8::ObjectTemplate>  nspace = v8::ObjectTemplate::New(isolate);
+		std::string className(clazz->GetName());
+		nspace->SetInternalFieldCount(Toolbox::INTERNAL_FIELD_COUNT); // each instance stores a map containing the property proxies
+
+		/**
+		 *	Add public methods as properties
+		 */
+		std::map<std::string, TFunction*> methods;
+		TIter funcIter(clazz->GetListOfAllPublicMethods(kTRUE));
+		TMethod* method;
+		while ( (method = (TMethod*) funcIter()))
+		{
+			if (method == nullptr || !method->IsValid())
+			{
+				Toolbox::logError(std::string("Invalid method found in '").append(className).append("'."));
+				continue;
+			}
+
+			std::string methodName(method->GetName());
+
+			// Skip template functions
+			if(isTemplateFunction(methodName))
+			{
+				Toolbox::logInfo("Skipped template method '" + methodName + "' in '" + className + "'.");
+				continue;
+			}
+			Long_t property = method->Property();
+
+			// make overridden or overloaded methods only occur once
+			if (methods.count(methodName))
+			{
+				// Toolbox::logInfo("Already set method '" + methodName + "' as property in '" + className + "'.");
+				continue;
+			}
+			else
+			{
+				methods[methodName] = method;
+			}
+
+			switch (method->ExtraProperty())
+			{
+			case kIsConstructor:
+			case kIsDestructor:
+			case kIsConversion:
+				// don't expose
+				break;
+			case kIsOperator:
+				// TODO: handle operators
+				// Toolbox::logInfo("Operator '" + methodName + "' found in '" + className + "'.");
+				break;
+			default:
+
+				if (property & kIsStatic)
+				{
+					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
+					nspace->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+				}
+				break;
+			}
+		}
+		/**
+		    *	Add public static members as properties
+		    */
+		TIter memberIter(clazz->GetListOfAllPublicDataMembers(kTRUE));
+		TDataMember *member;
+		while ( (member = (TDataMember*) memberIter()))
+		{
+			if (member == nullptr || !member->IsValid())
+			{
+				Toolbox::logError("Invalid member found in '" + className + "'.");
+				continue;
+			}
+
+			if(member->Property() & kIsStatic)
+			{
+				MemberInfo info(*member, (void*)(member->GetOffsetCint()));	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
+				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
+				CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
+				nspace->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback);
+			}
+		}
+
+		return nspace;
 	}
 
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createEnumTemplate(TClass *clazz) throw(std::invalid_argument)
@@ -210,7 +319,7 @@ namespace rootJS
 		{
 			if (method == nullptr || !method->IsValid())
 			{
-				Toolbox::logError("Invalid method found in '" + className + "'.");
+				Toolbox::logError(std::string("Invalid method found in '").append(className).append("'."));
 				continue;
 			}
 
