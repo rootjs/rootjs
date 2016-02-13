@@ -42,7 +42,7 @@ namespace rootJS
 				return typeName;
 			};
 
-			virtual MetaInfo* clone()
+			virtual PointerInfo* clone()
 			{
 				return new PointerInfo(baseAddress, typeName);
 			};
