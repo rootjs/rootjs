@@ -158,7 +158,7 @@ namespace rootJS
 
 		proxy->prepareCall(args);
 		ObjectProxy *resultProxy = proxy->call();
-		if(proxy)
+		if(resultProxy && proxy)
 		{
 			if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
 				info.GetReturnValue().Set(resultProxy->get());
@@ -167,7 +167,6 @@ namespace rootJS
 				info.GetReturnValue().Set(resultProxy->getWeakPeristent());
 			}
 		}
-
 		delete proxy;
 	}
 
