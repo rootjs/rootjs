@@ -31,7 +31,7 @@ namespace rootJS
 
 	std::map<std::string, ProxyInitializator> ObjectProxyFactory::primitiveProxyMap;
 
-	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope /*, ObjectProxy  *holder*/) throw(std::invalid_argument)
+	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope, ObjectProxy *holder) throw(std::invalid_argument)
 	{
 		std::map<std::string, ObjectProxy*> *propertyMap = new std::map<std::string, ObjectProxy*>();
 
@@ -50,7 +50,7 @@ namespace rootJS
 				continue;
 			}
 
-			if(!(member->Property() & kIsStatic))
+			if(!(member->Property() & kIsStatic) && holder->getProxy()->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName())))
 			{
 				/*
 				 * Toolbox::logInfo("Encapsulating '" + std::string(member->GetName()) + "' from '" + std::string(scope->GetName()) + "'.");
@@ -77,7 +77,7 @@ namespace rootJS
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope) throw(std::invalid_argument)
 	{
-		ObjectProxy* proxy = createPrimitiveProxy(info, scope);
+		ObjectProxy* proxy = findPrimitiveProxy(info, scope);
 
 		if(proxy != nullptr)
 		{
@@ -103,7 +103,7 @@ namespace rootJS
 		proxy = new ObjectProxy(info, scope);
 		proxy->setProxy(instance);
 
-		std::map<std::string, ObjectProxy*>* propertyMap = createPropertyMap(info, type);
+		std::map<std::string, ObjectProxy*>* propertyMap = createPropertyMap(info, type, proxy);
 
 		instance->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, proxy);
 		instance->SetAlignedPointerInInternalField(Toolbox::PropertyMapPtr, propertyMap);
@@ -111,36 +111,38 @@ namespace rootJS
 		return proxy;
 	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(TGlobal &global)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope, v8::Local<v8::Object> instance)
 	{
-		if(!global.IsValid() || !global.GetAddress())
+		// TODO
+		return createObjectProxy(info, scope);
+	}
+
+	ObjectProxy* ObjectProxyFactory::findPrimitiveProxy(MetaInfo &info, TClass* clazz)
+	{
+		std::string trueType;
+		if(!resolveTypeName(info, trueType))
 		{
 			return nullptr;
 		}
 
-		/*
-		if(!(global.Property() & kIsEnum))
+		if(primitiveProxyMap.find(trueType) == primitiveProxyMap.end())
 		{
-			Toolbox::logInfo("Encapsulating global '" + std::string(global.GetName()) + "'.");
-			Toolbox::logInfo("");
-
-			Toolbox::logInfo("GetTypeName()     '" + std::string(global.GetTypeName()) + "'.");
-			Toolbox::logInfo("GetFullTypeName() '" + std::string(global.GetFullTypeName()) + "'.");
-
-			Toolbox::logInfo("------------------------------------------------------------");
-			Toolbox::logInfo("");
+			Toolbox::logError("Could not resolve basic type '" + trueType
+			                  + "' from '" + std::string(info.getName())
+			                  + "' with type '" + std::string(info.getTypeName())
+			                  + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
+			return nullptr;
+		}
+		/* else
+		{
+			Toolbox::logInfo("Resolved '" + trueType
+			                 + "' from '" + std::string(info.getName())
+			                 + "' with type '" + std::string(info.getTypeName())
+			                 + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
 		   }
 		*/
 
-		GlobalInfo info(global);
-		return createObjectProxy(info, nullptr);
-	}
-
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(void *address, TClass *type, v8::Local<v8::Object> proxy)
-	{
-		// TODO: populate proxy
-		PointerInfo info(address, type->GetName());
-		return createObjectProxy(info, type);
+		return primitiveProxyMap[trueType](info, clazz);
 	}
 
 	TClass* ObjectProxyFactory::getClass(std::string const& typeName)
@@ -162,40 +164,23 @@ namespace rootJS
 		return nullptr;
 	}
 
-	ObjectProxy* ObjectProxyFactory::createPrimitiveProxy(MetaInfo &info, TClass* clazz)
+	bool ObjectProxyFactory::resolveTypeName(MetaInfo &info, std::string &trueType)
 	{
 		std::string stdTypeName(info.getTypeName());
 		TDataType* type = Types::getTypeByName(stdTypeName);
 		if(type == nullptr)
 		{
-			return nullptr;
+			return false;
 		}
 
 		TString typeName = type->GetTypeName().Data();
 		if(typeName.IsNull())
 		{
-			return nullptr;
+			return false;
 		}
 
-		stdTypeName = std::string(typeName.Data());
-		if(primitiveProxyMap.find(stdTypeName) == primitiveProxyMap.end())
-		{
-			Toolbox::logError("Could not resolve basic type '" + stdTypeName
-			                  + "' from '" + std::string(info.getName())
-			                  + "' with type '" + std::string(info.getTypeName())
-			                  + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
-			return nullptr;
-		}
-		/* else
-		{
-			Toolbox::logInfo("Resolved '" + stdTypeName
-			                 + "' from '" + std::string(info.getName())
-			                 + "' with type '" + std::string(info.getTypeName())
-			                 + "' in '" +  ((clazz == nullptr) ? "global" : std::string(clazz->GetName())) + "' scope.");
-		   }
-		*/
-
-		return primitiveProxyMap[stdTypeName](info, clazz);
+		trueType = std::string(typeName.Data());
+		return true;
 	}
 
 	void ObjectProxyFactory::initializeProxyMap()
