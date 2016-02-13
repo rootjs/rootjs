@@ -201,6 +201,7 @@ namespace rootJS
 			{
 				v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> params;
 				FunctionProxy* proxy;
+				void* selfAddress;
 			};
 
 			static std::map<std::string, ObjectProxy*> globalObjectMap;

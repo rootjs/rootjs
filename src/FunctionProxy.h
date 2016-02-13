@@ -46,7 +46,7 @@ namespace rootJS
 			 * @param function the function's reflection object
 			 * @param scope the class that the function belongs to
 			 */
-			FunctionProxy(void *address, FunctionInfo &info, TFunction *function, TClass *scope);
+			FunctionProxy(FunctionInfo &info, TFunction *function, TClass *scope);
 
 			/**
 			 * Makes a clone of the current FunctionProxy
@@ -71,7 +71,7 @@ namespace rootJS
 			 * @param args the arguments for the function call.
 			 * @return the function's return value encasulated in an ObjectProxy
 			 */
-			ObjectProxy* call(bool isConstructorCall = false);
+			ObjectProxy* call(void *self, bool isConstructorCall = false);
 
 			/**
 			 * TODO: verify
@@ -90,17 +90,6 @@ namespace rootJS
 			 * @return true if the overloaded function is found
 			bool determineOverload(const v8::Local<v8::Array>& info);
 			 */
-
-			/**
-			 * Sets the address of the function
-			 *
-			 * @param addr
-			 *              The address the function will be set to
-			 */
-			void setSelfAddress(void* addr)
-			{
-				selfAddress = addr;
-			}
 
 			/**
 			 * Check if this proxy encapsulates a constant.
@@ -150,8 +139,6 @@ namespace rootJS
 			TFunction* function;
 			std::vector<void*> buf;
 
-			void *address;
-			void *selfAddress = 0;
 
 			static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg);
 

@@ -58,18 +58,16 @@ namespace rootJS
 		return methods;
 	}
 
-	FunctionProxy::FunctionProxy(void *address, FunctionInfo &info, TFunction *function, TClass *scope) : Proxy(info, scope)
+	FunctionProxy::FunctionProxy(FunctionInfo &info, TFunction *function, TClass *scope) : Proxy(info, scope)
 	{
-		this->address = address;
 		this->function = function;
 	}
 
 	FunctionProxy* FunctionProxy::clone()
 	{
-		FunctionProxy *p = new FunctionProxy(address, *(rootJS::FunctionInfo*)info, function, scope);
+		FunctionProxy *p = new FunctionProxy(*(rootJS::FunctionInfo*)info, function, scope);
 		p->buf = buf;
 		p->facePtr = facePtr;
-		p->selfAddress = selfAddress;
 		return p;
 	}
 
@@ -156,7 +154,7 @@ namespace rootJS
 
 	void FunctionProxy::prepareCall(const  v8::Local<v8::Array>& args)
 	{
-		CallFunc_t* callFunc = (CallFunc_t*)getCallFunc(scope, function);
+		CallFunc_t* callFunc = (CallFunc_t*)info->getAddress();
 		if(!callFunc)
 		{
 			//TODO Handle this, should not segfault (maybe throw something...)
@@ -173,9 +171,8 @@ namespace rootJS
 		}
 	}
 
-	ObjectProxy* FunctionProxy::call(bool isConstructorCall /* false */)
+	ObjectProxy* FunctionProxy::call(void *self, bool isConstructorCall /* false */)
 	{
-		void *self = nullptr;
 		void *result = nullptr;
 		void **resultPtr;
 		resultPtr = &result;
@@ -194,13 +191,17 @@ namespace rootJS
 		switch(facePtr.fKind)
 		{
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
-			facePtr.fGeneric((selfAddress == nullptr) ? self : *(void**)selfAddress, buf.size(), buf.data(), resultPtr);
+			facePtr.fGeneric(self, buf.size(), buf.data(), resultPtr);
 			break;
 		case (TInterpreter::CallFuncIFacePtr_t::kCtor):
 			facePtr.fCtor(buf.data(), &result, buf.size());
 			break;
-		default:
-			Toolbox::throwException("Jonas was too lazy to implement this...");
+		case (TInterpreter::CallFuncIFacePtr_t::kDtor):
+			throw std::invalid_argument("Destructor calls are not supported, objects will automatically be destructed when they go out of scope.");
+			break;
+		case (TInterpreter::CallFuncIFacePtr_t::kUninitialized):
+			throw std::invalid_argument("Got an uninitialized CallFuncIFacePtr_t, this should not happen and might be a bug.");
+			break;
 		}
 
 		for(int i = 0; i < (int)buf.size(); i++)
