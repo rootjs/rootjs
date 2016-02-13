@@ -24,7 +24,9 @@ namespace rootJS
 		private:
 			static std::map<std::string, ProxyInitializator> primitiveProxyMap;
 
+			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope, v8::Local<v8::Object>* instancePtr) throw(std::invalid_argument);
 			static std::map<std::string, ObjectProxy*>* createPropertyMap(MetaInfo &info, TClass *clazz, ObjectProxy *holder) throw(std::invalid_argument);
+
 			static TClass* getClass(std::string const& typeName);
 			static TEnumConstant* getEnumConstant(std::string const& typeName);
 			static bool resolveTypeName(MetaInfo &info, std::string &trueType);
@@ -59,20 +61,11 @@ namespace rootJS
 			 *
 			 *	@return a new ObjectProxy holding the supplied JavaScript object for exposure
 			 */
-			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope, v8::Local<v8::Object> instance);
+			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope, v8::Local<v8::Object> instance) throw(std::invalid_argument);
 
-            /**
-			 *	Encapsulate the data at the specified address into the specified primitive JavaScript object.
-			 *
-			 *	@param info
-			 *			the info of the Object to be created
-			 *
-			 *	@param scope
-			 *			the type of the data which should be encapsulated
-			 *
-			 *	@return a new primitive ObjectProxy holding the specified JavaScript Object for exposure
-			 */
-			static ObjectProxy* findPrimitiveProxy(MetaInfo &info, TClass *scope);
+			static ObjectProxy* createPrimitiveProxy(MetaInfo &info, TClass *scope);
+
+			static ObjectProxy* createEnumProxy(MetaInfo &info, TClass *scope);
 
             /**
              *  Initializes the ProxyMap with standard data types.
