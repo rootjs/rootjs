@@ -252,7 +252,8 @@ namespace rootJS
 				return nullptr;
 			}
 			copied = false;
-			return argToObj(originalArg);
+			std::string fullTypeName(arg->GetFullTypeName());
+			return argToObj(originalArg, std::count(fullTypeName.begin(), fullTypeName.end(), '*'));
 		}
 
 		TString typeName = type->GetTypeName();
@@ -327,13 +328,18 @@ namespace rootJS
 		return new TString(*string);
 	}
 
-	void* FunctionProxy::argToObj(v8::Local<v8::Value> originalArg)
+	void* FunctionProxy::argToObj(v8::Local<v8::Value> originalArg, int derefCount)
 	{
 		v8::Local<v8::Object> obj = v8::Local<v8::Object>::Cast(originalArg);
 		assert(obj->InternalFieldCount() == Toolbox::INTERNAL_FIELD_COUNT);
 
 		ObjectProxy *proxy = (ObjectProxy*)obj->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
-		return *(void**)(proxy->getAddress());
+
+		void *result = proxy->getAddress();
+		for(; derefCount < 1; derefCount++) {
+			result = *(void**)result;
+		}
+		return result;
 	}
 
 
