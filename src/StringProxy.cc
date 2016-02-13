@@ -76,11 +76,13 @@ namespace rootJS
 		if(isConst())
 		{
 			Toolbox::throwException("This value cannot be overwritten, it's constant.");
+            return;
 		}
 
 		if(!value->IsString() && !value->IsStringObject())
 		{
 			Toolbox::throwException("This element can only store strings.");
+			return;
 		}
 
 		v8::String::Utf8Value str(value->ToString());
