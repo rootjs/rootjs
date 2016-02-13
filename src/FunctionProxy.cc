@@ -9,6 +9,7 @@
 #include "FunctionInfo.h"
 #include "PointerInfo.h"
 #include "Toolbox.h"
+#include "Types.h"
 
 #include <map>
 #include <sstream>
@@ -229,10 +230,21 @@ namespace rootJS
 
 	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg)
 	{
-		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(std::string(arg->GetTypeName()));
+		TDataType* type = Types::getTypeByName(std::string(arg->GetTypeName()));
+		if(type == nullptr) {
+			throw std::invalid_argument(std::string("Could not get type of ") + arg->GetTypeName());
+			return nullptr;
+		}
+
+		TString typeName = type->GetTypeName();
+		std::string stdTypeName(typeName.Data());
+		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(stdTypeName);
 		if(iterator == typeMap.end())
 		{
-			Toolbox::throwException(std::string("bufferParam does not know how to handle ") + arg->GetTypeName());
+			//Might be an object
+
+
+			throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + arg->GetTypeName());
 			return nullptr;
 		}
 		switch(iterator->second)
