@@ -44,6 +44,7 @@ namespace rootJS
 		if(isConst())
 		{
 			Toolbox::throwException("This value cannot be overwritten, it's constant.");
+			return;
 		}
 
 		bool* b = (bool*)getAddress();
