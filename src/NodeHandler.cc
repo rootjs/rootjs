@@ -110,7 +110,7 @@ namespace rootJS
 	}
 
 	void NodeHandler::exposeClasses() throw (std::invalid_argument)
-	{
+	{	//TODO implement maps for dynamic loading
 		for (int i = 0; i < gClassTable->Classes(); i++)
 		{
 			DictFuncPtr_t funcPtr = gClassTable->GetDict(gClassTable->At(i));
@@ -171,7 +171,7 @@ namespace rootJS
 	}
 
 	void NodeHandler::refreshExports() {
-
+		exposeClasses(); //crashes
 	}
 
 
