@@ -1,3 +1,4 @@
+/*jshint expr: true*/
 require('should');
 var root = require('../index');
 
