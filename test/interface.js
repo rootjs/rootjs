@@ -76,9 +76,11 @@ describe('Interface', function() {
           });
 
 		  it('should fail to write to const globals', function() {
+			  var oldValue = root.kInitTreatAsZero;
 			  (function(){
 				  root.kInitTreatAsZero = 0;
 			  }).should.throw();
+			  root.kInitTreatAsZero.should.equal(oldValue);
 		  });
       });
 	  describe('strings', function() {
@@ -86,9 +88,11 @@ describe('Interface', function() {
 			  root.gProgName.should.equal('node');
 		  });
 		  it('should consider char pointers to be immutable', function() {
+			  var oldValue = root.gProgName;
 			  (function(){
 				  root.gProgName = 'testImmutable';
 			  }).should.throw();
+			  root.gProgName.should.equal(oldValue);
 		  });
 	  });
 	  describe('booleans', function() {
@@ -102,6 +106,7 @@ describe('Interface', function() {
 			  (function() {
 				  root.kFALSE = true;
 			  }).should.throw();
+			  root.kFALSE.should.equal(false);
 		  });
 	  });
 	  describe('functions', function() {

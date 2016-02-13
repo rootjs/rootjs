@@ -10,7 +10,7 @@ describe('Bugs', function() {
 		 tstring.Copy().Data().should.equal("test");
 	 });
   });
-  describe('#30', function() {
+describe('#30', function() {
 	  it('should be possible to pass objects', function() {
 		  var test = new root.TString("test");
 		  var test2 = new root.TString(test);
@@ -27,5 +27,13 @@ describe('Bugs', function() {
 		  }).should.not.throw();
 
 	  });
+  });
+  describe('constants', function() {
+	  it('constants should really be constant!', function() {
+		  (function() {
+			  root.kFALSE = true;
+		  }).should.throw();
+		  root.kFALSE.should.equal(false);
+	 });
   });
 });
