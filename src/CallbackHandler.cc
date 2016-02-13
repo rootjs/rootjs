@@ -159,7 +159,7 @@ namespace rootJS
 
 		proxy->prepareCall(args);
 		ObjectProxy *resultProxy = proxy->call(nullptr);
-		if(resultProxy && proxy)
+		if(resultProxy)
 		{
 			if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
 				info.GetReturnValue().Set(resultProxy->get());
@@ -292,7 +292,6 @@ namespace rootJS
 			Toolbox::throwException("No suitable method named '" + name + "' found for the supplied arguments in '" + std::string(scope->GetName()) + "'.");
 			return;
 		}
-		proxy->setSelfAddress(holder->getAddress());
 
 		if(callback.IsEmpty())
 		{
