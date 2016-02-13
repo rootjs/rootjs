@@ -5,6 +5,7 @@
 #include "FunctionProxy.h"
 #include "FunctionProxyFactory.h"
 #include "MemberInfo.h"
+#include "PointerInfo.h"
 #include "Toolbox.h"
 
 #include "TClassTable.h"
@@ -37,7 +38,7 @@ namespace rootJS
 
 		if (clazz->Property() & kIsNamespace)
 		{
-			return createNamespaceTemplate(clazz)->NewInstance();
+			return initializeNamespace(clazz);
 		}
 		else if (clazz->Property() & kIsClass)
 		{
@@ -91,6 +92,21 @@ namespace rootJS
 		}
 	}
 
+	v8::Local<v8::Object> TemplateFactory::initializeNamespace(TClass *clazz) throw(std::invalid_argument)
+	{
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::EscapableHandleScope handle_scope(isolate);
+
+		v8::Local<v8::Object> nspace = createNamespaceTemplate(clazz)->NewInstance();
+
+		// populate namespace object
+		PointerInfo info(nullptr, clazz->GetName()); // TODO replace with something like ClassInfo / NSpaceInfo
+		nspace->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, new ObjectProxy(info, clazz));
+		nspace->SetAlignedPointerInInternalField(Toolbox::PropertyMapPtr, new std::map<std::string, ObjectProxy*>()); // there are no non-static members
+
+		return handle_scope.Escape(nspace);
+	}
+
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createNamespaceTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
 		if(!isValid(clazz))
@@ -127,7 +143,7 @@ namespace rootJS
 			// Skip template functions
 			if(isTemplateFunction(methodName))
 			{
-				 Toolbox::logInfo("Skipped template method '" + methodName + "' in '" + className + "'.");
+				Toolbox::logInfo("Skipped template method '" + methodName + "' in '" + className + "'.");
 				continue;
 			}
 			Long_t property = method->Property();
@@ -145,28 +161,28 @@ namespace rootJS
 
 			switch (method->ExtraProperty())
 			{
-				case kIsConstructor:
-				case kIsDestructor:
-				case kIsConversion:
-					// don't expose
-					break;
-				case kIsOperator:
-					// TODO: handle operators
-					// Toolbox::logInfo("Operator '" + methodName + "' found in '" + className + "'.");
-					break;
-				default:
+			case kIsConstructor:
+			case kIsDestructor:
+			case kIsConversion:
+				// don't expose
+				break;
+			case kIsOperator:
+				// TODO: handle operators
+				// Toolbox::logInfo("Operator '" + methodName + "' found in '" + className + "'.");
+				break;
+			default:
 
-					if (property & kIsStatic)
-					{
-						v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
-						nspace->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
-					}
-					break;
+				if (property & kIsStatic)
+				{
+					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
+					nspace->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+				}
+				break;
 			}
 		}
-	/**
-     *	Add public static members as properties
-     */
+		/**
+		    *	Add public static members as properties
+		    */
 		TIter memberIter(clazz->GetListOfAllPublicDataMembers(kTRUE));
 		TDataMember *member;
 		while ( (member = (TDataMember*) memberIter()))
@@ -269,7 +285,6 @@ namespace rootJS
 
 		v8::Local<v8::FunctionTemplate> tmplt = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
 		tmplt->SetClassName(v8::String::NewFromUtf8(isolate, className.c_str()));
-		tmplt->PrototypeTemplate()->SetInternalFieldCount(1);
 
 		// create template
 		createInstantiableTemplate(clazz, tmplt);
@@ -287,7 +302,6 @@ namespace rootJS
 
 		// add static functions and members to the prototype template
 		v8::Local<v8::ObjectTemplate> prototype = tmplt->PrototypeTemplate();
-		// prototype->SetInternalFieldCount(1);
 
 		// add non-static functions and members to the instance template
 		v8::Local<v8::ObjectTemplate> instance = tmplt->InstanceTemplate();
