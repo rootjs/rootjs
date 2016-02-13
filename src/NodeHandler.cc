@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include <TClassTable.h>
+#include <TSystem.h>
 
 namespace rootJS
 {
