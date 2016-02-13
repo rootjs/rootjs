@@ -17,22 +17,20 @@ namespace rootJS
 			MemberInfo(const TDataMember &, void* baseAddress);
 			~MemberInfo();
 
-			virtual bool isGlobal();
 			virtual Long_t getOffset();
 
+			virtual bool isGlobal();
 			virtual bool isConst();
 			virtual bool isStatic();
 
 			virtual const char* getTypeName();
 			virtual const char* getName();
 
-			/** The type the MemberInfo is holding.  */
-			const TDataMember &currentObject;
+			virtual MemberInfo* clone();
 
-			virtual MetaInfo* clone()
-			{
-				return new MemberInfo(currentObject, baseAddress);
-			};
+		private:
+			/** The type the MemberInfo is holding.  */
+			const TDataMember &type;
 	};
 }
 #endif

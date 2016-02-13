@@ -18,26 +18,20 @@ namespace rootJS
 			GlobalInfo(const TGlobal & type);
 			~GlobalInfo();
 
-			virtual bool isGlobal();
 			virtual Long_t GetOffset();
 
+			virtual bool isGlobal();
 			virtual bool isConst();
-			virtual bool isStatic()
-			{
-				return true;
-			};
+			virtual bool isStatic();
 
 			virtual const char* getTypeName();
 			virtual const char* getName();
 
-			/** The type the GlobalInfo is holding.  */
-			const TGlobal &currentObject;
+			virtual GlobalInfo* clone();
 
-			virtual MetaInfo* clone()
-			{
-				return new GlobalInfo(currentObject);
-			};
-		protected:
+		private:
+			/** The type the GlobalInfo is holding.  */
+			const TGlobal &type;
 	};
 }
 
