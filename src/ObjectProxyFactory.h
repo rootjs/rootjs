@@ -28,7 +28,6 @@ namespace rootJS
 			static std::map<std::string, ObjectProxy*>* createPropertyMap(MetaInfo &info, TClass *clazz, ObjectProxy *holder) throw(std::invalid_argument);
 
 			static TClass* getClass(std::string const& typeName);
-			static TEnumConstant* getEnumConstant(std::string const& typeName);
 			static bool resolveTypeName(MetaInfo &info, std::string &trueType);
 
 			ObjectProxyFactory();
@@ -63,9 +62,9 @@ namespace rootJS
 			 */
 			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope, v8::Local<v8::Object> instance) throw(std::invalid_argument);
 
-			static ObjectProxy* createPrimitiveProxy(MetaInfo &info, TClass *scope);
+			static ObjectProxy* createPrimitiveProxy(std::string const& trueTypeName, MetaInfo &info, TClass *scope);
 
-			static ObjectProxy* createEnumProxy(MetaInfo &info, TClass *scope);
+			static ObjectProxy* createEnumProxy(std::string const& trueTypeName, MetaInfo &info, TClass *scope);
 
             /**
              *  Initializes the ProxyMap with standard data types.
