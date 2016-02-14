@@ -153,17 +153,13 @@ namespace rootJS
 			return;
 		}
 
-		//TODO: Callback!
-		// if(callback.IsEmpty()) ...
-
-
 
 		if(callback.IsEmpty())
 		{
 			proxy->prepareCall(args);
 			ObjectProxy *resultProxy = proxy->call(nullptr);
 			delete proxy;
-			if(resultProxy) {
+			if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
 				info.GetReturnValue().Set(resultProxy->get());
 				delete resultProxy;
 			} else {
