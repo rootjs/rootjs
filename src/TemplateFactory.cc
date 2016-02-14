@@ -173,8 +173,18 @@ namespace rootJS
 				// don't expose
 				break;
 			case kIsOperator:
-				// TODO: handle operators
-				// Toolbox::logInfo("Operator '" + methodName + "' found in '" + className + "'.");
+				{
+					std::map<std::string, std::string>::const_iterator opNameIt = Types::operatorNames.find(method->GetName());
+					if(opNameIt == Types::operatorNames.end())
+					{
+						Toolbox::logInfo(std::string("Operator: ") + method->GetName() + " not handled",1);
+					}
+					else
+					{
+						v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
+						nspace->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+					}
+				}
 				break;
 			default:
 
@@ -200,8 +210,12 @@ namespace rootJS
 			{
 				MemberInfo info(*member, (void*)(member->GetOffsetCint()));	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
 				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
-				v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
-				nspace->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+
+				if(proxy != nullptr)	// don't expose members that could not be encapsulated
+				{
+					v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
+					nspace->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+				}
 			}
 		}
 
@@ -472,9 +486,12 @@ namespace rootJS
 			{
 				MemberInfo info(*member, (void*)(member->GetOffsetCint()));	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
 				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
-				v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
 
-				tmplt->SetNativeDataProperty(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+				if(proxy != nullptr)	// don't expose members that could not be encapsulated
+				{
+					v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
+					tmplt->SetNativeDataProperty(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+				}
 			}
 			else
 			{
