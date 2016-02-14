@@ -5,15 +5,15 @@ var root = require('../index');
 
 describe('Objects', function() {
   describe('methods', function() {
-	  it('should not be possible to call gSystem.Dump without the corect args', function() {
+	  it('should not be possible to call gSystem.SizeOf without the corect args', function() {
 		  (function() {
-			  root.gSystem.Dump();
+			  root.gSystem.Sizeof();
 		  }).should.not.throw();
 		  (function() {
-			  root.gSystem.Dump(true);
+			  root.gSystem.SizeOf(true);
 		  }).should.throw();
 		  (function() {
-			  root.gSystem.Dump("test");
+			  root.gSystem.SizeOf("test");
 		  }).should.throw();
 	  });
 	  it('should have gSystem.ProcessEvents returning a boolean value', function() {

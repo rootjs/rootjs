@@ -28,4 +28,9 @@ namespace rootJS
 			std::cerr << message << std::endl;
 		}
 	}
+
+	std::string Toolbox::Stringv8toStd(v8::Local<v8::String> vstr) {
+		return std::string(*v8::String::Utf8Value(vstr->ToString()));
+	}
+
 }
