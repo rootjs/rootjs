@@ -198,17 +198,11 @@ namespace rootJS
 
 	ObjectProxy* ObjectProxyFactory::createEnumProxy(std::string const& trueTypeName, MetaInfo &info, TClass *scope)
 	{
-		/*
 		TEnum *e = TEnum::GetEnum(trueTypeName.c_str());
-
-		if(e == nullptr) {
-			return nullptr;
-	} else {
-			v8::Local<v8::Object> eNum = v8::Object::New(v8::Isolate::GetCurrent());
-
-	}
-		*/
-
+		if(e != nullptr)
+		{
+			return NumberProxy::llongConstruct(info, scope);
+		}
 		return nullptr;
 	}
 
