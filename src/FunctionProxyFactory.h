@@ -19,12 +19,20 @@ namespace rootJS
 		OBJECT
 	};
 
+	struct NumberInfo {
+		bool floatingPoint;
+		long double maxValue;
+		long double minValue;
+	};
+
 	class FunctionProxyFactory
 	{
 		private:
 			static std::map<std::string, v8BasicTypes> basicTypeMap;
+			static std::map<std::string, NumberInfo> basicNumberInfoMap;
 
-			static bool paramMatches(const char *type, v8::Local<v8::Value> object);
+			static bool checkNumberBounds(const char *type, v8::Local<v8::Value> object, bool &prefer);
+			static bool paramMatches(const char *type, v8::Local<v8::Value> object, bool &prefer);
 
 			FunctionProxyFactory(void);
 
