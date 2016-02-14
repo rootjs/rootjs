@@ -22,18 +22,10 @@ describe('Bugs', function() {
 		  var test2 = new root.TString(test);
 		  test2.Data().should.equal("test");
 	  });
-	  xit('should be possible to pass pointers to objects as params', function(done) { //Test is unstable...
-		  var object = new root.TObject();
-		  var browser = new root.TBrowser();
+	  it('should be possible to pass pointers to objects as params', function() { //Test is unstable...
 		  (function() {
-			  browser.Add(object);
-		  }).should.not.throw();
-		  setTimeout(function() {
-			  //browser.Destructor();
-			  /* When we do not run this we get a segfault because the initialization is not complete before the test is done and
-			   * deletion of a TBrowser when it's not fully loaded leads to a crash */
-			   done();
-		  }, 200);
+			  root.ROOT.GetROOT().SetApplication(root.gApplication);
+		  }).should.not.throw()
 	  });
   });
   describe('constants', function() {
