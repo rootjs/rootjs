@@ -1,7 +1,6 @@
 #include "NodeHandler.h"
 
 #include "NodeApplication.h"
-#include "ClassExposer.h"
 #include "GlobalInfo.h"
 #include "Toolbox.h"
 #include "Types.h"
