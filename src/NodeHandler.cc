@@ -23,7 +23,6 @@ namespace rootJS
 		{
 
 			NodeApplication::CreateNodeApplication();
-			ObjectProxyFactory::initializeProxyMap();
 			instance = new NodeHandler(exports);
 			instance->exposeROOT();
 

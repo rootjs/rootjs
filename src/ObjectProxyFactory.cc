@@ -29,8 +29,6 @@
 namespace rootJS
 {
 
-	std::map<std::string, ProxyInitializator> ObjectProxyFactory::primitiveProxyMap;
-
 	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope, ObjectProxy *holder) throw(std::invalid_argument)
 	{
 		std::map<std::string, ObjectProxy*> *propertyMap = new std::map<std::string, ObjectProxy*>();
@@ -184,12 +182,13 @@ namespace rootJS
 
 	ObjectProxy* ObjectProxyFactory::createPrimitiveProxy(std::string const& trueTypeName, MetaInfo &info, TClass *scope)
 	{
-		if(primitiveProxyMap.find(trueTypeName) == primitiveProxyMap.end())
+		std::map<std::string, ProxyInitializator>::const_iterator iter = primitiveProxyMap.find(trueTypeName);
+		if(iter == primitiveProxyMap.end())
 		{
 			return nullptr;
 		}
 
-		return primitiveProxyMap[trueTypeName](info, scope);
+		return iter->second(info, scope);
 	}
 
 	TClass* ObjectProxyFactory::getClass(std::string const& typeName)
@@ -222,45 +221,44 @@ namespace rootJS
 		return true;
 	}
 
-	void ObjectProxyFactory::initializeProxyMap()
-	{
+	const std::map<std::string, ProxyInitializator> ObjectProxyFactory::primitiveProxyMap {
 
-		primitiveProxyMap["int"]                = &NumberProxy::intConstruct;
-		primitiveProxyMap["unsigned int"]       = &NumberProxy::uintConstruct;
+		{"int", &NumberProxy::intConstruct},
+		{"unsigned int", &NumberProxy::uintConstruct},
 
-		primitiveProxyMap["double"]             = &NumberProxy::doubleConstruct;
-		primitiveProxyMap["long double"]        = &NumberProxy::ldoubleConstruct;
+		{"double", &NumberProxy::doubleConstruct},
+		{"long double", &NumberProxy::ldoubleConstruct},
 
-		primitiveProxyMap["short"]              = &NumberProxy::shortConstruct;
-		primitiveProxyMap["unsigned short"]     = &NumberProxy::ushortConstruct;
+		{"short", &NumberProxy::shortConstruct},
+		{"unsigned short", &NumberProxy::ushortConstruct},
 
-		primitiveProxyMap["unsigned char"]      = &NumberProxy::ucharConstruct;
+		{"unsigned char", &NumberProxy::ucharConstruct},
 
-		primitiveProxyMap["long"]               = &NumberProxy::longConstruct;
-		primitiveProxyMap["long long"]          = &NumberProxy::llongConstruct;
+		{"long", &NumberProxy::longConstruct},
+		{"long long", &NumberProxy::llongConstruct},
 
-		primitiveProxyMap["unsigned long"]      = &NumberProxy::ulongConstruct;
-		primitiveProxyMap["unsigned long long"] = &NumberProxy::ullongConstruct;
+		{"unsigned long", &NumberProxy::ulongConstruct},
+		{"unsigned long long", &NumberProxy::ullongConstruct},
 
-		primitiveProxyMap["float"]              = &NumberProxy::floatConstruct;
+		{"float", &NumberProxy::floatConstruct},
 
-		primitiveProxyMap["char"]               = &StringProxy::singleCharConstruct;
-		primitiveProxyMap["char*"]              = &StringProxy::charConstruct;
-		primitiveProxyMap["const char*"]        = &StringProxy::charConstruct;
-		primitiveProxyMap["char&"]              = &StringProxy::singleCharConstruct;
+		{"char", &StringProxy::singleCharConstruct},
+		{"char*", &StringProxy::charConstruct},
+		{"const char*", &StringProxy::charConstruct},
+		{"char&", &StringProxy::singleCharConstruct},
 
-		primitiveProxyMap["string"]             = &StringProxy::stringConstruct;	// = std::string
+		{"string", &StringProxy::stringConstruct},	// = std::string
 
-		primitiveProxyMap["bool"]               = &BooleanProxy::boolConstruct;
+		{"bool", &BooleanProxy::boolConstruct},
 
-		primitiveProxyMap["void"]               = &VoidPointerProxy::voidConstruct;
+		{"void", &VoidPointerProxy::voidConstruct},
 
 		// Special typedefs
-		primitiveProxyMap["Double32_t"]         = &NumberProxy::doubleConstruct;
-		primitiveProxyMap["Float16_t"]          = &NumberProxy::floatConstruct;
-		primitiveProxyMap["Long64_t"]           = &NumberProxy::llongConstruct;
-		primitiveProxyMap["ULong64_t"]          = &NumberProxy::ullongConstruct;
+		{"Double32_t", &NumberProxy::doubleConstruct},
+		{"Float16_t", &NumberProxy::floatConstruct},
+		{"Long64_t", &NumberProxy::llongConstruct},
+		{"ULong64_t", &NumberProxy::ullongConstruct}
 
-	}
+	};
 
 }
