@@ -15,13 +15,15 @@
 #include "RConfig.h"
 
 
-namespace rootJS {
+namespace rootJS
+{
 
 	/**
 	 * The ObjectProxy class is used to represent ROOT objects.
 	 * It differentiates between primitive and non-primitive object types.
 	 */
-	class ObjectProxy : public Proxy {
+	class ObjectProxy : public Proxy
+	{
 
 		public:
 			/**

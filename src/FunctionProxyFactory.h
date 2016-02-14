@@ -11,8 +11,7 @@
 
 namespace rootJS
 {
-	enum class v8BasicTypes
-	{
+	enum class v8BasicTypes {
 		BOOLEAN,
 		STRING,
 		NUMBER,

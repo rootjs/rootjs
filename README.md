@@ -44,7 +44,13 @@ You can easily load other ROOT libraries whenever needed, just use `loadLibrary`
 >root.ROOT.Math.Pi()
 3.141592653589793 //Verified!
 ```
+Calling ROOT's `gSystem.load("libName.so")`to load a library is highly discouraged and may result in unexpected behaviour.
 
+If neccessary a refresh of the exported functions can be done through `loadLibrary` 
+```javascript
+>root.refreshExports() //Checks for additions to the gClassTable and exposes them
+undefined
+```
 ##Callbacks
 We support async code execution on every method call, just add a callback:
 ```javascript
