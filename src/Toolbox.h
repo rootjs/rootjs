@@ -13,7 +13,7 @@ namespace rootJS
 	{
 		public:
 			static const int INTERNAL_FIELD_COUNT = 2;
-			
+
 			/**
 			 * Controls the verbosity of the compiled module.
 			 *

@@ -37,7 +37,7 @@ namespace rootJS
 		pathque.push(buff);
 
 		//setting up the names under which the object are exported and their names in ROOT
-		for(uint i = 1; i < vec.size();i++)
+		for(uint i = 1; i < vec.size(); i++)
 		{
 			std::string buff = vec[i];
 			nameque.push(buff);
@@ -65,13 +65,13 @@ namespace rootJS
 						TClass *curclazz = funcPtr();
 						if (curclazz->Property() & kIsNamespace)
 						{
-							 Toolbox::logInfo(std::string("loading namespace ").append(curclazz->GetName()));
+							Toolbox::logInfo(std::string("loading namespace ").append(curclazz->GetName()));
 							obj = TemplateFactory::getInstance(curclazz);
 							scope->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj);
 						}
 						if (curclazz->Property() & kIsClass)
 						{
-						    Toolbox::logInfo(std::string("loading class ").append(curclazz->GetName()));
+							Toolbox::logInfo(std::string("loading class ").append(curclazz->GetName()));
 							obj = TemplateFactory::getConstructor(curclazz);
 							scope->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj);
 						}

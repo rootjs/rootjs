@@ -17,7 +17,7 @@ namespace rootJS
 		{
 			// TODO: maybe find a way to directly call console.log("...") here
 			std::cout << message << std::endl;
-		}	
+		}
 	}
 
 	void Toolbox::logError(const std::string& message)

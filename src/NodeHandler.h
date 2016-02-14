@@ -44,20 +44,20 @@ namespace rootJS
 		public:
 			/**
 			 * The method which starts rootJS. It instantiates a NodeApplication, a proxyMap from ObjectProxyFactory
-             * and a NodeHandler. It also exposes the contents of ROOT.
-             *
-             * @param exports
-             *              The exports sent back to node
-             * @param module
-             *              The module to be instantiated
+			 * and a NodeHandler. It also exposes the contents of ROOT.
+			 *
+			 * @param exports
+			 *              The exports sent back to node
+			 * @param module
+			 *              The module to be instantiated
 			 */
 			static void initialize(v8::Local<v8::Object>, v8::Local<v8::Object>);
 			static void loadlibraryCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
 			static void refreshExportsCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
 
-		static NodeHandler* getInstance();
+			static NodeHandler* getInstance();
 
-		void exposeInterfaceFunctions();
+			void exposeInterfaceFunctions();
 	};
 
 	NODE_MODULE(rootjs, NodeHandler::initialize)

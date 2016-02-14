@@ -42,10 +42,12 @@ namespace rootJS
 	}
 
 
-	NodeHandler* NodeHandler::getInstance(){
-		if(initialized){
+	NodeHandler* NodeHandler::getInstance() {
+		if(initialized) {
 			return NodeHandler::instance;
-		} else {throw std::invalid_argument("NodeHandler not loaded yet"); }
+		} else {
+			throw std::invalid_argument("NodeHandler not loaded yet");
+		}
 	}
 
 	void NodeHandler::exposeROOT()
@@ -85,7 +87,7 @@ namespace rootJS
 			{
 				CallbackHandler::registerGlobalObject(std::string(global->GetName()), proxy);
 				exportsLocal->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()),
-				                           CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
+				                          CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
 			}
 		}
 	}
@@ -136,7 +138,7 @@ namespace rootJS
 				throw std::invalid_argument(
 				    std::string("Specified class is not loaded."));
 			}
-			if ((((std::string) clazz->GetName()).find(":") == std::string::npos) && (!exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName())))){
+			if ((((std::string) clazz->GetName()).find(":") == std::string::npos) && (!exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName())))) {
 				if ((clazz->Property() & kIsClass))
 				{
 					Toolbox::logInfo(std::string("loading class ").append(clazz->GetName()));
@@ -170,9 +172,9 @@ namespace rootJS
 		if(rcode >= 0) {
 			NodeHandler::getInstance()->refreshExports();
 		}
-		}
+	}
 
-	void NodeHandler::refreshExportsCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument){
+	void NodeHandler::refreshExportsCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument) {
 		if(info.Length() != 0)
 		{
 			throw std::invalid_argument("Usage: No arguments. Refreshes the exported functions");
@@ -188,7 +190,7 @@ namespace rootJS
 	void NodeHandler::exposeInterfaceFunctions() {
 		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
 		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"loadlibrary"),
-					 v8::Function::New(v8::Isolate::GetCurrent(), NodeHandler::loadlibraryCallback));
+		                  v8::Function::New(v8::Isolate::GetCurrent(), NodeHandler::loadlibraryCallback));
 		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"refreshExports"),v8::Function::New(v8::Isolate::GetCurrent(),NodeHandler::refreshExportsCallback));
 	}
 }
