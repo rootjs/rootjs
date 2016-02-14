@@ -10,7 +10,7 @@ describe('Dynamic Loading', function() {
               root.loadlibrary("libMathCore.so").should.equal(0);
             }).should.not.throw();
         });
-        it('should be possible to call stuffi', function () {
+        it('ROOT.Math should not be undefined anymore', function () {
                root.ROOT.Math.should.not.be.undefined()
 
         });
