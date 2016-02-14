@@ -77,10 +77,13 @@ namespace rootJS
 			ObjectProxy *resultProxy = proxy->call(nullptr);
 			if(resultProxy)
 			{
-				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
+				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
+				{
 					info.GetReturnValue().Set(resultProxy->get());
 					delete resultProxy;
-				} else {
+				}
+				else
+				{
 					info.GetReturnValue().Set(resultProxy->get());
 				}
 			}
@@ -106,20 +109,36 @@ namespace rootJS
 	}
 
 
-	void CallbackHandler::registerStaticObject(const std::string &name, TClass *scope, ObjectProxy* proxy)
+	v8::Local<v8::Value> CallbackHandler::registerStaticObject(const std::string &name, TClass *scope, ObjectProxy* proxy)
 	{
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::EscapableHandleScope handle_scope(isolate);
+
 		if(scope == nullptr || !scope->IsLoaded())
 		{
 			staticObjectMap[name] = proxy;
+			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, name.c_str()));
 		}
 		else
 		{
 			staticObjectMap[std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + name)] = proxy;
+			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + name).c_str()));
 		}
 	}
 
 	void CallbackHandler::staticGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
-	{}
+	{
+		std::string propertyName(Toolbox::Stringv8toStd(info.Data()->ToString()));
+
+		if(staticObjectMap.find(propertyName) == staticObjectMap.end())
+		{
+			info.GetReturnValue().Set(v8::Undefined(v8::Isolate::GetCurrent()));
+			Toolbox::throwException("Property '" + propertyName + "' not found.");
+			return;
+		}
+
+		info.GetReturnValue().Set(staticObjectMap[propertyName]->get());
+	}
 
 	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
 	{}
@@ -161,10 +180,13 @@ namespace rootJS
 		ObjectProxy *resultProxy = proxy->call(nullptr);
 		if(resultProxy)
 		{
-			if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
+			if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
+			{
 				info.GetReturnValue().Set(resultProxy->get());
 				delete resultProxy;
-			} else {
+			}
+			else
+			{
 				info.GetReturnValue().Set(resultProxy->get());
 			}
 		}
@@ -243,7 +265,29 @@ namespace rootJS
 	}
 
 	void CallbackHandler::memberGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
-	{}
+	{
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::Local<v8::Object> instance = info.This();
+
+		if(instance->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
+		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("Unexpected internal field count.");
+			return;
+		}
+
+		std::map<std::string, ObjectProxy*> *propertyMap = (std::map<std::string, ObjectProxy*>*) instance->GetAlignedPointerFromInternalField(Toolbox::PropertyMapPtr);
+		std::string propertyName(Toolbox::Stringv8toStd(property));
+
+		if(propertyMap->find(propertyName) == propertyMap->end())
+		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("Property '" + propertyName + "' not found.");
+			return;
+		}
+
+		info.GetReturnValue().Set((*propertyMap)[propertyName]->get());
+	}
 
 	void CallbackHandler::memberSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
 	{}
@@ -300,10 +344,13 @@ namespace rootJS
 			delete proxy;
 			if(resultProxy)
 			{
-				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
+				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
+				{
 					info.GetReturnValue().Set(resultProxy->get());
 					delete resultProxy;
-				} else {
+				}
+				else
+				{
 					info.GetReturnValue().Set(resultProxy->get());
 				}
 			}
@@ -350,16 +397,12 @@ namespace rootJS
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		v8::EscapableHandleScope handle_scope(isolate);
 
-		// std::cout << "function name: "<< functionName.c_str() << std::endl;
-
 		if(scope != nullptr && scope->IsLoaded())
 		{
-			// return v8::String::NewFromUtf8(isolate, std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + functionName).c_str());
 			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + functionName).c_str()));
 		}
 		else
 		{
-			// return v8::String::NewFromUtf8(isolate, functionName.c_str());
 			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, functionName.c_str()));
 		}
 	}
