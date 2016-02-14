@@ -15,7 +15,7 @@ namespace rootJS
 {
 
 	NodeHandler *NodeHandler::instance;
-	bool NodeHaer::initialized;
+	bool NodeHandler::initialized;
 
 	void NodeHandler::initialize(v8::Local<v8::Object> exports, v8::Local<v8::Object> module)
 	{
