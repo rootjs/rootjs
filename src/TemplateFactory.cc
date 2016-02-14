@@ -13,6 +13,7 @@
 #include "Toolbox.h"
 
 #include <string>
+#include <iostream>
 
 #include <TClassTable.h>
 #include <TMethod.h>
@@ -37,59 +38,39 @@ namespace rootJS
 
 	v8::Local<v8::Object> TemplateFactory::getInstance(TClass *clazz) throw(std::invalid_argument)
 	{
-		if(!isValid(clazz))
-		{
+		if(!isValid(clazz)) {
 			throw std::invalid_argument("Specified TClass is null or not loaded.");
 		}
 
-		if (clazz->Property() & kIsNamespace)
-		{
+		if (clazz->Property() & kIsNamespace) {
 			return initializeNamespace(clazz);
-		}
-		else if (clazz->Property() & kIsClass)
-		{
+		} else if (clazz->Property() & kIsClass) {
 			return createClassTemplate(clazz)->InstanceTemplate()->NewInstance(); // creation without ctor callback
-		}
-		else if (clazz->Property() & kIsStruct)
-		{
+		} else if (clazz->Property() & kIsStruct) {
 			return createStructTemplate(clazz)->InstanceTemplate()->NewInstance(); // creation without ctor callback
 
-		}
-		else if (clazz->Property() & kIsUnion)
-		{
+		} else if (clazz->Property() & kIsUnion) {
 			return createUnionTemplate(clazz)->InstanceTemplate()->NewInstance(); // creation without ctor callback
-		}
-		else if (clazz->Property() & kIsArray)
-		{
+		} else if (clazz->Property() & kIsArray) {
 			return createArrayTemplate(clazz)->NewInstance();
-		}
-		else
-		{
+		} else {
 			throw std::invalid_argument("The type of the specified TClass '" + std::string(clazz->GetName()) + "'is not supported.");
 		}
 	}
 
 	v8::Local<v8::Function> TemplateFactory::getConstructor(TClass *clazz) throw(std::invalid_argument)
 	{
-		if(!isValid(clazz))
-		{
+		if(!isValid(clazz)) {
 			throw std::invalid_argument("Specified TClass is null or not loaded.");
 		}
 
-		if (clazz->Property() & kIsClass)
-		{
+		if (clazz->Property() & kIsClass) {
 			return createClassTemplate(clazz)->GetFunction();
-		}
-		else if (clazz->Property() & kIsStruct)
-		{
+		} else if (clazz->Property() & kIsStruct) {
 			return createStructTemplate(clazz)->GetFunction();
-		}
-		else if (clazz->Property() & kIsUnion)
-		{
+		} else if (clazz->Property() & kIsUnion) {
 			return createUnionTemplate(clazz)->GetFunction();
-		}
-		else
-		{
+		} else {
 			throw std::invalid_argument("The type of the specified TClass '" + std::string(clazz->GetName()) + "'is not supported.");
 		}
 	}
@@ -111,13 +92,11 @@ namespace rootJS
 
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createNamespaceTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
-		if(!isValid(clazz))
-		{
+		if(!isValid(clazz)) {
 			throw std::invalid_argument("Specified TClass is null or not loaded.");
 		}
 
-		if(!(clazz->Property() & kIsNamespace))
-		{
+		if(!(clazz->Property() & kIsNamespace)) {
 			throw std::invalid_argument("Specified TClass '" + std::string(clazz->GetName()) + "' is not a namespace.");
 		}
 
@@ -137,10 +116,8 @@ namespace rootJS
 		std::map<std::string, TFunction*> methods;
 		TIter funcIter(clazz->GetListOfAllPublicMethods(kTRUE));
 		TMethod* method;
-		while ( (method = (TMethod*) funcIter()))
-		{
-			if (method == nullptr || !method->IsValid())
-			{
+		while ( (method = (TMethod*) funcIter())) {
+			if (method == nullptr || !method->IsValid()) {
 				Toolbox::logError(std::string("Invalid method found in '").append(className).append("'."));
 				continue;
 			}
@@ -148,24 +125,19 @@ namespace rootJS
 			std::string methodName(method->GetName());
 
 			// Skip template functions
-			if(isTemplateFunction(methodName))
-			{
-				Toolbox::logInfo("Skipped template method '" + methodName + "' in '" + className + "'.");
+			if(isTemplateFunction(methodName)) {
+				Toolbox::logInfo("Skipped template method '" + methodName + "' in '" + className + "'.",1);
 				continue;
 			}
 			// make overridden or overloaded methods only occur once
-			if (methods.count(methodName))
-			{
+			if (methods.count(methodName)) {
 				// Toolbox::logInfo("Already set method '" + methodName + "' as property in '" + className + "'.");
 				continue;
-			}
-			else
-			{
+			} else {
 				methods[methodName] = method;
 			}
 
-			switch (method->ExtraProperty())
-			{
+			switch (method->ExtraProperty()) {
 			case kIsConstructor:
 			case kIsDestructor:
 			case kIsConversion:
@@ -187,20 +159,17 @@ namespace rootJS
 		    */
 		TIter memberIter(clazz->GetListOfAllPublicDataMembers(kTRUE));
 		TDataMember *member;
-		while ( (member = (TDataMember*) memberIter()))
-		{
-			if (member == nullptr || !member->IsValid())
-			{
+		while ( (member = (TDataMember*) memberIter())) {
+			if (member == nullptr || !member->IsValid()) {
 				Toolbox::logError("Invalid member found in '" + className + "'.");
 				continue;
 			}
 
-			if(member->Property() & kIsStatic)
-			{
+			if(member->Property() & kIsStatic) {
 				MemberInfo info(*member, (void*)(member->GetOffsetCint()));	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
 				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
-				CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
-				nspace->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback);
+				v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
+				nspace->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
 			}
 		}
 
@@ -223,8 +192,7 @@ namespace rootJS
 		std::map<std::string, ObjectProxy*>* propertyMap = new std::map<std::string, ObjectProxy*>();
 		TIter enumIter(eNum->GetConstants());
 		TEnumConstant *eConst = nullptr;
-		while ( (eConst = (TEnumConstant*) enumIter()))
-		{
+		while ( (eConst = (TEnumConstant*) enumIter())) {
 			EnumConstInfo constInfo(*eConst);
 			(*propertyMap)[std::string(eConst->GetName())] = NumberProxy::llongConstruct(constInfo, eNum->GetClass());
 		}
@@ -235,8 +203,7 @@ namespace rootJS
 
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createEnumTemplate(TEnum *eNum) throw(std::invalid_argument)
 	{
-		if(eNum == nullptr || !eNum->IsValid())
-		{
+		if(eNum == nullptr || !eNum->IsValid()) {
 			throw std::invalid_argument("Specified TEnum is null or not loaded.");
 		}
 
@@ -248,8 +215,7 @@ namespace rootJS
 
 		TIter enumIter(eNum->GetConstants());
 		TEnumConstant *eConst = nullptr;
-		while ( (eConst = (TEnumConstant*) enumIter()))
-		{
+		while ( (eConst = (TEnumConstant*) enumIter())) {
 			tmplt->SetAccessor(v8::String::NewFromUtf8(isolate, eConst->GetName()), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
 		}
 
@@ -268,13 +234,11 @@ namespace rootJS
 
 	v8::Local<v8::FunctionTemplate> TemplateFactory::createStructTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
-		if(!isValid(clazz))
-		{
+		if(!isValid(clazz)) {
 			throw std::invalid_argument("Specified TClass is null or not loaded.");
 		}
 
-		if(!(clazz->Property() & kIsStruct))
-		{
+		if(!(clazz->Property() & kIsStruct)) {
 			throw std::invalid_argument("Specified TClass '" + std::string(clazz->GetName()) + "' is not a struct.");
 		}
 
@@ -284,8 +248,7 @@ namespace rootJS
 		std::string structName(clazz->GetName());
 
 		// check if template has been created already
-		if (structTemplates.count(structName) && !structTemplates[structName].IsEmpty())
-		{
+		if (structTemplates.count(structName) && !structTemplates[structName].IsEmpty()) {
 			return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, structTemplates[structName]));
 		}
 
@@ -303,18 +266,15 @@ namespace rootJS
 
 	v8::Local<v8::FunctionTemplate> TemplateFactory::createClassTemplate(TClass *clazz) throw(std::invalid_argument)
 	{
-		if(!isValid(clazz))
-		{
+		if(!isValid(clazz)) {
 			throw std::invalid_argument("Specified TClass is null or not loaded.");
 		}
 
-		if(!(clazz->Property() & kIsClass))
-		{
+		if(!(clazz->Property() & kIsClass)) {
 			throw std::invalid_argument("Specified TClass '" + std::string(clazz->GetName()) + "' is not a class.");
 		}
 
-		if(clazz->Property() & kClassIsAbstract)
-		{
+		if(clazz->Property() & kClassIsAbstract) {
 			throw std::invalid_argument("Specified TClass '" + std::string(clazz->GetName()) + "'is abstract.");
 		}
 
@@ -324,8 +284,7 @@ namespace rootJS
 		std::string className(clazz->GetName());
 
 		// check if template has been created already
-		if (classTemplates.count(className) && !classTemplates[className].IsEmpty())
-		{
+		if (classTemplates.count(className) && !classTemplates[className].IsEmpty()) {
 			return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]));
 		}
 
@@ -347,7 +306,7 @@ namespace rootJS
 		std::string className(clazz->GetName());
 
 		// add static functions and members to the prototype template
-		v8::Local<v8::ObjectTemplate> prototype = tmplt->PrototypeTemplate();
+		// v8::Local<v8::ObjectTemplate> prototype = tmplt->PrototypeTemplate();
 
 		// add non-static functions and members to the instance template
 		v8::Local<v8::ObjectTemplate> instance = tmplt->InstanceTemplate();
@@ -356,7 +315,7 @@ namespace rootJS
 		/**
 		 *  Add enums
 		 */
-		addEnumTemplate(clazz, prototype);
+		addEnumTemplate(clazz, tmplt);
 
 		/**
 		 *	Add public methods as properties
@@ -366,10 +325,8 @@ namespace rootJS
 		TIter funcIter(clazz->GetListOfAllPublicMethods(kTRUE));
 		TMethod *method = nullptr;
 
-		while ( (method = (TMethod*) funcIter()))
-		{
-			if (method == nullptr || !method->IsValid())
-			{
+		while ( (method = (TMethod*) funcIter())) {
+			if (method == nullptr || !method->IsValid()) {
 				Toolbox::logError(std::string("Invalid method found in '").append(className).append("'."));
 				continue;
 			}
@@ -377,54 +334,41 @@ namespace rootJS
 			std::string methodName(method->GetName());
 
 			// Skip template functions
-			if(isTemplateFunction(methodName))
-			{
+			if(isTemplateFunction(methodName)) {
 				// Toolbox::logInfo("Skipped template method '" + methodName + "' in '" + className + "'.");
 				continue;
 			}
 
 			// skip abstract or pure virtual functions
 			Long_t property = method->Property();
-			if ((property & kIsPureVirtual)) // (property & kIsAbstract)
-			{
+			if ((property & kIsPureVirtual)) { // (property & kIsAbstract)
 				// Toolbox::logInfo("Skipped pure virtual method '" + methodName + "' in '" + className + "'.");
 				//TODO? continue;
 			}
 
 			// make overridden or overloaded methods only occur once
-			if (methods.count(methodName))
-			{
+			if (methods.count(methodName)) {
 				// Toolbox::logInfo("Already set method '" + methodName + "' as property in '" + className + "'.");
 				continue;
-			}
-			else
-			{
+			} else {
 				methods[methodName] = method;
 			}
 
-			switch (method->ExtraProperty())
-			{
+			switch (method->ExtraProperty()) {
 			case kIsConstructor:
 			case kIsDestructor:
 			case kIsConversion:
 				// don't expose
 				break;
-			case kIsOperator:
-			{
+			case kIsOperator: {
 				std::map<std::string, std::string>::const_iterator opNameIt = Types::operatorNames.find(method->GetName());
-				if(opNameIt == Types::operatorNames.end())
-				{
-					Toolbox::logInfo(std::string("Operator: ") + method->GetName() + " not handled");
-				}
-				else
-				{
-					if (property & kIsStatic)
-					{
+				if(opNameIt == Types::operatorNames.end()) {
+					Toolbox::logInfo(std::string("Operator: ") + method->GetName() + " not handled",1);
+				} else {
+					if (property & kIsStatic) {
 						v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
-						prototype->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
-					}
-					else
-					{
+						tmplt->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+					} else {
 						v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
 						instance->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, data));
 					}
@@ -433,13 +377,10 @@ namespace rootJS
 			break;
 			default:
 
-				if (property & kIsStatic)
-				{
+				if (property & kIsStatic) {
 					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
-					prototype->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
-				}
-				else
-				{
+					tmplt->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+				} else {
 					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
 					instance->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, data));
 				}
@@ -453,24 +394,19 @@ namespace rootJS
 		TIter memberIter((TList*)clazz->GetListOfAllPublicDataMembers(kTRUE));
 		TDataMember *member = nullptr;
 
-		while ( (member = (TDataMember*) memberIter()))
-		{
-			if (member == nullptr || !member->IsValid())
-			{
+		while ( (member = (TDataMember*) memberIter())) {
+			if (member == nullptr || !member->IsValid()) {
 				Toolbox::logError("Invalid member found in '" + className + "'.");
 				continue;
 			}
 
-			if(member->Property() & kIsStatic)
-			{
+			if(member->Property() & kIsStatic) {
 				MemberInfo info(*member, (void*)(member->GetOffsetCint()));	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
 				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
-				CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
+				v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
 
-				prototype->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback);
-			}
-			else
-			{
+				tmplt->SetNativeDataProperty(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+			} else {
 				instance->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
 			}
 
@@ -482,26 +418,38 @@ namespace rootJS
 		TIter enumIter(clazz->GetListOfEnums(kTRUE));
 		TEnum *eNum = nullptr;
 
-		while ((eNum = (TEnum*) enumIter()))
-		{
-			if (eNum == nullptr || !eNum->IsValid()) // assert eNum->GetClass() == clazz
-			{
+		while ((eNum = (TEnum*) enumIter())) {
+			if (eNum == nullptr || !eNum->IsValid()) { // assert eNum->GetClass() == clazz
 				Toolbox::logError("Invalid enum found in '" + std::string(clazz->GetName()) + "'.");
 				continue;
 			}
 
-			if(eNum->Property() & kIsPublic)
-			{
-				tmplt->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
+			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) initializeEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			tmplt->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+		}
+
+	}
+
+	void TemplateFactory::addEnumTemplate(TClass *clazz, v8::Local<v8::FunctionTemplate> tmplt) throw(std::invalid_argument)
+	{
+		TIter enumIter(clazz->GetListOfEnums(kTRUE));
+		TEnum *eNum = nullptr;
+
+		while ((eNum = (TEnum*) enumIter())) {
+			if (eNum == nullptr || !eNum->IsValid()) { // assert eNum->GetClass() == clazz
+				Toolbox::logError("Invalid enum found in '" + std::string(clazz->GetName()) + "'.");
+				continue;
 			}
+
+			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) initializeEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			tmplt->SetNativeDataProperty(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
 		}
 
 	}
 
 	bool TemplateFactory::isTemplateFunction(std::string const& functionName)
 	{
-		if(functionName.size() > 0)
-		{
+		if(functionName.size() > 0) {
 			return (functionName[functionName.size()-1] == '>') && (functionName.find('<') != std::string::npos);
 		}
 

@@ -3,11 +3,13 @@
 
 #include "TApplication.h"
 
-namespace rootJS {
+namespace rootJS
+{
 	/**
 	 * NodeApplication is used to handle ROOT GUIs
 	 */
-	class NodeApplication : public TApplication {
+	class NodeApplication : public TApplication
+	{
 		public:
 			/**
 			 * Constructor for NodeApplication

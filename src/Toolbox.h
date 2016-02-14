@@ -43,7 +43,7 @@ namespace rootJS
 			 *	@param
 			 *		the message to log
 			 */
-			static void logInfo(const std::string &message);
+			static void logInfo(const std::string &message, int);
 
 			/**
 			 *	Log the specified message at error level.

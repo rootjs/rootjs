@@ -11,10 +11,9 @@ namespace rootJS
 		v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), message.c_str()));
 	}
 
-	void Toolbox::logInfo(const std::string& message)
+	void Toolbox::logInfo(const std::string& message, int verbosity)
 	{
-		if (Toolbox::VERBOSITY > 0)
-		{
+		if (Toolbox::VERBOSITY >= verbosity) {
 			// TODO: maybe find a way to directly call console.log("...") here
 			std::cout << message << std::endl;
 		}
@@ -22,14 +21,12 @@ namespace rootJS
 
 	void Toolbox::logError(const std::string& message)
 	{
-		if (Toolbox::VERBOSITY > 1)
-		{
-			// TODO: maybe find a way to directly call console.error("...") here
-			std::cerr << message << std::endl;
-		}
+		// TODO: maybe find a way to directly call console.error("...") here
+		std::cerr << message << std::endl;
 	}
 
-	std::string Toolbox::Stringv8toStd(v8::Local<v8::String> vstr) {
+	std::string Toolbox::Stringv8toStd(v8::Local<v8::String> vstr)
+	{
 		return std::string(*v8::String::Utf8Value(vstr->ToString()));
 	}
 

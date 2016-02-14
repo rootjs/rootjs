@@ -95,7 +95,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void registerStaticObject(const std::string &name, TClass *scope, ObjectProxy* proxy);
+			static v8::Local<v8::Value> registerStaticObject(const std::string &name, TClass *scope, ObjectProxy* proxy);
 
 
 			/**

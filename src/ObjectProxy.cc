@@ -6,9 +6,11 @@
 #include <TGlobal.h>
 #include <TClassTable.h>
 
-namespace rootJS {
+namespace rootJS
+{
 
-	ObjectProxy::ObjectProxy(MetaInfo &info, TClass *scope) : Proxy(info, scope) {
+	ObjectProxy::ObjectProxy(MetaInfo &info, TClass *scope) : Proxy(info, scope)
+	{
 		if(!proxy.IsEmpty()) {
 			proxy.SetWeak(this, weakCallback);
 		}
@@ -26,68 +28,83 @@ namespace rootJS {
 		}
 	}
 
-	void ObjectProxy::weakCallback(v8::WeakCallbackData<v8::Object, ObjectProxy> const& data) {
+	void ObjectProxy::weakCallback(v8::WeakCallbackData<v8::Object, ObjectProxy> const& data)
+	{
 		ObjectProxy *objectProxy = data.GetParameter();
 		objectProxy->proxy.Reset();
 
 		delete objectProxy;
 	}
 
-	const char* ObjectProxy::getTypeName() {
+	const char* ObjectProxy::getTypeName()
+	{
 		return getTypeInfo()->getTypeName();
 	}
 
-	Long_t ObjectProxy::getOffset() {
+	Long_t ObjectProxy::getOffset()
+	{
 		return getTypeInfo()->getOffset();
 	}
 
-	void ObjectProxy::set(ObjectProxy &value) {
+	void ObjectProxy::set(ObjectProxy &value)
+	{
 		// TODO: validate type equality
 		//address = value.getAddress();
 	}
 
-	v8::Local<v8::Value> ObjectProxy::get() {
+	v8::Local<v8::Value> ObjectProxy::get()
+	{
 		// objects just return their holder - i.e the proxy member
 		return getProxy();
 	}
 
-	void ObjectProxy::setProxy(v8::Local<v8::Object> proxy) {
+	void ObjectProxy::setProxy(v8::Local<v8::Object> proxy)
+	{
 		this->proxy.Reset(v8::Isolate::GetCurrent(), proxy);
 	}
 
-	v8::Local<v8::Object> ObjectProxy::getProxy() {
+	v8::Local<v8::Object> ObjectProxy::getProxy()
+	{
 		return v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(), proxy);
 	}
 
-	bool ObjectProxy::isPrimitive() {
+	bool ObjectProxy::isPrimitive()
+	{
 		return false;
 	}
 
-	bool ObjectProxy::isTemplate() {
+	bool ObjectProxy::isTemplate()
+	{
 		return false;
 	}
 
-	bool ObjectProxy::isGlobal() {
+	bool ObjectProxy::isGlobal()
+	{
 		return getTypeInfo()->isGlobal();
 	}
 
-	bool ObjectProxy::isConst() {
+	bool ObjectProxy::isConst()
+	{
 		return getTypeInfo()->isConst();
 	}
 
-	bool ObjectProxy::isStatic() {
+	bool ObjectProxy::isStatic()
+	{
 		return getTypeInfo()->isStatic();
 	}
 
-	void ObjectProxy::setValue(v8::Local<v8::Value> value) {
+	void ObjectProxy::setValue(v8::Local<v8::Value> value)
+	{
 		return;
 	}
 
-	void ObjectProxy::registerMallocedSpace(void *allocated) {
+	void ObjectProxy::registerMallocedSpace(void *allocated)
+	{
 		boundMallocs.push_back(allocated);
 	}
 
-	v8::Persistent<v8::Object> &ObjectProxy::getWeakPeristent() {
+	v8::Persistent<v8::Object> &ObjectProxy::getWeakPeristent()
+	{
 		proxy.SetWeak(this, weakCallback);
 		return proxy;
 	}

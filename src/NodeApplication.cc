@@ -8,9 +8,11 @@
 #include <TError.h>
 #include <Getline.h>
 
-namespace rootJS {
+namespace rootJS
+{
 	NodeApplication::NodeApplication(const char* acn, Int_t* argc, char** argv):
-		TApplication( acn, argc, argv ) {
+		TApplication( acn, argc, argv )
+	{
 		// save current interpreter context
 		gInterpreter->SaveContext();
 		gInterpreter->SaveGlobalsContext();
@@ -22,7 +24,8 @@ namespace rootJS {
 		SetReturnFromRun( kTRUE );
 	}
 
-	Bool_t NodeApplication::CreateNodeApplication() {
+	Bool_t NodeApplication::CreateNodeApplication()
+	{
 		if ( ! gApplication ) {
 			int argc = 1;
 			char** argv = new char*[ argc ];
@@ -39,7 +42,8 @@ namespace rootJS {
 		return kFALSE;
 	}
 
-	Bool_t NodeApplication::InitROOTGlobals() {
+	Bool_t NodeApplication::InitROOTGlobals()
+	{
 		if ( ! gBenchmark ) gBenchmark = new TBenchmark();
 		if ( ! gStyle ) gStyle = new TStyle();
 

@@ -41,47 +41,37 @@ namespace rootJS
 		std::vector<TFunction*> options;	// list of overridden / overloaded options
 		TFunction *validFunction = nullptr;
 
-		if(scope == nullptr)
-		{
+		if(scope == nullptr) {
 			// Global function has been called
 			TCollection *globals = gROOT->GetListOfGlobalFunctions(kTRUE);
 			TFunction *function;
 
 			TIter next(globals);
-			while((function = (TFunction*)next()))
-			{
-				if(strcmp(function->GetName(), name.c_str()) == 0)
-				{
+			while((function = (TFunction*)next())) {
+				if(strcmp(function->GetName(), name.c_str()) == 0) {
 					options.push_back(function);
 				}
 			}
-		}
-		else
-		{
+		} else {
 			options = FunctionProxy::getMethodsFromName(scope, name);
 		}
 
-		for(TFunction* function : options)
-		{
-			if((int)args->Length() > function->GetNargs() || (int)args->Length() < (function->GetNargs() - function->GetNargsOpt()))
-			{
+		for(TFunction* function : options) {
+			if((int)args->Length() > function->GetNargs() || (int)args->Length() < (function->GetNargs() - function->GetNargsOpt())) {
 				continue;
 			}
 
 			TList *funcArgs = function->GetListOfMethodArgs();
 			bool argsMatch = true;
 
-			for(int i = 0; i < (int)args->Length(); i++)
-			{
-				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i)))
-				{
+			for(int i = 0; i < (int)args->Length(); i++) {
+				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i))) {
 					argsMatch = false;
 					break;
 				}
 			}
 
-			if(argsMatch)
-			{
+			if(argsMatch) {
 				validFunction = function;
 				break;
 			}
@@ -94,8 +84,7 @@ namespace rootJS
 	{
 		TFunction* function = determineFunction(name, scope, args);
 
-		if(function == nullptr)
-		{
+		if(function == nullptr) {
 			return nullptr;
 		}
 
@@ -104,8 +93,7 @@ namespace rootJS
 
 	bool FunctionProxyFactory::paramMatches(const char *typeName, v8::Local<v8::Value> arg)
 	{
-		if (Types::isV8Primitive(arg))
-		{
+		if (Types::isV8Primitive(arg)) {
 			//Resolve the type
 			TDataType* type = Types::getTypeByName(std::string(typeName));
 			if(type == nullptr) {
@@ -116,10 +104,8 @@ namespace rootJS
 			std::string stdTypeName(typeName.Data());
 
 			std::map<std::string, v8BasicTypes>::iterator it = basicTypeMap.find(stdTypeName);
-			if(it != basicTypeMap.end())
-			{
-				switch(it->second)
-				{
+			if(it != basicTypeMap.end()) {
+				switch(it->second) {
 				case v8BasicTypes::STRING:
 					return Types::isV8String(arg);
 				case v8BasicTypes::NUMBER:
@@ -137,12 +123,9 @@ namespace rootJS
 					return false;
 				}
 			}
-		}
-		else
-		{
+		} else {
 			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
-			if (objectArg->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
-			{
+			if (objectArg->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT) {
 				Toolbox::logError("Supplied JavaScript object contains an unexpected number of internal fields.");
 				return false;
 			}

@@ -7,13 +7,15 @@
 #include <v8.h>
 #include <uv.h>
 
-namespace rootJS {
+namespace rootJS
+{
 
 	/**
 	 * The AsyncRunner provides methods to enable asyncronous function execution.
 	 *
 	 */
-	class AsyncRunner {
+	class AsyncRunner
+	{
 			typedef void (*AsyncFunction)(AsyncRunner* runner, void* param);
 		private:
 			AsyncFunction func;
@@ -43,7 +45,8 @@ namespace rootJS {
 			 *
 			 * @param result The result of the asynchronous function.
 			 */
-			void setResult(std::vector<ObjectProxy*> result) {
+			void setResult(std::vector<ObjectProxy*> result)
+			{
 				this->result = result;
 			};
 

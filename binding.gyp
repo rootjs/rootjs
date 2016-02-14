@@ -13,7 +13,6 @@
 			'sources': [
 				'src/NodeApplication.cc',
 				'src/NodeHandler.cc',
-				'src/ClassExposer.cc',
 				'src/TemplateFactory.cc',
 				'src/FunctionProxyFactory.cc',
 				'src/ObjectProxyFactory.cc',
