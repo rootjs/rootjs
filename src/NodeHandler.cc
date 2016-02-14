@@ -6,7 +6,7 @@
 #include "Types.h"
 
 #include <iostream>
-
+#include <TROOT.h>
 #include <TClassTable.h>
 #include <TSystem.h>
 #include <queue>
