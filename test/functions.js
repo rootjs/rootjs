@@ -30,10 +30,12 @@ describe('Functions', function() {
 		  root.Compress('these are multiple words').should.equal('thesearemultiplewords');
 	  });
 	  it('should be possible to pass doubles as params', function() {
-		  root.loadlibrary("libMathCore.so");
+		  var test = new root.TString("test");
+		  test.Data().should.equal("test");
 		  (function() {
-			  root.ROOT.Math.ellint_1(1, 1);
+			  test._setAdd(0.01);
 		  }).should.not.throw();
+		  test.Data().should.equal("test0.01");
 	  });
   });
   describe('parameter types', function() {

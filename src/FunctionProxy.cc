@@ -45,11 +45,11 @@ namespace rootJS
 
 		{"unsigned char", mappedTypes::UCHAR},
 
-		{"double", mappedTypes::LONG},
-		{"long double", mappedTypes::LLONG},
+		{"long", mappedTypes::LONG},
+		{"long long", mappedTypes::LLONG},
 
-		{"unsigned double", mappedTypes::ULONG},
-		{"unsigned long double", mappedTypes::ULLONG},
+		{"unsigned long", mappedTypes::ULONG},
+		{"unsigned long long", mappedTypes::ULLONG},
 
 		{"float", mappedTypes::FLOAT},
 
