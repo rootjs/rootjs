@@ -33,8 +33,21 @@ namespace rootJS
 			/* Private constructor - Singleton */
 			NodeHandler(v8::Local<v8::Object>);
 
+			/**
+			 * This method exposes all the contents of the given TClass so that rootJS has access to the contents.
+			 * The namespace hierarchy is preserved and mapped to the exported node.js object. Namespaces that don"t
+			 * have a TClass are generated as stubs and inserted at the appropriate position.
+			 *
+			 * @param clazz
+			 *              The class which will be exposed
+			 * @param exports
+			 *              The exports Local<Object> will be examined to see if the class has already has been exposed.
+			 *              If it hasn't been exposed, then the ClassExposer will expose the contents of the class.
+			 */
 
+			std::vector<std::string> splitClassName(std::string name, std::vector<std::string>& vec);
 			void exposeROOT();
+			void exposeHierarchy(TClass*,v8::Local<v8::Object>) throw(std::invalid_argument);
 			void exposeGlobals() throw(std::invalid_argument);
 			void exposeGlobalFunctions() throw(std::invalid_argument);
 			void exposeClasses() throw(std::invalid_argument);
@@ -52,7 +65,24 @@ namespace rootJS
 			 *              The module to be instantiated
 			 */
 			static void initialize(v8::Local<v8::Object>, v8::Local<v8::Object>);
+
+		/**
+		* CallbackMethod for user initiated library loading.
+		* the node method forwards the int return value of gSystem->Load()
+		*
+		* @param info
+		*              the arguments passed in node.js
+		*
+		*/
 			static void loadlibraryCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
+
+		/**
+        * CallbackMethod for user initiated refreshing of the exposed functions
+        *
+        * @param info
+        *              the arguments passed in node.js (expected are none)
+        *
+        */
 			static void refreshExportsCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
 
 			static NodeHandler* getInstance();
