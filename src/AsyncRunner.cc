@@ -31,7 +31,7 @@ namespace rootJS {
 			delete runner->result[i];
 		}
 
-		v8::Local<v8::Function> cb = runner->callback.Get(isolate);
+		v8::Local<v8::Function> cb = v8::Local<v8::Function>::New(isolate, runner->callback);
 		if(runner->result.size()) {
 			cb->Call(isolate->GetCurrentContext()->Global(), passParams.size(), &(passParams[0]));
 		} else {
