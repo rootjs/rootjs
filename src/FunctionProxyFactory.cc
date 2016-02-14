@@ -12,17 +12,64 @@
 #include <TClass.h>
 #include <TClassRef.h>
 #include <TMethodArg.h>
+#include <limits.h>
+#include <float.h>
 
 namespace rootJS
 {
 
 	std::map<std::string, v8BasicTypes> FunctionProxyFactory::basicTypeMap = {
 		{"char", v8BasicTypes::STRING},
-		{"TStringasdf", v8BasicTypes::STRING},
-		{"Int_t", v8BasicTypes::NUMBER},
+		{"Bool_t", v8BasicTypes::BOOLEAN},
+
 		{"int", v8BasicTypes::NUMBER},
-		{"Double_t", v8BasicTypes::NUMBER},
-		{"Bool_t", v8BasicTypes::BOOLEAN}
+		{"unsigned int", v8BasicTypes::NUMBER},
+
+		{"short", v8BasicTypes::NUMBER},
+		{"unsigned short", v8BasicTypes::NUMBER},
+
+		{"unsigned char", v8BasicTypes::NUMBER},
+
+		{"long", v8BasicTypes::NUMBER},
+		{"long long", v8BasicTypes::NUMBER},
+
+		{"unsigned long", v8BasicTypes::NUMBER},
+		{"unsigned long long", v8BasicTypes::NUMBER},
+
+		{"double", v8BasicTypes::NUMBER},
+		{"long double",v8BasicTypes::NUMBER},
+
+		{"float",v8BasicTypes::NUMBER},
+
+		{"Double32_t", v8BasicTypes::NUMBER},
+		{"Float16_t", v8BasicTypes::NUMBER},
+		{"Long64_t", v8BasicTypes::NUMBER},
+		{"ULong64_t", v8BasicTypes::NUMBER}
+	};
+
+	std::map<std::string, NumberInfo> FunctionProxyFactory::basicNumberInfoMap = {
+		{"int", {false, INT_MAX, INT_MIN}},
+		{"unsigned int", {false, UINT_MAX, 0}},
+
+		{"double", {true, DBL_MAX, DBL_MIN}},
+		{"long double", {true, LDBL_MAX, LDBL_MIN}},
+
+		{"short", {false, SHRT_MAX, SHRT_MIN}},
+		{"unsigned short", {false, USHRT_MAX, 0}},
+
+		{"unsigned char", {false, UCHAR_MAX, 0}},
+
+		{"long", {false, LONG_MAX, LONG_MIN}},
+		{"long long", {false, LLONG_MAX, LLONG_MIN}},
+		{"unsigned long", {false, ULONG_MAX, 0}},
+		{"unsigned long long", {false, ULLONG_MAX, 0}},
+
+		{"float", {true, FLT_MAX, FLT_MIN}},
+
+		{"Double32_t", {true, DBL_MAX, DBL_MIN}},
+		{"Float16_t", {true, FLT_MAX, FLT_MIN}},
+		{"Long64_t", {true, LLONG_MAX, LLONG_MIN}},
+		{"ULong64_t", {true, ULLONG_MAX, 0}}
 	};
 
 	FunctionProxyFactory::FunctionProxyFactory()
@@ -63,9 +110,10 @@ namespace rootJS
 
 			TList *funcArgs = function->GetListOfMethodArgs();
 			bool argsMatch = true;
+			bool prefer = true;
 
 			for(int i = 0; i < (int)args->Length(); i++) {
-				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i))) {
+				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i), prefer)) {
 					argsMatch = false;
 					break;
 				}
@@ -73,7 +121,8 @@ namespace rootJS
 
 			if(argsMatch) {
 				validFunction = function;
-				break;
+				if(prefer)
+					break;
 			}
 		}
 
@@ -91,7 +140,40 @@ namespace rootJS
 		return createFunctionProxy(function, scope);
 	}
 
-	bool FunctionProxyFactory::paramMatches(const char *typeName, v8::Local<v8::Value> arg)
+	bool FunctionProxyFactory::checkNumberBounds(const char *typeName, v8::Local<v8::Value> arg, bool &prefer) {
+		std::string strTypeName(typeName);
+		std::map<std::string, NumberInfo>::iterator it = basicNumberInfoMap.find(strTypeName);
+		if(it == basicNumberInfoMap.end()) {
+			return false;
+		} else {
+			double val;
+			if(arg->IsNumber()) {
+				val = v8::Local<v8::Number>::Cast(arg)->Value();
+			} else if (arg->IsNumberObject()) {
+				val = v8::Local<v8::NumberObject>::Cast(arg)->ValueOf();
+			} else {
+				return false;
+			}
+			if((val - (long long)val) == 0.0) {
+				if(it->second.floatingPoint) {
+					return false;
+				}
+			} else {
+				if(!it->second.floatingPoint) {
+					return false;
+				}
+				if(strTypeName.find("double") != 0) {
+					prefer = false;
+				}
+			}
+			if (val > it->second.maxValue || val < it->second.minValue) {
+				return false;
+			}
+			return true;
+		}
+	}
+
+	bool FunctionProxyFactory::paramMatches(const char *typeName, v8::Local<v8::Value> arg, bool &prefer)
 	{
 		if (Types::isV8Primitive(arg)) {
 			//Resolve the type
@@ -109,7 +191,11 @@ namespace rootJS
 				case v8BasicTypes::STRING:
 					return Types::isV8String(arg);
 				case v8BasicTypes::NUMBER:
-					return Types::isV8Number(arg);
+					if(Types::isV8Number(arg)) {
+						return checkNumberBounds(typeName, arg, prefer);
+					} else {
+						return false;
+					}
 				case v8BasicTypes::BOOLEAN:
 					return Types::isV8Boolean(arg);
 				case v8BasicTypes::ARRAY:
