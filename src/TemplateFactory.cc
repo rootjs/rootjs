@@ -7,6 +7,7 @@
 #include "MemberInfo.h"
 #include "PointerInfo.h"
 #include "Toolbox.h"
+#include "Types.h"
 
 #include "TClassTable.h"
 #include "TMethod.h"
@@ -353,9 +354,23 @@ namespace rootJS
 			case kIsConversion:
 				// don't expose
 				break;
-			case kIsOperator:
-				// TODO: handle operators
-				// Toolbox::logInfo("Operator '" + methodName + "' found in '" + className + "'.");
+			case kIsOperator: {
+					std::map<std::string, std::string>::const_iterator opNameIt = Types::operatorNames.find(method->GetName());
+					if(opNameIt == Types::operatorNames.end()) {
+						Toolbox::logInfo(std::string("Operator: ") + method->GetName() + " not handled");
+					} else {
+						if (property & kIsStatic)
+						{
+							v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
+							prototype->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+						}
+						else
+						{
+							v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
+							instance->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, data));
+						}
+					}
+				}
 				break;
 			default:
 

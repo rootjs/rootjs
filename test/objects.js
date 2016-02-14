@@ -56,4 +56,28 @@ describe('Objects', function() {
 		  testSring.Data().should.equal("test");
 	  });
   });
+  describe('Operators', function() {
+	  it('should be possible to use _equals', function() {
+		  var t1 = new root.TString("test");
+		  var t2 = new root.TString("test");
+
+		  (t1 == t2).should.not.equal(true);
+		  root._equals(t1, t2).should.equal(true);
+	  });
+	  it('should be possible to use _setAdd', function() {
+		  var t1 = new root.TString("test");
+		  var t2 = new root.TString("test");
+
+		  t1._setAdd(t2);
+		  t1.Data().should.equal("testtest");
+	  });
+	  it('should be possible to use _at', function() {
+		  var t1 = new root.TString("test");
+
+		  t1._at(2).should.equal('s');
+		  (function() {
+			  t1._at(10).should.equal('')
+		  });
+	  });
+  })
 });
