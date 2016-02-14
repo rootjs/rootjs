@@ -29,8 +29,6 @@
 namespace rootJS
 {
 
-	std::map<std::string, ProxyInitializator> ObjectProxyFactory::primitiveProxyMap;
-
 	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope, ObjectProxy *holder) throw(std::invalid_argument)
 	{
 		std::map<std::string, ObjectProxy*> *propertyMap = new std::map<std::string, ObjectProxy*>();
@@ -54,28 +52,23 @@ namespace rootJS
 			{
 				if(!holder->getProxy()->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName())))
 				{
-					Toolbox::logError("v8 instance of type '" + std::string(scope->GetName())
-					                  + "' has no property '" + std::string(member->GetName())
-					                  + "' of type '" + std::string(member->GetTypeName()) + "'.");
+					Toolbox::throwException("v8 instance of type '" + std::string(scope->GetName())
+					                        + "' has no property '" + std::string(member->GetName())
+					                        + "' of type '" + std::string(member->GetTypeName()) + "'.");
+					continue;
 				}
 
-				/*
-				 * Toolbox::logInfo("Encapsulating '" + std::string(member->GetName()) + "' from '" + std::string(scope->GetName()) + "'.");
-				 * Toolbox::logInfo("");
-				 *
-				 * Toolbox::logInfo("GetTypeName()     '" + std::string(member->GetTypeName()) + "'.");
-				 * Toolbox::logInfo("GetFullTypeName() '" + std::string(member->GetFullTypeName()) + "'.");
-				 * Toolbox::logInfo("GetTrueTypeName() '" + std::string(member->GetTrueTypeName()) + "'.");
-				 *
-				 * Toolbox::logInfo("GetDataType()->GetTypeName() '" + std::string(member->GetDataType()->GetTypeName()) + "'.");
-				 *
-				 * Toolbox::logInfo("------------------------------------------------------------");
-				 * Toolbox::logInfo("");
-				*/
-
 				MemberInfo memberInfo(*member, info.getAddress());
-				// ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(memberInfo, scope);
-				(*propertyMap)[std::string(member->GetName())] = nullptr; // = memberProxy;
+				ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(memberInfo, scope);
+				if(memberProxy == nullptr)
+				{
+					// Delete properties that could not be encapsulated
+					holder->getProxy()->Delete(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName()));
+				}
+				else
+				{
+					(*propertyMap)[std::string(member->GetName())] = memberProxy;
+				}
 			}
 		}
 
@@ -98,7 +91,8 @@ namespace rootJS
 
 		//Try without resolving the type first:
 		ObjectProxy* proxy = createPrimitiveProxy(trueTypeName, info, scope);
-		if(proxy != nullptr) {
+		if(proxy != nullptr)
+		{
 			return proxy;
 		}
 
@@ -106,15 +100,7 @@ namespace rootJS
 
 		// Try to encapsulate as primitive
 		proxy = createPrimitiveProxy(trueTypeName, info, scope);
-		if(proxy == nullptr)
-		{
-			/* Toolbox::logInfo("Resolved Type '" + trueTypeName
-			                 + "' from '" + std::string(info.getName())
-			                 + "' with type '" + std::string(info.getTypeName())
-			                 + "' in '" +  ((scope == nullptr) ? "global" : std::string(scope->GetName())) + "' scope is not a basic type.");
-			*/
-		}
-		else
+		if(proxy != nullptr)
 		{
 			return proxy;
 		}
@@ -124,15 +110,7 @@ namespace rootJS
 
 		// Try to encapsulate as enum
 		proxy = createEnumProxy(trueTypeName, info, scope);
-		if(proxy == nullptr)
-		{
-			/* Toolbox::logInfo("Resolved Type '" + trueTypeName
-			                 + "' from '" + std::string(info.getName())
-			                 + "' with type '" + std::string(info.getTypeName())
-			                 + "' in '" +  ((scope == nullptr) ? "global" : std::string(scope->GetName())) + "' scope is not a enum type.");
-			*/
-		}
-		else
+		if(proxy != nullptr)
 		{
 			return proxy;
 		}
@@ -141,13 +119,10 @@ namespace rootJS
 		TClass *type = getClass(std::string(info.getTypeName()));
 		if(type == nullptr)
 		{
-			/*
-			* Toolbox::logInfo("No TClass for '" + typeName + "' found.");
-			* Toolbox::logInfo("------------------------------------------------------------");
-			* Toolbox::logInfo("");
-			*/
-
-			// throw std::invalid_argument("Type '" + typeName + "' is not supported.");
+			Toolbox::logError("Resolved Type '" + trueTypeName
+			                  + "' from '" + std::string(info.getName())
+			                  + "' with type '" + std::string(info.getTypeName())
+			                  + "' in scope '" +  ((scope == nullptr) ? "global" : std::string(scope->GetName())) + "' could not be encapsulated.");
 			return nullptr;
 		}
 
@@ -183,12 +158,13 @@ namespace rootJS
 
 	ObjectProxy* ObjectProxyFactory::createPrimitiveProxy(std::string const& trueTypeName, MetaInfo &info, TClass *scope)
 	{
-		if(primitiveProxyMap.find(trueTypeName) == primitiveProxyMap.end())
+		std::map<std::string, ProxyInitializator>::const_iterator iter = primitiveProxyMap.find(trueTypeName);
+		if(iter == primitiveProxyMap.end())
 		{
 			return nullptr;
 		}
 
-		return primitiveProxyMap[trueTypeName](info, scope);
+		return iter->second(info, scope);
 	}
 
 	TClass* ObjectProxyFactory::getClass(std::string const& typeName)
@@ -221,45 +197,45 @@ namespace rootJS
 		return true;
 	}
 
-	void ObjectProxyFactory::initializeProxyMap()
+	const std::map<std::string, ProxyInitializator> ObjectProxyFactory::primitiveProxyMap
 	{
 
-		primitiveProxyMap["int"]                = &NumberProxy::intConstruct;
-		primitiveProxyMap["unsigned int"]       = &NumberProxy::uintConstruct;
+	    {"int", &NumberProxy::intConstruct},
+	    {"unsigned int", &NumberProxy::uintConstruct},
 
-		primitiveProxyMap["double"]             = &NumberProxy::doubleConstruct;
-		primitiveProxyMap["long double"]        = &NumberProxy::ldoubleConstruct;
+	    {"double", &NumberProxy::doubleConstruct},
+	    {"long double", &NumberProxy::ldoubleConstruct},
 
-		primitiveProxyMap["short"]              = &NumberProxy::shortConstruct;
-		primitiveProxyMap["unsigned short"]     = &NumberProxy::ushortConstruct;
+	    {"short", &NumberProxy::shortConstruct},
+	    {"unsigned short", &NumberProxy::ushortConstruct},
 
-		primitiveProxyMap["unsigned char"]      = &NumberProxy::ucharConstruct;
+	    {"unsigned char", &NumberProxy::ucharConstruct},
 
-		primitiveProxyMap["long"]               = &NumberProxy::longConstruct;
-		primitiveProxyMap["long long"]          = &NumberProxy::llongConstruct;
+	    {"long", &NumberProxy::longConstruct},
+	    {"long long", &NumberProxy::llongConstruct},
 
-		primitiveProxyMap["unsigned long"]      = &NumberProxy::ulongConstruct;
-		primitiveProxyMap["unsigned long long"] = &NumberProxy::ullongConstruct;
+	    {"unsigned long", &NumberProxy::ulongConstruct},
+	    {"unsigned long long", &NumberProxy::ullongConstruct},
 
-		primitiveProxyMap["float"]              = &NumberProxy::floatConstruct;
+	    {"float", &NumberProxy::floatConstruct},
 
-		primitiveProxyMap["char"]               = &StringProxy::singleCharConstruct;
-		primitiveProxyMap["char*"]              = &StringProxy::charConstruct;
-		primitiveProxyMap["const char*"]              = &StringProxy::charConstruct;
-		primitiveProxyMap["char&"]              = &StringProxy::singleCharConstruct;
+	    {"char", &StringProxy::singleCharConstruct},
+	    {"char*", &StringProxy::charConstruct},
+	    {"const char*", &StringProxy::charConstruct},
+	    {"char&", &StringProxy::singleCharConstruct},
 
-		primitiveProxyMap["string"]             = &StringProxy::stringConstruct;	// = std::string
+	    {"string", &StringProxy::stringConstruct},	// = std::string
 
-		primitiveProxyMap["bool"]               = &BooleanProxy::boolConstruct;
+	    {"bool", &BooleanProxy::boolConstruct},
 
-		primitiveProxyMap["void"]               = &VoidPointerProxy::voidConstruct;
+	    {"void", &VoidPointerProxy::voidConstruct},
 
-		// Special typedefs
-		primitiveProxyMap["Double32_t"]         = &NumberProxy::doubleConstruct;
-		primitiveProxyMap["Float16_t"]          = &NumberProxy::floatConstruct;
-		primitiveProxyMap["Long64_t"]           = &NumberProxy::llongConstruct;
-		primitiveProxyMap["ULong64_t"]          = &NumberProxy::ullongConstruct;
+	    // Special typedefs
+	    {"Double32_t", &NumberProxy::doubleConstruct},
+	    {"Float16_t", &NumberProxy::floatConstruct},
+	    {"Long64_t", &NumberProxy::llongConstruct},
+	    {"ULong64_t", &NumberProxy::ullongConstruct}
 
-	}
+	};
 
 }

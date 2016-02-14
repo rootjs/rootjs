@@ -22,7 +22,7 @@ namespace rootJS
 	class ObjectProxyFactory
 	{
 		private:
-			static std::map<std::string, ProxyInitializator> primitiveProxyMap;
+			static const std::map<std::string, ProxyInitializator> primitiveProxyMap;
 
 			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope, v8::Local<v8::Object>* instancePtr) throw(std::invalid_argument);
 			static std::map<std::string, ObjectProxy*>* createPropertyMap(MetaInfo &info, TClass *clazz, ObjectProxy *holder) throw(std::invalid_argument);
@@ -65,11 +65,6 @@ namespace rootJS
 			static ObjectProxy* createPrimitiveProxy(std::string const& trueTypeName, MetaInfo &info, TClass *scope);
 
 			static ObjectProxy* createEnumProxy(std::string const& trueTypeName, MetaInfo &info, TClass *scope);
-
-			/**
-			 *  Initializes the ProxyMap with standard data types.
-			 */
-			static void initializeProxyMap(void);
 	};
 }
 
