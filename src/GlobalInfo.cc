@@ -47,6 +47,10 @@ namespace rootJS
 		return type.GetTypeName();
 	}
 
+	const char* GlobalInfo::getFullTypeName() {
+		return type.GetFullTypeName();
+	};
+
 	const char* GlobalInfo::getName()
 	{
 		return type.GetName();

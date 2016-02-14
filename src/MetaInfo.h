@@ -88,6 +88,12 @@ namespace rootJS
 			virtual const char* getTypeName() = 0;
 
 			/**
+			 * Returns the full typename of the TObject.
+			 * @return full type name like char* instead of char (which is what getTypeNaem would return)
+			 */
+			virtual const char* getFullTypeName() = 0;
+
+			/**
 			 * Returns the name of the TObject.
 			 * @return name of the TObject
 			 */

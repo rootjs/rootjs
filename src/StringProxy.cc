@@ -46,6 +46,12 @@ namespace rootJS
 			TString *tstr = (TString*)getAddress();
 			return tstr->Data();
 		}
+		case StringType::SINGLE_CHAR:
+		{
+			singleChar[0] = **(char**)getAddress();
+			singleChar[1] = '\0';
+			return singleChar;
+		}
 		}
 		return "Failed to load c_str from this var";
 	}
@@ -71,6 +77,12 @@ namespace rootJS
 		return proxy;
 	}
 
+	ObjectProxy* StringProxy::singleCharConstruct(MetaInfo &info, TClass *scope) {
+		StringProxy *proxy = new StringProxy(info, scope);
+		proxy->strType = StringType::SINGLE_CHAR;
+		return proxy;
+	}
+
 	void StringProxy::setValue(v8::Local<v8::Value> value)
 	{
 		if(isConst())
@@ -91,6 +103,11 @@ namespace rootJS
 		switch(strType)
 		{
 		case StringType::CHAR:
+		{
+			Toolbox::throwException("This value cannot be overwritten, it's a char pointer.");
+			break;
+		}
+		case StringType::SINGLE_CHAR:
 		{
 			Toolbox::throwException("This value cannot be overwritten, it's a char pointer.");
 			break;

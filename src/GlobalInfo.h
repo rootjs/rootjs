@@ -27,6 +27,7 @@ namespace rootJS
 
 			virtual int getArrayLength();
 			virtual const char* getTypeName();
+			virtual const char* getFullTypeName();
 			virtual const char* getName();
 
 			virtual GlobalInfo* clone();
