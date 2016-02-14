@@ -18,8 +18,7 @@
 
 namespace rootJS
 {
-	enum class mappedTypes
-	{
+	enum class mappedTypes {
 		CHAR, INT, DOUBLE, BOOL, TSTRING
 	};
 

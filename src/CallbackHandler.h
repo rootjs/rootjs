@@ -197,8 +197,7 @@ namespace rootJS
 			static v8::Local<v8::Value> createFunctionCallbackData(TClass *scope);
 
 		private:
-			struct AsyncCallParam
-			{
+			struct AsyncCallParam {
 				v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> params;
 				FunctionProxy* proxy;
 				void* selfAddress;

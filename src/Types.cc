@@ -6,15 +6,15 @@
 namespace rootJS
 {
 
-	TDataType* Types::getTypeByName(const std::string &stdTypeName) {
+	TDataType* Types::getTypeByName(const std::string &stdTypeName)
+	{
 		std::string cpyTypeName = stdTypeName;
 		// check if typeName starts with const
 		std::size_t idx = cpyTypeName.find("const ");
 		if(cpyTypeName.find('*') != std::string::npos) {
 			cpyTypeName = cpyTypeName.substr(0, cpyTypeName.find('*'));
 		}
-		if(idx != std::string::npos && idx == 0)
-		{
+		if(idx != std::string::npos && idx == 0) {
 			return (TDataType*) (gROOT->GetListOfTypes(kTRUE)->FindObject(stdTypeName.substr(6).c_str()));
 		}
 
