@@ -1,6 +1,7 @@
 #include "ObjectProxyFactory.h"
 
 #include "Proxy.h"
+#include "ArrayProxy.h"
 #include "NumberProxy.h"
 #include "StringProxy.h"
 #include "BooleanProxy.h"
@@ -25,6 +26,8 @@
 #include <TEnum.h>
 #include <Rtypes.h>
 #include <RtypesCore.h>
+
+#include <iostream>
 
 namespace rootJS
 {
@@ -77,6 +80,27 @@ namespace rootJS
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope) throw(std::invalid_argument)
 	{
+		if (info.isArray())
+		{
+			std::cout << "!!! Array over here !!!" << std::endl << "type: " << info.getTypeName() << std::endl;
+
+			v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), info.getArrayLength());
+			for (int i = 0; i < info.getArrayLength(); i++)
+			{
+				// TODO call createObjectProxy for the i-th element in the array
+				ObjectProxy* element = nullptr;
+				array->Set(i, element->get());
+			}
+
+			ArrayProxy *proxy = new ArrayProxy(info, scope);
+			proxy->setProxy(array);
+
+			array->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, proxy);
+			// TODO propertyMap?
+
+			return proxy;
+		}
+
 		ObjectProxy* proxy = findPrimitiveProxy(info, scope);
 
 		if(proxy != nullptr)

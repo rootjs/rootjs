@@ -18,6 +18,7 @@
 				'src/FunctionProxyFactory.cc',
 				'src/ObjectProxyFactory.cc',
 				'src/Proxy.cc',
+				'src/ArrayProxy.cc',
 				'src/FunctionProxy.cc',
 				'src/ObjectProxy.cc',
 				'src/PrimitiveProxy.cc',
