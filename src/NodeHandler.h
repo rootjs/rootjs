@@ -20,7 +20,7 @@ namespace rootJS
 			 * Has the NodeHandler been initialized yet?
 			 */
 			static bool initialized;
-			v8::Persistent<v8::Object> rootJS;
+			v8::Persistent<v8::Object> exportPersistent;
 			/**
 			 * Singleton holder for NodeHandler
 			 */
@@ -33,32 +33,34 @@ namespace rootJS
 			/* Private constructor - Singleton */
 			NodeHandler(v8::Local<v8::Object>);
 
+
 			void exposeROOT();
 			void exposeGlobals() throw(std::invalid_argument);
 			void exposeGlobalFunctions() throw(std::invalid_argument);
 			void exposeClasses() throw(std::invalid_argument);
+			void refreshExports();
+
 
 		public:
 			/**
 			 * The method which starts rootJS. It instantiates a NodeApplication, a proxyMap from ObjectProxyFactory
-             * and a NodeHandler. It also exposes the contents of ROOT.
-             *
-             * @param exports
-             *              The exports sent back to node
-             * @param module
-             *              The module to be instantiated
+			 * and a NodeHandler. It also exposes the contents of ROOT.
+			 *
+			 * @param exports
+			 *              The exports sent back to node
+			 * @param module
+			 *              The module to be instantiated
 			 */
 			static void initialize(v8::Local<v8::Object>, v8::Local<v8::Object>);
+			static void loadlibraryCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
+			static void refreshExportsCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
 
-            /**
-             * Gets the exports from node.
-             *
-             * @return The exports from node
-             */
-			v8::Local<v8::Object> getExports(void);
+			static NodeHandler* getInstance();
+
+			void exposeInterfaceFunctions();
 	};
 
-	NODE_MODULE(rootjs, NodeHandler::initialize);
+	NODE_MODULE(rootjs, NodeHandler::initialize)
 }
 
 #endif

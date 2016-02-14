@@ -192,7 +192,7 @@ namespace rootJS
 		std::string returnTypeName(function->GetReturnTypeName());
 		int ptrDepth = std::count(returnTypeName.begin(), returnTypeName.end(), '*');
 		std::string typeName = function->GetReturnTypeNormalizedName();
-		
+
 
 		if(!isConstructorCall) {
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());

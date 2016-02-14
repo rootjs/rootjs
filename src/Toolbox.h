@@ -2,6 +2,7 @@
 #define TOOLBOX_H
 
 #include <string>
+#include <v8.h>
 
 namespace rootJS
 {
@@ -12,7 +13,7 @@ namespace rootJS
 	{
 		public:
 			static const int INTERNAL_FIELD_COUNT = 2;
-			
+
 			/**
 			 * Controls the verbosity of the compiled module.
 			 *
@@ -51,6 +52,8 @@ namespace rootJS
 			 *		the message to log
 			 */
 			static void logError(const std::string &message);
+
+			static std::string Stringv8toStd(v8::Local<v8::String> vstr);
 	};
 }
 

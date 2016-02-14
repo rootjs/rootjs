@@ -33,7 +33,7 @@ namespace rootJS
 			ObjectProxyFactory();
 
 		public:
-            /**
+			/**
 			 *	Encapsulate the supplied data into a new JavaScript object.
 			 *
 			 *	@param info
@@ -46,7 +46,7 @@ namespace rootJS
 			 */
 			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope) throw(std::invalid_argument);
 
-            /**
+			/**
 			 *	Encapsulate the supplied data into the specified JavaScript object.
 			 *
 			 *	@param info
@@ -66,9 +66,9 @@ namespace rootJS
 
 			static ObjectProxy* createEnumProxy(std::string const& trueTypeName, MetaInfo &info, TClass *scope);
 
-            /**
-             *  Initializes the ProxyMap with standard data types.
-             */
+			/**
+			 *  Initializes the ProxyMap with standard data types.
+			 */
 			static void initializeProxyMap(void);
 	};
 }

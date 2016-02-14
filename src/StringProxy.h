@@ -20,7 +20,7 @@ namespace rootJS
 			 * It also contains standard string type in ROOT, TStrings.
 			 */
 			enum class StringType {
-			    CHAR, STRING, TSTRING, SINGLE_CHAR
+				CHAR, STRING, TSTRING, SINGLE_CHAR
 			};
 
 			/**

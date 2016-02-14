@@ -88,7 +88,7 @@ namespace rootJS
 		if(isConst())
 		{
 			Toolbox::throwException("This value cannot be overwritten, it's constant.");
-            return;
+			return;
 		}
 
 		if(!value->IsString() && !value->IsStringObject())
