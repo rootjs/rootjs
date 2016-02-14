@@ -81,7 +81,7 @@ namespace rootJS
 					info.GetReturnValue().Set(resultProxy->get());
 					delete resultProxy;
 				} else {
-					info.GetReturnValue().Set(resultProxy->getWeakPeristent());
+					info.GetReturnValue().Set(resultProxy->get());
 				}
 			}
 			delete proxy;
@@ -165,7 +165,7 @@ namespace rootJS
 				info.GetReturnValue().Set(resultProxy->get());
 				delete resultProxy;
 			} else {
-				info.GetReturnValue().Set(resultProxy->getWeakPeristent());
+				info.GetReturnValue().Set(resultProxy->get());
 			}
 		}
 
@@ -304,7 +304,7 @@ namespace rootJS
 					info.GetReturnValue().Set(resultProxy->get());
 					delete resultProxy;
 				} else {
-					info.GetReturnValue().Set(resultProxy->getWeakPeristent());
+					info.GetReturnValue().Set(resultProxy->get());
 				}
 			}
 		}
