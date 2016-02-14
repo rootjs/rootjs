@@ -14,12 +14,13 @@ namespace rootJS
 	class StringProxy: public PrimitiveProxy
 	{
 		private:
+			char singleChar[2];
 			/**
 			 * An enum containing the two standard string types, string and c-strings.
 			 * It also contains standard string type in ROOT, TStrings.
 			 */
 			enum class StringType {
-			    CHAR, STRING, TSTRING
+			    CHAR, STRING, TSTRING, SINGLE_CHAR
 			};
 
 			/**
@@ -73,6 +74,14 @@ namespace rootJS
 			 * @param scope the scope of the encapsulated object
 			 */
 			static ObjectProxy* tStringConstruct(MetaInfo &info, TClass *scope);
+
+			/**
+			 * Creates a StringProxy based on a single char.
+			 *
+			 * @param info the type of the encapsulated object
+			 * @param scope the scope of the encapsulated object
+			 */
+			static ObjectProxy* singleCharConstruct(MetaInfo &info, TClass *scope);
 
 
 			/**

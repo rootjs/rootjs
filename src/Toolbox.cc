@@ -13,14 +13,20 @@ namespace rootJS
 
 	void Toolbox::logInfo(const std::string& message)
 	{
-		// TODO: maybe find a way to directly call console.log("...") here
-		std::cout << message << std::endl;
+		if (Toolbox::VERBOSITY > 0)
+		{
+			// TODO: maybe find a way to directly call console.log("...") here
+			std::cout << message << std::endl;
+		}	
 	}
 
 	void Toolbox::logError(const std::string& message)
 	{
-		// TODO: maybe find a way to directly call console.error("...") here
-		std::cerr << message << std::endl;
+		if (Toolbox::VERBOSITY > 1)
+		{
+			// TODO: maybe find a way to directly call console.error("...") here
+			std::cerr << message << std::endl;
+		}
 	}
 
 	std::string Toolbox::Stringv8toStd(v8::Local<v8::String> vstr) {

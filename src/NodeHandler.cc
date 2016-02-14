@@ -1,8 +1,10 @@
 #include "NodeHandler.h"
+
 #include "NodeApplication.h"
 #include "ClassExposer.h"
 #include "GlobalInfo.h"
 #include "Toolbox.h"
+#include "Types.h"
 
 #include <iostream>
 
@@ -17,7 +19,6 @@ namespace rootJS
 
 	void NodeHandler::initialize(v8::Local<v8::Object> exports, v8::Local<v8::Object> module)
 	{
-
 		if (!initialized)
 		{
 
@@ -55,7 +56,6 @@ namespace rootJS
 		{
 			exposeGlobals();
 			exposeGlobalFunctions();
-			
 			exposeClasses();
 			exposeInterfaceFunctions();
 		}
@@ -66,7 +66,6 @@ namespace rootJS
 		}
 	}
 
-	
 	void NodeHandler::exposeGlobals() throw (std::invalid_argument)
 	{
 		TCollection *globals = gROOT->GetListOfGlobals(kTRUE);
@@ -129,8 +128,6 @@ namespace rootJS
 				throw std::invalid_argument(
 				    std::string("Specified class is not loaded."));
 			}
-			exportsLocal->IsString();
-			//exports->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"Math"));
 			if ((((std::string) clazz->GetName()).find(":") == std::string::npos) && (!exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName())))){
 				if ((clazz->Property() & kIsClass))
 				{

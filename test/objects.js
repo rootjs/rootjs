@@ -26,7 +26,7 @@ describe('Objects', function() {
 	  });
 	  it('should be possible to call methods asynchronously', function(done) {
 		  var AsyncWorks = false;
-		  root.gSystem.Exec("sleep 100ms", function(result) {
+		  root.gSystem.Exec("sleep 0.1", function(result) {
 			  AsyncWorks.should.equal(true);
 			  done();
 		  });
@@ -46,7 +46,7 @@ describe('Objects', function() {
 			  }
 		  };
 		  for(var i = 0; i < 5; i++) {
-			  root.gSystem.Exec("sleep 100ms", cb);
+			  root.gSystem.Exec("sleep 0.1", cb);
 		  }
 	  });
   });
@@ -56,4 +56,28 @@ describe('Objects', function() {
 		  testSring.Data().should.equal("test");
 	  });
   });
+  describe('Operators', function() {
+	  it('should be possible to use _equals', function() {
+		  var t1 = new root.TString("test");
+		  var t2 = new root.TString("test");
+
+		  (t1 == t2).should.not.equal(true);
+		  root._equals(t1, t2).should.equal(true);
+	  });
+	  it('should be possible to use _setAdd', function() {
+		  var t1 = new root.TString("test");
+		  var t2 = new root.TString("test");
+
+		  t1._setAdd(t2);
+		  t1.Data().should.equal("testtest");
+	  });
+	  it('should be possible to use _at', function() {
+		  var t1 = new root.TString("test");
+
+		  t1._at(2).should.equal('s');
+		  (function() {
+			  t1._at(10).should.equal('')
+		  });
+	  });
+  })
 });
