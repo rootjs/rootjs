@@ -152,21 +152,42 @@ namespace rootJS
 			return;
 		}
 
-		//TODO: Callback!
-		// if(callback.IsEmpty()) ...
 
-		proxy->prepareCall(args);
-		ObjectProxy *resultProxy = proxy->call(nullptr);
-		if(resultProxy) {
-			if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
+
+		if(callback.IsEmpty()) {
+			proxy->prepareCall(args);
+			ObjectProxy *resultProxy = proxy->call(nullptr);
+			delete proxy;
+			if(resultProxy) {
 				info.GetReturnValue().Set(resultProxy->get());
 				delete resultProxy;
 			} else {
-				info.GetReturnValue().Set(resultProxy->get());
+				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive()) {
+					info.GetReturnValue().Set(resultProxy->get());
+					delete resultProxy;
+				} else {
+					info.GetReturnValue().Set(resultProxy->get());
+				}
 			}
-		}
+		} else {
+			AsyncCallParam *asyncCallParam = new AsyncCallParam();
+			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), args);
+			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
 
-		delete proxy;
+			/*
+			 * Clone the FunctionProxy because when the same function is called multiple times
+			 * prepareCall might be called with new data before the old call finished,
+			 * which leads to unexpected results (while testing: multiple frees of the param buffer)
+			 */
+			FunctionProxy* cloneProxy = proxy->clone();
+
+			asyncCallParam->params = persistentArgs;
+			asyncCallParam->proxy = cloneProxy;
+			asyncCallParam->selfAddress = nullptr;
+			cloneProxy->prepareCall(args);
+			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, persistentCallback);
+			runner->run();
+		}
 	}
 
 
