@@ -92,21 +92,25 @@ namespace rootJS
 
 	void NodeHandler::exposeGlobalFunctions() throw (std::invalid_argument)
 	{
-		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
-		TCollection *functions = gROOT->GetListOfGlobalFunctions(kTRUE);
+		TCollection *globals = gROOT->GetListOfGlobals(kTRUE);
+		TIter next(globals);
 
-		TIter next(functions);
-		while (TFunction *function = (TFunction*) next())
+		while (TGlobal *global = (TGlobal*) next())
 		{
-			if (!function->IsValid())
+			if( (!global->IsValid()) || (global->GetAddress() == nullptr))
 			{
-				Toolbox::logError("Invalid global function found.");
+				Toolbox::logError("Invalid global instance found.");
 				continue;
 			}
 
-			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(function->GetName(), nullptr);
-			exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), function->GetName()),
-			             v8::Function::New(v8::Isolate::GetCurrent(), CallbackHandler::globalFunctionCallback, data));
+			GlobalInfo info(*global);
+			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, nullptr);
+			if (proxy != nullptr)
+			{
+				CallbackHandler::registerGlobalObject(std::string(global->GetName()), proxy);
+				this->exports->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()),
+										   CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
+			}
 		}
 	}
 
