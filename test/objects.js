@@ -26,7 +26,7 @@ describe('Objects', function() {
 	  });
 	  it('should be possible to call methods asynchronously', function(done) {
 		  var AsyncWorks = false;
-		  root.gSystem.Exec("sleep 100ms", function(result) {
+		  root.gSystem.Exec("sleep 0.1", function(result) {
 			  AsyncWorks.should.equal(true);
 			  done();
 		  });
@@ -46,7 +46,7 @@ describe('Objects', function() {
 			  }
 		  };
 		  for(var i = 0; i < 5; i++) {
-			  root.gSystem.Exec("sleep 100ms", cb);
+			  root.gSystem.Exec("sleep 0.1", cb);
 		  }
 	  });
   });
