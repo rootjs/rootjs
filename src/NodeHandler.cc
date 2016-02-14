@@ -159,7 +159,7 @@ namespace rootJS
 		std::string libname = Toolbox::Stringv8toStd(v8::Local<v8::String>::Cast(arg));
 		int rcode = gSystem->Load(libname.c_str());
 		info.GetReturnValue().Set(rcode);
-		if(rcode == 0) {
+		if(rcode >= 0) {
 			NodeHandler::getInstance()->refreshExports();
 		}
 		}
