@@ -28,7 +28,6 @@ namespace rootJS
 			static std::map<std::string, ObjectProxy*>* createPropertyMap(MetaInfo &info, TClass *clazz, ObjectProxy *holder) throw(std::invalid_argument);
 
 			static TClass* getClass(std::string const& typeName);
-			static bool resolveTypeName(MetaInfo &info, std::string &trueType);
 
 			ObjectProxyFactory();
 
