@@ -15,7 +15,7 @@ namespace rootJS
 {
 
 	NodeHandler *NodeHandler::instance;
-	bool NodeHandler::initialized;
+	bool NodeHaer::initialized;
 
 	void NodeHandler::initialize(v8::Local<v8::Object> exports, v8::Local<v8::Object> module)
 	{
@@ -159,8 +159,10 @@ namespace rootJS
 		std::string libname = Toolbox::Stringv8toStd(v8::Local<v8::String>::Cast(arg));
 		int rcode = gSystem->Load(libname.c_str());
 		info.GetReturnValue().Set(rcode);
-		NodeHandler::getInstance()->refreshExports();
-	}
+		if(rcode == 0) {
+			NodeHandler::getInstance()->refreshExports();
+		}
+		}
 
 	void NodeHandler::refreshExportsCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument){
 		if(info.Length() != 0)
