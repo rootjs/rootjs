@@ -236,7 +236,7 @@ namespace rootJS
 
 		ObjectProxy* proxy = nullptr;
 
-		PointerInfo mode(result, typeName.c_str(), ptrDepth + 1);
+		PointerInfo mode(result, typeName.c_str(), ptrDepth);
 		if(reuseLocal != nullptr) {
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());
 			if(dictFunc != nullptr) {
@@ -432,10 +432,10 @@ namespace rootJS
 	void* FunctionProxy::argToObj(v8::Local<v8::Value> originalArg, int derefCount)
 	{
 		v8::Local<v8::Object> obj = v8::Local<v8::Object>::Cast(originalArg);
-		if(object->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
+		if(obj->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
 		{
 			Toolbox::throwException("Unexpected internal field count.");
-			return;
+			return nullptr;
 		}
 
 		ObjectProxy *proxy = (ObjectProxy*)obj->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
