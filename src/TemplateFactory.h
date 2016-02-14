@@ -32,7 +32,7 @@ namespace rootJS
 			 * Finds out the type of the given TClass and calls the correct member function
 			 * to create a v8 constructor of it, then returns the template.
 			 *
-			 * @param *clazz Pointer to the TClass 
+			 * @param *clazz Pointer to the TClass
 			 *
 			 * @return The v8 constructor for the given TClass
 			 */

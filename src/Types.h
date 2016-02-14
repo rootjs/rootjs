@@ -1,6 +1,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <map>
+
 #include <v8.h>
 #include <TDataType.h>
 
@@ -43,6 +45,8 @@ namespace rootJS
              *              The value to checked
              */
 			static bool isV8Primitive(v8::Local<v8::Value> value);
+
+			static const std::map<std::string, std::string> operatorNames;
 	};
 }
 

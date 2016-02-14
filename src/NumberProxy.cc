@@ -37,6 +37,9 @@ namespace rootJS
             return *((pointer*)getAddress());                       \
             break;
 
+			SWITCH_CAST_DOUBLE(CHAR_T,char)
+			SWITCH_CAST_DOUBLE(UCHAR_T,UChar_t)
+
 			SWITCH_CAST_DOUBLE(INT_T,Int_t)
 			SWITCH_CAST_DOUBLE(UINT_T,UInt_t)
 
@@ -66,6 +69,9 @@ namespace rootJS
         proxy->numberType = NumberType::numbertype;                                             \
         return proxy;                                                                               \
     }
+
+	ROOTJS_NUMBER_PROXY(char, CHAR_T)
+	ROOTJS_NUMBER_PROXY(uchar, UCHAR_T)
 
 	ROOTJS_NUMBER_PROXY(int, INT_T )
 	ROOTJS_NUMBER_PROXY(uint, UINT_T )
@@ -124,6 +130,9 @@ namespace rootJS
 
 		switch(numberType)
 		{
+			SWITCH_SET_VALUE(CHAR_T, char)
+			SWITCH_SET_VALUE(UCHAR_T, unsigned char)
+
 			SWITCH_SET_VALUE(INT_T,int)
 			SWITCH_SET_VALUE(UINT_T,unsigned int)
 
