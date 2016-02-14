@@ -164,7 +164,7 @@ namespace rootJS
 		if(name.find('<') != std::string::npos)
 		{
 			//TODO Handle templates
-			// Toolbox::logInfo(std::string("omitting template ").append(clazz->GetName()));
+			 Toolbox::logInfo(std::string("omitting template ").append(clazz->GetName()),2);
 			return;
 		}
 		splitClassName(name, vec);

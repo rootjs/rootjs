@@ -120,9 +120,9 @@ namespace rootJS
 		if(type == nullptr)
 		{
 			Toolbox::logInfo("Resolved Type '" + trueTypeName
-			                  + "' from '" + std::string(info.getName())
-			                  + "' with type '" + std::string(info.getTypeName())
-			                  + "' in scope '" +  ((scope == nullptr) ? "global" : std::string(scope->GetName())) + "' could not be encapsulated.",1);
+			                 + "' from '" + std::string(info.getName())
+			                 + "' with type '" + std::string(info.getTypeName())
+			                 + "' in scope '" +  ((scope == nullptr) ? "global" : std::string(scope->GetName())) + "' could not be encapsulated.",1);
 			return nullptr;
 		}
 
@@ -200,41 +200,41 @@ namespace rootJS
 	const std::map<std::string, ProxyInitializator> ObjectProxyFactory::primitiveProxyMap
 	{
 
-	    {"int", &NumberProxy::intConstruct},
-	    {"unsigned int", &NumberProxy::uintConstruct},
+		{"int", &NumberProxy::intConstruct},
+		{"unsigned int", &NumberProxy::uintConstruct},
 
-	    {"double", &NumberProxy::doubleConstruct},
-	    {"long double", &NumberProxy::ldoubleConstruct},
+		{"double", &NumberProxy::doubleConstruct},
+		{"long double", &NumberProxy::ldoubleConstruct},
 
-	    {"short", &NumberProxy::shortConstruct},
-	    {"unsigned short", &NumberProxy::ushortConstruct},
+		{"short", &NumberProxy::shortConstruct},
+		{"unsigned short", &NumberProxy::ushortConstruct},
 
-	    {"unsigned char", &NumberProxy::ucharConstruct},
+		{"unsigned char", &NumberProxy::ucharConstruct},
 
-	    {"long", &NumberProxy::longConstruct},
-	    {"long long", &NumberProxy::llongConstruct},
+		{"long", &NumberProxy::longConstruct},
+		{"long long", &NumberProxy::llongConstruct},
 
-	    {"unsigned long", &NumberProxy::ulongConstruct},
-	    {"unsigned long long", &NumberProxy::ullongConstruct},
+		{"unsigned long", &NumberProxy::ulongConstruct},
+		{"unsigned long long", &NumberProxy::ullongConstruct},
 
-	    {"float", &NumberProxy::floatConstruct},
+		{"float", &NumberProxy::floatConstruct},
 
-	    {"char", &StringProxy::singleCharConstruct},
-	    {"char*", &StringProxy::charConstruct},
-	    {"const char*", &StringProxy::charConstruct},
-	    {"char&", &StringProxy::singleCharConstruct},
+		{"char", &StringProxy::singleCharConstruct},
+		{"char*", &StringProxy::charConstruct},
+		{"const char*", &StringProxy::charConstruct},
+		{"char&", &StringProxy::singleCharConstruct},
 
-	    {"string", &StringProxy::stringConstruct},	// = std::string
+		{"string", &StringProxy::stringConstruct},	// = std::string
 
-	    {"bool", &BooleanProxy::boolConstruct},
+		{"bool", &BooleanProxy::boolConstruct},
 
-	    {"void", &VoidPointerProxy::voidConstruct},
+		{"void", &VoidPointerProxy::voidConstruct},
 
-	    // Special typedefs
-	    {"Double32_t", &NumberProxy::doubleConstruct},
-	    {"Float16_t", &NumberProxy::floatConstruct},
-	    {"Long64_t", &NumberProxy::llongConstruct},
-	    {"ULong64_t", &NumberProxy::ullongConstruct}
+		// Special typedefs
+		{"Double32_t", &NumberProxy::doubleConstruct},
+		{"Float16_t", &NumberProxy::floatConstruct},
+		{"Long64_t", &NumberProxy::llongConstruct},
+		{"ULong64_t", &NumberProxy::ullongConstruct}
 
 	};
 

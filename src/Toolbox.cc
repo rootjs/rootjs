@@ -22,8 +22,8 @@ namespace rootJS
 
 	void Toolbox::logError(const std::string& message)
 	{
-			// TODO: maybe find a way to directly call console.error("...") here
-			std::cerr << message << std::endl;
+		// TODO: maybe find a way to directly call console.error("...") here
+		std::cerr << message << std::endl;
 	}
 
 	std::string Toolbox::Stringv8toStd(v8::Local<v8::String> vstr) {
