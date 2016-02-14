@@ -119,10 +119,10 @@ namespace rootJS
 		TClass *type = getClass(std::string(info.getTypeName()));
 		if(type == nullptr)
 		{
-			Toolbox::logError("Resolved Type '" + trueTypeName
+			Toolbox::logInfo("Resolved Type '" + trueTypeName
 			                  + "' from '" + std::string(info.getName())
 			                  + "' with type '" + std::string(info.getTypeName())
-			                  + "' in scope '" +  ((scope == nullptr) ? "global" : std::string(scope->GetName())) + "' could not be encapsulated.");
+			                  + "' in scope '" +  ((scope == nullptr) ? "global" : std::string(scope->GetName())) + "' could not be encapsulated.",1);
 			return nullptr;
 		}
 
