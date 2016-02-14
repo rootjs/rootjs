@@ -11,7 +11,11 @@ describe('Dynamic Loading', function() {
                 root.loadlibrary("libSpectrumPainter.so");
             }).should.not.throw();
         });
-
+        it('should be possible to call reloadLibrary', function () {
+            (function () {
+            root.refreshExports()
+            }).should.not.throw();
+        });
         describe('accessing', function () {
             it('should be able to access TSpectrum2Painter', function () {
                 root.TSpectrum2Painter.should.not.be.undefined()
