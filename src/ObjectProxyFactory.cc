@@ -141,25 +141,25 @@ namespace rootJS
 		}
 
 		if (info.isArray())
-        {
-            std::cout << "!!! Array over here !!!" << std::endl << "type: " << info.getTypeName() << std::endl;
+		{
+			std::cout << "!!! Array over here !!!" << std::endl << "type: " << info.getTypeName() << std::endl;
+			
+			v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), info.getArrayLength());
+			for (int i = 0; i < info.getArrayLength(); i++)
+			{
+				// TODO call createObjectProxy for the i-th element in the array
+				ObjectProxy* element = nullptr;
+				array->Set(i, element->get());
+			}
+			
+			ArrayProxy *proxy = new ArrayProxy(info, scope);
+			proxy->setProxy(array);
 
-            v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), info.getArrayLength());
-            for (int i = 0; i < info.getArrayLength(); i++)
-            {
-                // TODO call createObjectProxy for the i-th element in the array
-                ObjectProxy* element = nullptr;
-                array->Set(i, element->get());
-            }
+			array->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, proxy);
+			// TODO propertyMap?
 
-            ArrayProxy *proxy = new ArrayProxy(info, scope);
-            proxy->setProxy(array);
-
-            array->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, proxy);
-            // TODO propertyMap?
-
-            return proxy;
-        }
+			return proxy;
+		}
 
 		// Try to encapsulate as object / struct / union / array
 		TClass *type = getClass(std::string(info.getTypeName()));
