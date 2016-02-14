@@ -226,7 +226,7 @@ namespace rootJS
 		TEnumConstant *eConst = nullptr;
 		while ( (eConst = (TEnumConstant*) enumIter()))
 		{
-			if(eConst->IsValid())
+			if(eConst->IsValid() && (eConst->Property() & kIsEnum))
 			{
 				EnumConstInfo constInfo(*eConst);
 				(*propertyMap)[std::string(eConst->GetName())] = NumberProxy::llongConstruct(constInfo, eNum->GetClass());
@@ -254,7 +254,7 @@ namespace rootJS
 		TEnumConstant *eConst = nullptr;
 		while ( (eConst = (TEnumConstant*) enumIter()))
 		{
-			if(eConst->IsValid())
+			if(eConst->IsValid() && (eConst->Property() & kIsEnum))
 			{
 				tmplt->SetAccessor(v8::String::NewFromUtf8(isolate, eConst->GetName()), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
 			}
