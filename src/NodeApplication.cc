@@ -1,5 +1,7 @@
 #include "NodeApplication.h"
 
+#include "ObjectProxy.h"
+
 #include <TROOT.h>
 #include <TInterpreter.h>
 #include <TSystem.h>
@@ -7,6 +9,7 @@
 #include <TStyle.h>
 #include <TError.h>
 #include <Getline.h>
+#include <TEnv.h>
 
 namespace rootJS
 {
@@ -35,6 +38,7 @@ namespace rootJS
 			delete[] argv;
 
 			InitROOTGlobals();
+			TObject::SetObjectStat(true);
 
 			return kTRUE;
 		}
@@ -50,6 +54,12 @@ namespace rootJS
 		if ( ! gProgName )              // should have been set by TApplication
 			gSystem->SetProgname( "node" );
 
+		gROOT->GetListOfCleanups()->Add(gApplication);
+
 		return kTRUE;
+	}
+
+	void NodeApplication::RecursiveRemove(TObject *obj) {
+		ObjectProxy::rootDesturcted(obj);
 	}
 }

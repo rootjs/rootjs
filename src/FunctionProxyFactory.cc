@@ -154,11 +154,7 @@ namespace rootJS
 			} else {
 				return false;
 			}
-			if((val - (long long)val) == 0.0) {
-				if(it->second.floatingPoint) {
-					return false;
-				}
-			} else {
+			if((val - (long long)val) != 0.0 && val != 0) {
 				if(!it->second.floatingPoint) {
 					return false;
 				}

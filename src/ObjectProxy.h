@@ -121,10 +121,14 @@ namespace rootJS
 
 			v8::Persistent<v8::Object> &getWeakPeristent();
 
+			static void rootDesturcted(TObject* obj);
+
 		protected:
 			v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
 
 		private:
+			void removed();
+			static std::map<TObject*, ObjectProxy*> objMap;
 			std::vector<void*> boundMallocs;
 			bool isWeak = false;
 			static void weakCallback(v8::WeakCallbackData<v8::Object, ObjectProxy> const& data);
