@@ -1,7 +1,6 @@
 #include "NodeHandler.h"
 
 #include "NodeApplication.h"
-#include "ClassExposer.h"
 #include "GlobalInfo.h"
 #include "Toolbox.h"
 #include "Types.h"
@@ -23,7 +22,6 @@ namespace rootJS
 		if (!initialized) {
 
 			NodeApplication::CreateNodeApplication();
-			ObjectProxyFactory::initializeProxyMap();
 			instance = new NodeHandler(exports);
 			instance->exposeROOT();
 
@@ -266,7 +264,7 @@ void NodeHandler::unloadlibraryCallback(const v8::FunctionCallbackInfo<v8::Value
 		}
 		std::string libname = Toolbox::Stringv8toStd(v8::Local<v8::String>::Cast(arg));
 		gSystem->Unload(libname.c_str());
-		NodeHandler::getInstance()->refreshExports();
+		NodeHandler::getInstance()->refreshExports();//can root even unload non external libraries?
 	}
 
 }
