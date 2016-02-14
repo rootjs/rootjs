@@ -29,7 +29,7 @@ describe('Bugs', function() {
 			  browser.Add(object);
 		  }).should.not.throw();
 		  setTimeout(function() {
-			  browser.Destructor();
+			  //browser.Destructor();
 			  /* When we do not run this we get a segfault because the initialization is not complete before the test is done and
 			   * deletion of a TBrowser when it's not fully loaded leads to a crash */
 			   done();
