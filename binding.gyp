@@ -26,6 +26,8 @@
 				'src/BooleanProxy.cc',
 				'src/NumberProxy.cc',
 				'src/GlobalInfo.cc',
+				'src/EnumInfo.cc',
+				'src/EnumConstInfo.cc',
 				'src/MemberInfo.cc',
 				'src/FunctionInfo.cc',
 				'src/PointerInfo.cc',
