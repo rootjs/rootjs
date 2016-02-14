@@ -432,7 +432,11 @@ namespace rootJS
 	void* FunctionProxy::argToObj(v8::Local<v8::Value> originalArg, int derefCount)
 	{
 		v8::Local<v8::Object> obj = v8::Local<v8::Object>::Cast(originalArg);
-		assert(obj->InternalFieldCount() == Toolbox::INTERNAL_FIELD_COUNT);
+		if(object->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
+		{
+			Toolbox::throwException("Unexpected internal field count.");
+			return;
+		}
 
 		ObjectProxy *proxy = (ObjectProxy*)obj->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
 
