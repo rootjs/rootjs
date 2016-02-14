@@ -40,6 +40,10 @@ namespace rootJS
 				return typeName;
 			};
 
+			virtual const char* getFullTypeName() {
+				return typeName;
+			};
+
 			virtual PointerInfo* clone()
 			{
 				return new PointerInfo(baseAddress, typeName);

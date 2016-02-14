@@ -94,11 +94,15 @@ namespace rootJS
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope,  v8::Local<v8::Object>* instancePtr) throw(std::invalid_argument)
 	{
-		std::string trueTypeName = info.getTypeName();
+		std::string trueTypeName = info.getFullTypeName();
+		ObjectProxy* proxy = createPrimitiveProxy(trueTypeName, info, scope);
+		if(proxy != nullptr) {
+			return proxy;
+		}
 		resolveTypeName(info, trueTypeName);	// resolve typedefs
 
 		// Try to encapsulate as primitive
-		ObjectProxy* proxy = createPrimitiveProxy(trueTypeName, info, scope);
+		proxy = createPrimitiveProxy(trueTypeName, info, scope);
 		if(proxy == nullptr)
 		{
 			/* Toolbox::logInfo("Resolved Type '" + trueTypeName
@@ -241,6 +245,7 @@ namespace rootJS
 
 		primitiveProxyMap["char"]               = &StringProxy::singleCharConstruct;
 		primitiveProxyMap["char*"]              = &StringProxy::charConstruct;
+		primitiveProxyMap["const char*"]              = &StringProxy::charConstruct;
 		primitiveProxyMap["char&"]              = &StringProxy::singleCharConstruct;
 
 		primitiveProxyMap["string"]             = &StringProxy::stringConstruct;	// = std::string
