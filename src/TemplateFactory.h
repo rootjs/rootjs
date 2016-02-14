@@ -32,7 +32,7 @@ namespace rootJS
 			 * Finds out the type of the given TClass and calls the correct member function
 			 * to create a v8 constructor of it, then returns the template.
 			 *
-			 * @param *clazz Pointer to the TClass 
+			 * @param *clazz Pointer to the TClass
 			 *
 			 * @return The v8 constructor for the given TClass
 			 */
@@ -54,7 +54,6 @@ namespace rootJS
 			static v8::Local<v8::FunctionTemplate> createUnionTemplate(TClass *clazz) throw(std::invalid_argument);
 			static v8::Local<v8::FunctionTemplate> createStructTemplate(TClass *clazz) throw(std::invalid_argument);
 			static v8::Local<v8::FunctionTemplate> createClassTemplate(TClass *clazz) throw(std::invalid_argument);
-			static const std::map<std::string, std::string> operatorNames;
 
 			TemplateFactory();
 	};

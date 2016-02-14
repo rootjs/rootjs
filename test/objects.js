@@ -62,7 +62,7 @@ describe('Objects', function() {
 		  var t2 = new root.TString("test");
 
 		  (t1 == t2).should.not.equal(true);
-		  root.TString._equals(t1, t2).should.equal(true);
+		  root._equals(t1, t2).should.equal(true);
 	  });
 	  it('should be possible to use _setAdd', function() {
 		  var t1 = new root.TString("test");
