@@ -29,6 +29,11 @@ namespace rootJS
 		return true;
 	}
 
+	const char* EnumInfo::getFullTypeName()
+	{
+		return type.GetQualifiedName();
+	}
+
 	const char* EnumInfo::getTypeName()
 	{
 		return type.GetQualifiedName();

@@ -31,6 +31,11 @@ namespace rootJS
 		return (type.Property() & kIsStatic);	// true
 	}
 
+	const char* EnumConstInfo::getFullTypeName()
+	{
+		return type.GetFullTypeName();
+	}
+
 	const char* EnumConstInfo::getTypeName()
 	{
 		return type.GetTypeName();

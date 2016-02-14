@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include <TClass.h>
+#include <TEnum.h>
 
 class CallbackHandler;
 
@@ -43,13 +44,17 @@ namespace rootJS
 			static std::map<std::string, v8::Persistent<v8::FunctionTemplate>> structTemplates;
 
 			static void createInstantiableTemplate(TClass *clazz, v8::Local<v8::FunctionTemplate> tmplt) throw(std::invalid_argument);
+			static void addEnumTemplate(TClass *clazz, v8::Local<v8::ObjectTemplate> tmplt) throw(std::invalid_argument);
 
 			static inline bool isTemplateFunction(std::string const& functionName);
 			static bool isValid(TClass *clazz);
 
 			static v8::Local<v8::ObjectTemplate> createNamespaceTemplate(TClass *clazz) throw(std::invalid_argument);
 			static v8::Local<v8::Object> initializeNamespace(TClass *clazz) throw(std::invalid_argument);
-			static v8::Local<v8::ObjectTemplate> createEnumTemplate(TClass *clazz) throw(std::invalid_argument);
+
+			static v8::Local<v8::Object> initializeEnum(TEnum *eNum) throw(std::invalid_argument);
+			static v8::Local<v8::ObjectTemplate> createEnumTemplate(TEnum *eNum) throw(std::invalid_argument);
+
 			static v8::Local<v8::ObjectTemplate> createArrayTemplate(TClass *clazz) throw(std::invalid_argument);
 			static v8::Local<v8::FunctionTemplate> createUnionTemplate(TClass *clazz) throw(std::invalid_argument);
 			static v8::Local<v8::FunctionTemplate> createStructTemplate(TClass *clazz) throw(std::invalid_argument);

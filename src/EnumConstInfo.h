@@ -21,6 +21,7 @@ namespace rootJS
 			virtual bool isConst();
 			virtual bool isStatic();
 
+			virtual const char* getFullTypeName();
 			virtual const char* getTypeName();
 			virtual const char* getName();
 

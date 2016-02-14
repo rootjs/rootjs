@@ -1,23 +1,28 @@
 #include "TemplateFactory.h"
 
 #include "ObjectProxy.h"
+#include "NumberProxy.h"
 #include "ObjectProxyFactory.h"
 #include "FunctionProxy.h"
 #include "FunctionProxyFactory.h"
 #include "MemberInfo.h"
 #include "PointerInfo.h"
-#include "Toolbox.h"
+#include "EnumInfo.h"
+#include "EnumConstInfo.h"
 #include "Types.h"
+#include "Toolbox.h"
 
-#include "TClassTable.h"
-#include "TMethod.h"
-#include "TDataMember.h"
-
-#include "TCollection.h"
-#include "TList.h"
 #include <string>
-#include "RtypesCore.h"
-#include "Rtypes.h"
+
+#include <TClassTable.h>
+#include <TMethod.h>
+#include <TDataMember.h>
+
+#include <TCollection.h>
+#include <TSeqCollection.h>
+#include <TList.h>
+#include <RtypesCore.h>
+#include <Rtypes.h>
 
 namespace rootJS
 {
@@ -53,10 +58,6 @@ namespace rootJS
 		else if (clazz->Property() & kIsUnion)
 		{
 			return createUnionTemplate(clazz)->InstanceTemplate()->NewInstance(); // creation without ctor callback
-		}
-		else if (clazz->Property() & kIsEnum)
-		{
-			return createEnumTemplate(clazz)->NewInstance();
 		}
 		else if (clazz->Property() & kIsArray)
 		{
@@ -126,6 +127,11 @@ namespace rootJS
 		nspace->SetInternalFieldCount(Toolbox::INTERNAL_FIELD_COUNT); // each instance stores a map containing the property proxies
 
 		/**
+		 *  Add enums
+		 */
+		addEnumTemplate(clazz, nspace);
+
+		/**
 		 *	Add public methods as properties
 		 */
 		std::map<std::string, TFunction*> methods;
@@ -171,8 +177,8 @@ namespace rootJS
 				break;
 			default:
 
-					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
-					nspace->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+				v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
+				nspace->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
 				break;
 			}
 		}
@@ -201,9 +207,53 @@ namespace rootJS
 		return nspace;
 	}
 
-	v8::Local<v8::ObjectTemplate> TemplateFactory::createEnumTemplate(TClass *clazz) throw(std::invalid_argument)
+	v8::Local<v8::Object> TemplateFactory::initializeEnum(TEnum *eNum) throw(std::invalid_argument)
 	{
-		throw std::invalid_argument("Not implemented yet.");
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+		v8::EscapableHandleScope handle_scope(isolate);
+
+		v8::Local<v8::Object> instance = createEnumTemplate(eNum)->NewInstance();
+
+		// populate enum object
+		EnumInfo info(*eNum);
+		ObjectProxy *proxy = new ObjectProxy(info, eNum->GetClass());
+		instance->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, proxy);
+		proxy->setProxy(instance);
+
+		std::map<std::string, ObjectProxy*>* propertyMap = new std::map<std::string, ObjectProxy*>();
+		TIter enumIter(eNum->GetConstants());
+		TEnumConstant *eConst = nullptr;
+		while ( (eConst = (TEnumConstant*) enumIter()))
+		{
+			EnumConstInfo constInfo(*eConst);
+			(*propertyMap)[std::string(eConst->GetName())] = NumberProxy::llongConstruct(constInfo, eNum->GetClass());
+		}
+		instance->SetAlignedPointerInInternalField(Toolbox::PropertyMapPtr, propertyMap);
+
+		return handle_scope.Escape(instance);
+	}
+
+	v8::Local<v8::ObjectTemplate> TemplateFactory::createEnumTemplate(TEnum *eNum) throw(std::invalid_argument)
+	{
+		if(eNum == nullptr || !eNum->IsValid())
+		{
+			throw std::invalid_argument("Specified TEnum is null or not loaded.");
+		}
+
+		v8::Isolate *isolate = v8::Isolate::GetCurrent();
+
+		v8::Local<v8::ObjectTemplate> tmplt = v8::ObjectTemplate::New(isolate);
+		std::string enumName(eNum->GetQualifiedName());
+		tmplt->SetInternalFieldCount(Toolbox::INTERNAL_FIELD_COUNT); // each instance stores a map containing the property proxies
+
+		TIter enumIter(eNum->GetConstants());
+		TEnumConstant *eConst = nullptr;
+		while ( (eConst = (TEnumConstant*) enumIter()))
+		{
+			tmplt->SetAccessor(v8::String::NewFromUtf8(isolate, eConst->GetName()), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
+		}
+
+		return tmplt;
 	}
 
 	v8::Local<v8::ObjectTemplate> TemplateFactory::createArrayTemplate(TClass *clazz) throw(std::invalid_argument)
@@ -304,6 +354,11 @@ namespace rootJS
 		instance->SetInternalFieldCount(Toolbox::INTERNAL_FIELD_COUNT); // each instance stores a map containing the property proxies
 
 		/**
+		 *  Add enums
+		 */
+		addEnumTemplate(clazz, prototype);
+
+		/**
 		 *	Add public methods as properties
 		 */
 		std::map<std::string, TFunction*> methods;
@@ -354,11 +409,15 @@ namespace rootJS
 			case kIsConversion:
 				// don't expose
 				break;
-			case kIsOperator: {
+			case kIsOperator:
+				{
 					std::map<std::string, std::string>::const_iterator opNameIt = Types::operatorNames.find(method->GetName());
-					if(opNameIt == Types::operatorNames.end()) {
+					if(opNameIt == Types::operatorNames.end())
+					{
 						Toolbox::logInfo(std::string("Operator: ") + method->GetName() + " not handled");
-					} else {
+					}
+					else
+					{
 						if (property & kIsStatic)
 						{
 							v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
@@ -416,6 +475,27 @@ namespace rootJS
 			}
 
 		}
+	}
+
+	void TemplateFactory::addEnumTemplate(TClass *clazz, v8::Local<v8::ObjectTemplate> tmplt) throw(std::invalid_argument)
+	{
+		TIter enumIter(clazz->GetListOfEnums(kTRUE));
+		TEnum *eNum = nullptr;
+
+		while ((eNum = (TEnum*) enumIter()))
+		{
+			if (eNum == nullptr || !eNum->IsValid()) // assert eNum->GetClass() == clazz
+			{
+				Toolbox::logError("Invalid enum found in '" + std::string(clazz->GetName()) + "'.");
+				continue;
+			}
+
+			if(eNum->Property() & kIsPublic)
+			{
+				tmplt->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
+			}
+		}
+
 	}
 
 	bool TemplateFactory::isTemplateFunction(std::string const& functionName)
