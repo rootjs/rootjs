@@ -183,7 +183,7 @@ namespace rootJS
 	}
 
 	void NodeHandler::refreshExports() {
-		exposeClasses(); //crashes
+		exposeClasses();
 	}
 
 

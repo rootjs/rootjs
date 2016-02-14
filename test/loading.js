@@ -6,15 +6,19 @@ var root = require('../index');
 describe('Dynamic Loading', function() {
     this.timeout(10000);
     describe('interface', function () {
-        it('should be possible to call loadlibrary to load MathCore', function () {
+        it('should be possible to call loadlibrary to load libSpectrumPainter', function () {
             (function () {
-                root.loadlibrary("libMathCore.so");
+                root.loadlibrary("libSpectrumPainter.so");
             }).should.not.throw();
         });
-
+        it('should be possible to call reloadLibrary', function () {
+            (function () {
+            root.refreshExports()
+            }).should.not.throw();
+        });
         describe('accessing', function () {
-            it('ROOT.Math should not be undefined anymore', function () {
-                root.ROOT.Math.should.not.be.undefined()
+            it('should be able to access TSpectrum2Painter', function () {
+                root.TSpectrum2Painter.should.not.be.undefined()
             });
 
             it('pi should be equal to 3.141592653589793', function () {
