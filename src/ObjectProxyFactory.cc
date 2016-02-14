@@ -95,10 +95,13 @@ namespace rootJS
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope,  v8::Local<v8::Object>* instancePtr) throw(std::invalid_argument)
 	{
 		std::string trueTypeName = info.getFullTypeName();
+
+		//Try without resolving the type first:
 		ObjectProxy* proxy = createPrimitiveProxy(trueTypeName, info, scope);
 		if(proxy != nullptr) {
 			return proxy;
 		}
+
 		resolveTypeName(info, trueTypeName);	// resolve typedefs
 
 		// Try to encapsulate as primitive
@@ -115,6 +118,9 @@ namespace rootJS
 		{
 			return proxy;
 		}
+
+		//Switch to "normalized" type name
+		trueTypeName = info.getTypeName();
 
 		// Try to encapsulate as enum
 		proxy = createEnumProxy(trueTypeName, info, scope);
