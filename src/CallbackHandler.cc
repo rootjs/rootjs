@@ -200,17 +200,17 @@ namespace rootJS
 		v8::Isolate* isolate = info.GetIsolate();
 		v8::Local<v8::Object> instance = info.This();
 
-		if(instance->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
-		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
-			Toolbox::throwException("Unexpected internal field count.");
-			return;
-		}
-
 		if (!info.IsConstructCall())
 		{
 			info.GetReturnValue().Set(v8::Undefined(isolate));
 			Toolbox::throwException("Can not call this constructor as plain function. Use the new operator.");
+			return;
+		}
+
+		if(instance->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
+		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("Unexpected internal field count.");
 			return;
 		}
 
