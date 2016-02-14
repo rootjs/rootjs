@@ -54,9 +54,10 @@ namespace rootJS
 			{
 				if(!holder->getProxy()->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName())))
 				{
-					Toolbox::logError("v8 instance of type '" + std::string(scope->GetName())
+					Toolbox::throwException("v8 instance of type '" + std::string(scope->GetName())
 					                  + "' has no property '" + std::string(member->GetName())
 					                  + "' of type '" + std::string(member->GetTypeName()) + "'.");
+					continue;
 				}
 
 				/*
@@ -74,8 +75,8 @@ namespace rootJS
 				*/
 
 				MemberInfo memberInfo(*member, info.getAddress());
-				// ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(memberInfo, scope);
-				(*propertyMap)[std::string(member->GetName())] = nullptr; // = memberProxy;
+				ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(memberInfo, scope);
+				(*propertyMap)[std::string(member->GetName())] = memberProxy;
 			}
 		}
 
@@ -245,7 +246,7 @@ namespace rootJS
 
 		primitiveProxyMap["char"]               = &StringProxy::singleCharConstruct;
 		primitiveProxyMap["char*"]              = &StringProxy::charConstruct;
-		primitiveProxyMap["const char*"]              = &StringProxy::charConstruct;
+		primitiveProxyMap["const char*"]        = &StringProxy::charConstruct;
 		primitiveProxyMap["char&"]              = &StringProxy::singleCharConstruct;
 
 		primitiveProxyMap["string"]             = &StringProxy::stringConstruct;	// = std::string
