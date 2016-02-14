@@ -29,6 +29,12 @@ describe('Functions', function() {
 		  });
 		  root.Compress('these are multiple words').should.equal('thesearemultiplewords');
 	  });
+	  it('should be possible to pass doubles as params', function() {
+		  root.loadlibrary("libMathCore.so");
+		  (function() {
+			  root.ROOT.Math.ellint_1(1, 1);
+		  }).should.not.throw();
+	  });
   });
   describe('parameter types', function() {
 	  it('should be possible to pass objects', function() {

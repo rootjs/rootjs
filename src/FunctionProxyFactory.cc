@@ -20,9 +20,36 @@ namespace rootJS
 		{"char", v8BasicTypes::STRING},
 		{"TStringasdf", v8BasicTypes::STRING},
 		{"Int_t", v8BasicTypes::NUMBER},
-		{"int", v8BasicTypes::NUMBER},
 		{"Double_t", v8BasicTypes::NUMBER},
-		{"Bool_t", v8BasicTypes::BOOLEAN}
+		{"Bool_t", v8BasicTypes::BOOLEAN},
+
+		{"int", v8BasicTypes::NUMBER},
+		{"unsigned int", v8BasicTypes::NUMBER},
+
+		{"double", v8BasicTypes::NUMBER},
+		{"long double", v8BasicTypes::NUMBER},
+
+		{"short", v8BasicTypes::NUMBER},
+		{"unsigned short", v8BasicTypes::NUMBER},
+
+		{"unsigned char", v8BasicTypes::NUMBER},
+
+		{"double", v8BasicTypes::NUMBER},
+		{"long double",v8BasicTypes::NUMBER},
+
+		{"unsigned double", v8BasicTypes::NUMBER},
+		{"unsigned long double", v8BasicTypes::NUMBER},
+
+		{"float",v8BasicTypes::NUMBER},
+
+		{"char", v8BasicTypes::NUMBER},
+
+		{"bool", v8BasicTypes::NUMBER},
+
+		{"Double32_t", v8BasicTypes::NUMBER},
+		{"Float16_t", v8BasicTypes::NUMBER},
+		{"Long64_t", v8BasicTypes::NUMBER},
+		{"ULong64_t", v8BasicTypes::NUMBER}
 	};
 
 	FunctionProxyFactory::FunctionProxyFactory()
