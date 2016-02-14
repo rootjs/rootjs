@@ -8,28 +8,30 @@
 
 namespace rootJS
 {
+	std::map<TObject*, ObjectProxy*> ObjectProxy::objMap;
 
 	ObjectProxy::ObjectProxy(MetaInfo &info, TClass *scope) : Proxy(info, scope)
 	{
-		if(!proxy.IsEmpty())
-		{
-			proxy.SetWeak(this, weakCallback);
-		}
 	}
 
 	ObjectProxy::~ObjectProxy()
 	{
-		if(isWeak)
-		{
+		if(isWeak) {
 			DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
-			if(dictPtr != nullptr)
-			{
-				dictPtr()->Destructor(*(void**)getAddress(), true);
+			if(dictPtr != nullptr) {
+				TClass *klass = dictPtr();
+				TClass *objClass = klass->GetBaseClass("TObject");
+				if(objClass) {
+					TObject *objPtr = *(TObject**)getAddress();
+					klass->Destructor(*(void**)getAddress(), true);
+					objMap.erase(objPtr);
+				} else {
+					dictPtr()->Destructor(*(void**)getAddress(), true);
+				}
 			}
 		}
 
-		for(void* ptr : boundMallocs)
-		{
+		for(void* ptr : boundMallocs) {
 			free(ptr);
 		}
 	}
@@ -106,7 +108,28 @@ namespace rootJS
 	v8::Persistent<v8::Object> &ObjectProxy::getWeakPeristent()
 	{
 		proxy.SetWeak(this, weakCallback);
+		DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
+		if(dictPtr != nullptr) {
+			TClass *klass = dictPtr();
+			TClass *objClass = klass->GetBaseClass("TObject");
+			if(objClass) {
+				objMap[*(TObject**)getAddress()] = this;
+			}
+		}
 		isWeak = true;
 		return proxy;
+	}
+
+	void ObjectProxy::removed() {
+		isWeak = false;
+		proxy.Reset();
+	}
+
+	void ObjectProxy::rootDesturcted(TObject* obj) {
+		if(objMap.find(obj) != objMap.end()) {
+			objMap[obj]->removed();
+			//delete objMap[obj];
+			objMap.erase(obj);
+		}
 	}
 }

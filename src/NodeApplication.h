@@ -37,6 +37,8 @@ namespace rootJS
 			 * root needs to function prperly
 			 */
 			static Bool_t InitROOTGlobals();
+
+			virtual void RecursiveRemove(TObject *obj);
 	};
 }
 
