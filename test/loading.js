@@ -16,6 +16,7 @@ describe('Dynamic Loading', function() {
             root.refreshExports()
             }).should.not.throw();
         });
+    });
         describe('accessing', function () {
             it('should be able to access TSpectrum2Painter', function () {
                 root.TSpectrum2Painter.should.not.be.undefined()
@@ -25,5 +26,17 @@ describe('Dynamic Loading', function() {
                 root.ROOT.Math.Pi().should.be.equal(3.141592653589793);
             });
         });
+    describe('unloading', function () {
+        it('should be possible unload MathCore', function () {
+            (function () {
+                root.unloadlibrary("libMathCore.so");
+            }).should.not.throw();
+        });
+        it('should be impossible to access .ROOT.Math after unloading',function () {
+            (function () {
+                root.ROOT.Math.Pi()
+            }).should.throw();
+        });
     });
 });
+
