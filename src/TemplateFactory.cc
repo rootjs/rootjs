@@ -13,6 +13,7 @@
 #include "Toolbox.h"
 
 #include <string>
+#include <iostream>
 
 #include <TClassTable.h>
 #include <TMethod.h>
@@ -199,8 +200,8 @@ namespace rootJS
 			{
 				MemberInfo info(*member, (void*)(member->GetOffsetCint()));	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
 				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
-				CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
-				nspace->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback);
+				v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
+				nspace->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
 			}
 		}
 
@@ -347,7 +348,7 @@ namespace rootJS
 		std::string className(clazz->GetName());
 
 		// add static functions and members to the prototype template
-		v8::Local<v8::ObjectTemplate> prototype = tmplt->PrototypeTemplate();
+		// v8::Local<v8::ObjectTemplate> prototype = tmplt->PrototypeTemplate();
 
 		// add non-static functions and members to the instance template
 		v8::Local<v8::ObjectTemplate> instance = tmplt->InstanceTemplate();
@@ -356,7 +357,7 @@ namespace rootJS
 		/**
 		 *  Add enums
 		 */
-		addEnumTemplate(clazz, prototype);
+		addEnumTemplate(clazz, tmplt);
 
 		/**
 		 *	Add public methods as properties
@@ -410,33 +411,33 @@ namespace rootJS
 				// don't expose
 				break;
 			case kIsOperator:
-			{
-				std::map<std::string, std::string>::const_iterator opNameIt = Types::operatorNames.find(method->GetName());
-				if(opNameIt == Types::operatorNames.end())
 				{
-					Toolbox::logInfo(std::string("Operator: ") + method->GetName() + " not handled");
-				}
-				else
-				{
-					if (property & kIsStatic)
+					std::map<std::string, std::string>::const_iterator opNameIt = Types::operatorNames.find(method->GetName());
+					if(opNameIt == Types::operatorNames.end())
 					{
-						v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
-						prototype->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+						Toolbox::logInfo(std::string("Operator: ") + method->GetName() + " not handled");
 					}
 					else
 					{
-						v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
-						instance->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, data));
+						if (property & kIsStatic)
+						{
+							v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
+							tmplt->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+						}
+						else
+						{
+							v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
+							instance->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, data));
+						}
 					}
 				}
-			}
-			break;
+				break;
 			default:
 
 				if (property & kIsStatic)
 				{
 					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
-					prototype->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+					tmplt->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
 				}
 				else
 				{
@@ -465,9 +466,9 @@ namespace rootJS
 			{
 				MemberInfo info(*member, (void*)(member->GetOffsetCint()));	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
 				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
-				CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
+				v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
 
-				prototype->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback);
+				tmplt->SetNativeDataProperty(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
 			}
 			else
 			{
@@ -490,10 +491,27 @@ namespace rootJS
 				continue;
 			}
 
-			if(eNum->Property() & kIsPublic)
+			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) initializeEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			tmplt->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+		}
+
+	}
+
+	void TemplateFactory::addEnumTemplate(TClass *clazz, v8::Local<v8::FunctionTemplate> tmplt) throw(std::invalid_argument)
+	{
+		TIter enumIter(clazz->GetListOfEnums(kTRUE));
+		TEnum *eNum = nullptr;
+
+		while ((eNum = (TEnum*) enumIter()))
+		{
+			if (eNum == nullptr || !eNum->IsValid()) // assert eNum->GetClass() == clazz
 			{
-				tmplt->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
+				Toolbox::logError("Invalid enum found in '" + std::string(clazz->GetName()) + "'.");
+				continue;
 			}
+
+			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) initializeEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			tmplt->SetNativeDataProperty(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
 		}
 
 	}
