@@ -12,6 +12,13 @@ namespace rootJS
 	{
 		public:
 			static const int INTERNAL_FIELD_COUNT = 2;
+			
+			/**
+			 * 0 = off
+			 * 1 = logging
+			 * 2 = debug
+			 */
+			static const int VERBOSITY = 0;
 
 			/**
 			 * Enumerates the internal fields of v8::Objects.
