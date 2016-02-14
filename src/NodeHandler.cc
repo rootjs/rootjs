@@ -77,7 +77,7 @@ namespace rootJS
 		{
 			if( (!global->IsValid()) || (global->GetAddress() == nullptr))
 			{
-				Toolbox::logError("Invalid global instance found.");
+				Toolbox::logInfo("Invalid global instance found.",1);
 				continue;
 			}
 
@@ -102,7 +102,7 @@ namespace rootJS
 		{
 			if (!function->IsValid())
 			{
-				Toolbox::logError("Invalid global function found.");
+				Toolbox::logInfo("Invalid global function found.",1);
 				continue;
 			}
 
@@ -141,13 +141,13 @@ namespace rootJS
 			if ((((std::string) clazz->GetName()).find(":") == std::string::npos) && (!exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName())))) {
 				if ((clazz->Property() & kIsClass))
 				{
-					Toolbox::logInfo(std::string("loading class ").append(clazz->GetName()));
+					Toolbox::logInfo(std::string("loading class ").append(clazz->GetName()),2);
 					exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), clazz->GetName()), TemplateFactory::getConstructor(clazz));
 					continue;
 				}
 				if((clazz->Property() & kIsNamespace))
 				{
-					Toolbox::logInfo(std::string("loading namespace ").append(clazz->GetName()));
+					Toolbox::logInfo(std::string("loading namespace ").append(clazz->GetName()),2);
 					exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName()),TemplateFactory::getInstance(clazz));
 					continue;
 				}
