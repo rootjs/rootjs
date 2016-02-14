@@ -191,6 +191,19 @@ namespace rootJS
 		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
 		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"loadlibrary"),
 		                  v8::Function::New(v8::Isolate::GetCurrent(), NodeHandler::loadlibraryCallback));
+		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"unloadlibrary"),
+						  v8::Function::New(v8::Isolate::GetCurrent(), NodeHandler::unloadlibraryCallback));
 		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"refreshExports"),v8::Function::New(v8::Isolate::GetCurrent(),NodeHandler::refreshExportsCallback));
+	}
+
+	void NodeHandler::unloadlibraryCallback(const v8::FunctionCallbackInfo<v8::Value> &info)throw (std::invalid_argument) {
+		v8::Local<v8::Value> arg;
+		if(!((info.Length() == 1) && ((arg = info[0])->IsString())))
+		{
+			throw std::invalid_argument("Usage: Pass name of the library");
+		}
+		std::string libname = Toolbox::Stringv8toStd(v8::Local<v8::String>::Cast(arg));
+		gSystem->Unload(libname.c_str());
+		NodeHandler::getInstance()->refreshExports();
 	}
 }
