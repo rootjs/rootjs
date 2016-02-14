@@ -23,7 +23,7 @@ namespace rootJS
 
 	bool EnumConstInfo::isConst()
 	{
-		return (type.Property() & kIsConstant);
+		return true; // (type.Property() & kIsConstant);
 	}
 
 	bool EnumConstInfo::isStatic()
