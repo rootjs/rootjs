@@ -151,7 +151,7 @@ namespace rootJS
 			// Skip template functions
 			if(isTemplateFunction(methodName))
 			{
-				Toolbox::logInfo("Skipped template method '" + methodName + "' in '" + className + "'.");
+				Toolbox::logInfo("Skipped template method '" + methodName + "' in '" + className + "'.",1);
 				continue;
 			}
 			// make overridden or overloaded methods only occur once
@@ -415,7 +415,7 @@ namespace rootJS
 					std::map<std::string, std::string>::const_iterator opNameIt = Types::operatorNames.find(method->GetName());
 					if(opNameIt == Types::operatorNames.end())
 					{
-						Toolbox::logInfo(std::string("Operator: ") + method->GetName() + " not handled");
+						Toolbox::logInfo(std::string("Operator: ") + method->GetName() + " not handled",1);
 					}
 					else
 					{
