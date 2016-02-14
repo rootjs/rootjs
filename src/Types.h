@@ -1,6 +1,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include "MetaInfo.h"
+
 #include <map>
 
 #include <v8.h>
@@ -16,6 +18,20 @@ namespace rootJS
 			 * @return nullpointer if there is no matching datatype
 			 */
 			static TDataType* getTypeByName(const std::string &name);
+
+			/**
+			 *	Use Types::getTypeByName(info.getTypeName()) to get the normalized TDataType.
+			 *	The normalized name is than stored in the supplied trueType string.
+			 *	Note that trueType does not change, if the type could not be resolved.
+			 *
+			 *	@param info
+			 *			the type to get the normalized type name from
+			 *	@param trueType
+			 *			the storage for the resolved type name
+			 *
+			 *	@return true if info.getTypeName() name was resolved
+			 */
+			static bool resolveTypeName(MetaInfo &info, std::string &trueType);
 
 			/**
 			 * Checks if the given value is an v8 Boolean.
@@ -50,4 +66,4 @@ namespace rootJS
 	};
 }
 
-#endif // TYPES_H
+#endif
