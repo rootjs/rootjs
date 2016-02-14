@@ -21,16 +21,15 @@ namespace rootJS
 
 	v8::Local<v8::Value> NumberProxy::get()
 	{
-		if(getAddress())
-		{
+		if(getAddress()) {
 			return v8::Number::New(v8::Isolate::GetCurrent(), castToDouble(getAddress()));
 		}
 		return getProxy();
 	}
 
-	Double_t NumberProxy::castToDouble(void *ptr) {
-		switch(numberType)
-		{
+	Double_t NumberProxy::castToDouble(void *ptr)
+	{
+		switch(numberType) {
 
 #define SWITCH_CAST_DOUBLE(numbertype, pointer)           \
         case NumberType::numbertype:                                \
@@ -96,23 +95,17 @@ namespace rootJS
 
 	void NumberProxy::setValue(v8::Local<v8::Value> value)
 	{
-		if(isConst())
-		{
+		if(isConst()) {
 			Toolbox::throwException("This value cannot be overwritten, it's constant.");
 			return;
 		}
 
 		double numberValue;
-		if(value->IsNumberObject())
-		{
+		if(value->IsNumberObject()) {
 			numberValue = v8::Local<v8::NumberObject>::Cast(value)->NumberValue();
-		}
-		else if(value->IsNumber())
-		{
+		} else if(value->IsNumber()) {
 			numberValue = v8::Local<v8::Number>::Cast(value)->Value();
-		}
-		else
-		{
+		} else {
 			Toolbox::throwException("This element can only store numbers.");
 			return;
 		}
@@ -128,8 +121,7 @@ namespace rootJS
             break;
 
 
-		switch(numberType)
-		{
+		switch(numberType) {
 			SWITCH_SET_VALUE(CHAR_T, char)
 			SWITCH_SET_VALUE(UCHAR_T, unsigned char)
 

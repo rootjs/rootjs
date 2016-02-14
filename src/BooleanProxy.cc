@@ -6,12 +6,9 @@ namespace rootJS
 {
 	bool BooleanProxy::isBoolean(std::string type)
 	{
-		if (std::regex_match(type, std::regex("bool")))
-		{
+		if (std::regex_match(type, std::regex("bool"))) {
 			return true;
-		}
-		else if (std::regex_match(type, std::regex("Bool_t")))
-		{
+		} else if (std::regex_match(type, std::regex("Bool_t"))) {
 			return true;
 		}
 
@@ -41,23 +38,17 @@ namespace rootJS
 
 	void BooleanProxy::setValue(v8::Local<v8::Value> value)
 	{
-		if(isConst())
-		{
+		if(isConst()) {
 			Toolbox::throwException("This value cannot be overwritten, it's constant.");
 			return;
 		}
 
 		bool* b = (bool*)getAddress();
-		if(value->IsBoolean())
-		{
+		if(value->IsBoolean()) {
 			*b = v8::Local<v8::Boolean>::Cast(value)->Value();
-		}
-		else if(value->IsBooleanObject())
-		{
+		} else if(value->IsBooleanObject()) {
 			*b = v8::Local<v8::BooleanObject>::Cast(value)->ValueOf();
-		}
-		else
-		{
+		} else {
 			Toolbox::throwException("This element can only store a bool value.");
 		}
 	}

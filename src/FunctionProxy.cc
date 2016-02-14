@@ -50,10 +50,8 @@ namespace rootJS
 		const TList *funcList = scope.GetClass()->GetListOfAllPublicMethods();
 		TIter funcIter(funcList);
 		TFunction *func;
-		while((func = (TFunction*)funcIter()))
-		{
-			if(name.compare(func->GetName()) == 0)
-			{
+		while((func = (TFunction*)funcIter())) {
+			if(name.compare(func->GetName()) == 0) {
 				methods.push_back(func);
 			}
 		}
@@ -77,20 +75,16 @@ namespace rootJS
 	CallFunc_t* FunctionProxy::getCallFunc(const TClassRef& classRef, TFunction* method)
 	{
 		std::map<TFunction*, CallFunc_t*>::iterator iterator = FunctionProxy::functions.find(method);
-		if (iterator != FunctionProxy::functions.end())
-		{
+		if (iterator != FunctionProxy::functions.end()) {
 			return iterator->second;
-		}
-		else
-		{
+		} else {
 			CallFunc_t* callf = nullptr;
 			TFunction* func = (TFunction*)method;
 			std::string callString = "";
 
 			ClassInfo_t* gcl;
 			gcl = classRef.GetClass() ? classRef->GetClassInfo() : nullptr;
-			if ( ! gcl )
-			{
+			if ( ! gcl ) {
 				gcl = gInterpreter->ClassInfo_Factory();
 			}
 
@@ -98,8 +92,7 @@ namespace rootJS
 			TIter iarg( method_args );
 
 			TMethodArg* method_arg = 0;
-			while ((method_arg = (TMethodArg*)iarg.Next()))
-			{
+			while ((method_arg = (TMethodArg*)iarg.Next())) {
 				std::string fullType = method_arg->GetTypeNormalizedName();
 				if ( callString.empty() )
 					callString = fullType;
@@ -134,8 +127,7 @@ namespace rootJS
 			 */
 
 
-			if ( ! gInterpreter->CallFunc_IsValid( callf ) )
-			{
+			if ( ! gInterpreter->CallFunc_IsValid( callf ) ) {
 				gInterpreter->CallFunc_SetFuncProto(
 				    callf,
 				    gcl,
@@ -144,9 +136,7 @@ namespace rootJS
 				    func ? (func->Property() & kIsConstMethod) : kFALSE,
 				    &offset );
 				return callf;
-			}
-			else
-			{
+			} else {
 				return callf;
 			}
 
@@ -158,8 +148,7 @@ namespace rootJS
 	void FunctionProxy::prepareCall(const  v8::Local<v8::Array>& args)
 	{
 		CallFunc_t* callFunc = (CallFunc_t*)info->getAddress();
-		if(!callFunc)
-		{
+		if(!callFunc) {
 			//TODO Handle this, should not segfault (maybe throw something...)
 		}
 		this->facePtr = gCling->CallFunc_IFacePtr( callFunc );
@@ -167,8 +156,7 @@ namespace rootJS
 
 		buf = std::vector<void*>( args->Length() );
 		bufCopied = std::vector<bool>( args->Length() );
-		for(int i = 0; i < (int)args->Length(); i++)
-		{
+		for(int i = 0; i < (int)args->Length(); i++) {
 			void** bufEl = (void**)malloc(sizeof(void*));
 			bool copied = false;
 			*bufEl = bufferParam((TMethodArg*)(function->GetListOfMethodArgs()->At(i)), args->Get(i), copied);
@@ -204,8 +192,7 @@ namespace rootJS
 			}
 		}
 
-		switch(facePtr.fKind)
-		{
+		switch(facePtr.fKind) {
 		case (TInterpreter::CallFuncIFacePtr_t::kGeneric):
 			facePtr.fGeneric(self, buf.size(), buf.data(), resultPtr);
 			break;
@@ -220,10 +207,8 @@ namespace rootJS
 			break;
 		}
 
-		for(int i = 0; i < (int)buf.size(); i++)
-		{
-			if(bufCopied[i])
-			{
+		for(int i = 0; i < (int)buf.size(); i++) {
+			if(bufCopied[i]) {
 				free(*((void**)buf[i]));
 				free((void*)buf[i]);
 			}
@@ -241,8 +226,7 @@ namespace rootJS
 			proxy = ObjectProxyFactory::createObjectProxy(mode, nullptr);
 		}
 
-		if(proxy != nullptr)
-		{
+		if(proxy != nullptr) {
 			if(allocated) {
 				proxy->registerMallocedSpace(allocated);
 			}
@@ -260,8 +244,7 @@ namespace rootJS
 		if(type == nullptr) {
 			//might be an object...
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(arg->GetTypeName());
-			if(dictFunc == nullptr)
-			{
+			if(dictFunc == nullptr) {
 				throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + arg->GetTypeName());
 				return nullptr;
 			}
@@ -273,16 +256,14 @@ namespace rootJS
 		TString typeName = type->GetTypeName();
 		std::string stdTypeName(typeName.Data());
 		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(stdTypeName);
-		if(iterator == typeMap.end())
-		{
+		if(iterator == typeMap.end()) {
 			//Might be an object
 			throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + stdTypeName);
 			return nullptr;
 		}
 
 		copied = false;
-		switch(iterator->second)
-		{
+		switch(iterator->second) {
 		case mappedTypes::CHAR:
 			copied = true;
 			return argToChar(originalArg);
@@ -326,12 +307,9 @@ namespace rootJS
 	bool* FunctionProxy::argToBool(v8::Local<v8::Value> originalArg)
 	{
 		bool* boolValue = (bool*)malloc(sizeof(bool));
-		if(originalArg->IsBoolean())
-		{
+		if(originalArg->IsBoolean()) {
 			*boolValue = v8::Local<v8::Boolean>::Cast(originalArg)->Value();
-		}
-		else
-		{
+		} else {
 			*boolValue = v8::Local<v8::BooleanObject>::Cast(originalArg)->ValueOf();
 		}
 		return boolValue;
@@ -360,16 +338,11 @@ namespace rootJS
 
 	double FunctionProxy::getDoubleFromArg(v8::Local<v8::Value> originalArg)
 	{
-		if(originalArg->IsNumber())
-		{
+		if(originalArg->IsNumber()) {
 			return v8::Local<v8::Number>::Cast(originalArg)->Value();
-		}
-		else if(originalArg->IsNumberObject())
-		{
+		} else if(originalArg->IsNumberObject()) {
 			return v8::Local<v8::NumberObject>::Cast(originalArg)->ValueOf();
-		}
-		else
-		{
+		} else {
 			return -1;
 		}
 	}

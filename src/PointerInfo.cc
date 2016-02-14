@@ -14,42 +14,38 @@ namespace rootJS
 		this->typeName[len] = '\0';
 	}
 
-	PointerInfo::~PointerInfo() {
+	PointerInfo::~PointerInfo()
+	{
 		free(this->typeName);
 	}
 
 	void* PointerInfo::getAddress()
 	{
-		if(ptrDepth >= 2)
-		{
+		if(ptrDepth >= 2) {
 			void* result = &baseAddress;
-			for(int i = ptrDepth; i > 2; i--)
-			{
+			for(int i = ptrDepth; i > 2; i--) {
 				result = (void*)(*(void**)result);
 			}
 			return result;
-		}
-		else
-		{
+		} else {
 			ptr = &baseAddress;
 			ptrptr = &ptr;
 
-			if(ptrDepth == 1)
-			{
+			if(ptrDepth == 1) {
 				return ptr;
-			}
-			else
-			{
+			} else {
 				return ptrptr;
 			}
 		}
 	}
 
-	const char* PointerInfo::getFullTypeName() {
+	const char* PointerInfo::getFullTypeName()
+	{
 		return typeName;
 	};
 
-	const char* PointerInfo::getTypeName() {
+	const char* PointerInfo::getTypeName()
+	{
 		std::string normalTypeName(typeName);
 
 		if(normalTypeName.find('*') != std::string::npos) {

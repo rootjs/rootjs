@@ -1,12 +1,15 @@
 #include "PrimitiveProxy.h"
 
-namespace rootJS {
+namespace rootJS
+{
 
-	PrimitiveProxy::PrimitiveProxy(MetaInfo &type, TClass *scope): ObjectProxy(type, scope) {
+	PrimitiveProxy::PrimitiveProxy(MetaInfo &type, TClass *scope): ObjectProxy(type, scope)
+	{
 
 	}
 
-	bool PrimitiveProxy::isPrimitive() {
+	bool PrimitiveProxy::isPrimitive()
+	{
 		return true;
 	}
 }
