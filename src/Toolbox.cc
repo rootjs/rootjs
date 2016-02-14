@@ -14,7 +14,7 @@ namespace rootJS
 	void Toolbox::logInfo(const std::string& message)
 	{
 		// TODO: maybe find a way to directly call console.log("...") here
-		//std::cout << message << std::endl;
+		std::cout << message << std::endl;
 	}
 
 	void Toolbox::logError(const std::string& message)

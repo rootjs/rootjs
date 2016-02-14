@@ -35,6 +35,7 @@ namespace rootJS
 
 	NodeHandler::NodeHandler(v8::Local<v8::Object> exports)
 	{
+		this->exportPersistent.Reset(v8::Isolate::GetCurrent(),exports);
 		this->exports = exports;
 		initialized = true;
 	}
@@ -70,7 +71,7 @@ namespace rootJS
 	{
 		TCollection *globals = gROOT->GetListOfGlobals(kTRUE);
 		TIter next(globals);
-
+		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
 		while (TGlobal *global = (TGlobal*) next())
 		{
 			if( (!global->IsValid()) || (global->GetAddress() == nullptr))
@@ -84,7 +85,7 @@ namespace rootJS
 			if (proxy != nullptr)
 			{
 				CallbackHandler::registerGlobalObject(std::string(global->GetName()), proxy);
-				this->exports->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()),
+				exportsLocal->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()),
 				                           CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
 			}
 		}
@@ -92,6 +93,7 @@ namespace rootJS
 
 	void NodeHandler::exposeGlobalFunctions() throw (std::invalid_argument)
 	{
+		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
 		TCollection *functions = gROOT->GetListOfGlobalFunctions(kTRUE);
 
 		TIter next(functions);
@@ -104,13 +106,14 @@ namespace rootJS
 			}
 
 			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(function->GetName(), nullptr);
-			exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), function->GetName()),
+			exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), function->GetName()),
 			             v8::Function::New(v8::Isolate::GetCurrent(), CallbackHandler::globalFunctionCallback, data));
 		}
 	}
 
 	void NodeHandler::exposeClasses() throw (std::invalid_argument)
 	{	//TODO implement maps for dynamic loading
+		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
 		for (int i = 0; i < gClassTable->Classes(); i++)
 		{
 			DictFuncPtr_t funcPtr = gClassTable->GetDict(gClassTable->At(i));
@@ -126,25 +129,25 @@ namespace rootJS
 				throw std::invalid_argument(
 				    std::string("Specified class is not loaded."));
 			}
-
-			if (((std::string) clazz->GetName()).find(":") == std::string::npos)
-			{
+			exportsLocal->IsString();
+			//exports->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"Math"));
+			if ((((std::string) clazz->GetName()).find(":") == std::string::npos) && (!exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName())))){
 				if ((clazz->Property() & kIsClass))
 				{
-					// Toolbox::logInfo(std::string("loading class ").append(clazz->GetName()));
-					this->exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), clazz->GetName()), TemplateFactory::getConstructor(clazz));
+					Toolbox::logInfo(std::string("loading class ").append(clazz->GetName()));
+					exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), clazz->GetName()), TemplateFactory::getConstructor(clazz));
 					continue;
 				}
 				if((clazz->Property() & kIsNamespace))
 				{
-					// Toolbox::logInfo(std::string("loading namespace ").append(clazz->GetName()));
-					this->exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName()),TemplateFactory::getInstance(clazz));
+					Toolbox::logInfo(std::string("loading namespace ").append(clazz->GetName()));
+					exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName()),TemplateFactory::getInstance(clazz));
 					continue;
 				}
 			}
 			else
 			{
-				ClassExposer::expose(clazz, exports);
+				ClassExposer::expose(clazz, exportsLocal);
 			}
 		}
 	}
@@ -176,8 +179,9 @@ namespace rootJS
 
 
 	void NodeHandler::exposeInterfaceFunctions() {
-		exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"loadlibrary"),
+		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
+		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"loadlibrary"),
 					 v8::Function::New(v8::Isolate::GetCurrent(), NodeHandler::loadlibraryCallback));
-		exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"refreshExports"),v8::Function::New(v8::Isolate::GetCurrent(),NodeHandler::refreshExportsCallback));
+		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"refreshExports"),v8::Function::New(v8::Isolate::GetCurrent(),NodeHandler::refreshExportsCallback));
 	}
 }

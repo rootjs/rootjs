@@ -20,7 +20,7 @@ namespace rootJS
 			 * Has the NodeHandler been initialized yet?
 			 */
 			static bool initialized;
-			v8::Persistent<v8::Object> rootJS;
+			v8::Persistent<v8::Object> exportPersistent;
 			/**
 			 * Singleton holder for NodeHandler
 			 */
@@ -39,6 +39,8 @@ namespace rootJS
 			void exposeGlobalFunctions() throw(std::invalid_argument);
 			void exposeClasses() throw(std::invalid_argument);
 			void refreshExports();
+
+
 		public:
 			/**
 			 * The method which starts rootJS. It instantiates a NodeApplication, a proxyMap from ObjectProxyFactory
