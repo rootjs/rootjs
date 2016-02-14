@@ -17,14 +17,11 @@ namespace rootJS
 	v8::Local<v8::Value> VoidPointerProxy::get()
 	{
 		void *p = getAddress();
-		if(p != nullptr)
-		{
+		if(p != nullptr) {
 			std::ostringstream stm;
 			stm << ((Long_t) p);
 			return v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), stm.str().c_str());
-		}
-		else
-		{
+		} else {
 			return v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "nullptr");
 		}
 	}

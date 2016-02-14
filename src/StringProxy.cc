@@ -14,40 +14,35 @@ namespace rootJS
 		return false;
 	}
 
-	StringProxy::~StringProxy() {
+	StringProxy::~StringProxy()
+	{
 
 	}
 
-	v8::Local<v8::Value> StringProxy::get() {
+	v8::Local<v8::Value> StringProxy::get()
+	{
 		const char* c = c_str();
-		if(c == nullptr)
-		{
+		if(c == nullptr) {
 			return v8::Null(v8::Isolate::GetCurrent());
-		}
-		else
-		{
+		} else {
 			return v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), c);
 		}
 	}
 
 	const char* StringProxy::c_str()
 	{
-		switch(strType)
-		{
+		switch(strType) {
 		case StringType::CHAR:
 			return *(char**)getAddress();
-		case StringType::STRING:
-		{
+		case StringType::STRING: {
 			std::string *str = (std::string*)getAddress();
 			return str->c_str();
 		}
-		case StringType::TSTRING:
-		{
+		case StringType::TSTRING: {
 			TString *tstr = (TString*)getAddress();
 			return tstr->Data();
 		}
-		case StringType::SINGLE_CHAR:
-		{
+		case StringType::SINGLE_CHAR: {
 			singleChar[0] = **(char**)getAddress();
 			singleChar[1] = '\0';
 			return singleChar;
@@ -77,7 +72,8 @@ namespace rootJS
 		return proxy;
 	}
 
-	ObjectProxy* StringProxy::singleCharConstruct(MetaInfo &info, TClass *scope) {
+	ObjectProxy* StringProxy::singleCharConstruct(MetaInfo &info, TClass *scope)
+	{
 		StringProxy *proxy = new StringProxy(info, scope);
 		proxy->strType = StringType::SINGLE_CHAR;
 		return proxy;
@@ -85,14 +81,12 @@ namespace rootJS
 
 	void StringProxy::setValue(v8::Local<v8::Value> value)
 	{
-		if(isConst())
-		{
+		if(isConst()) {
 			Toolbox::throwException("This value cannot be overwritten, it's constant.");
 			return;
 		}
 
-		if(!value->IsString() && !value->IsStringObject())
-		{
+		if(!value->IsString() && !value->IsStringObject()) {
 			Toolbox::throwException("This element can only store strings.");
 			return;
 		}
@@ -100,26 +94,21 @@ namespace rootJS
 		v8::String::Utf8Value str(value->ToString());
 		std::string charValue(*str);
 
-		switch(strType)
-		{
-		case StringType::CHAR:
-		{
+		switch(strType) {
+		case StringType::CHAR: {
 			Toolbox::throwException("This value cannot be overwritten, it's a char pointer.");
 			break;
 		}
-		case StringType::SINGLE_CHAR:
-		{
+		case StringType::SINGLE_CHAR: {
 			Toolbox::throwException("This value cannot be overwritten, it's a char pointer.");
 			break;
 		}
-		case StringType::STRING:
-		{
+		case StringType::STRING: {
 			std::string *strObj = (std::string*)getAddress();
 			*strObj = charValue.c_str();
 			break;
 		}
-		case StringType::TSTRING:
-		{
+		case StringType::TSTRING: {
 			TString *strObj = (TString*)getAddress();
 			*strObj = charValue.c_str();
 			break;

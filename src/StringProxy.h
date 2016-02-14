@@ -19,8 +19,9 @@ namespace rootJS
 			 * An enum containing the two standard string types, string and c-strings.
 			 * It also contains standard string type in ROOT, TStrings.
 			 */
-			enum class StringType {
-				CHAR, STRING, TSTRING, SINGLE_CHAR
+			enum class StringType
+			{
+			    CHAR, STRING, TSTRING, SINGLE_CHAR
 			};
 
 			/**

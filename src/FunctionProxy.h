@@ -20,7 +20,7 @@ namespace rootJS
 {
 	enum class mappedTypes
 	{
-		CHAR, INT, DOUBLE, BOOL, TSTRING
+	    CHAR, INT, DOUBLE, BOOL, TSTRING
 	};
 
 	/**

@@ -1,23 +1,28 @@
 #include "AsyncRunner.h"
 
-namespace rootJS {
+namespace rootJS
+{
 	AsyncRunner::AsyncRunner(AsyncFunction func, void *param, v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> callback):
-		func(func), param(param), callback(callback) {
+		func(func), param(param), callback(callback)
+	{
 
 	}
 
-	void AsyncRunner::run() {
+	void AsyncRunner::run()
+	{
 		uv_work_t *req = new uv_work_t();
 		req->data = this;
 		uv_queue_work(uv_default_loop(), req, uvRunner, uvCallback);
 	}
 
-	void AsyncRunner::uvRunner(uv_work_t *req) {
+	void AsyncRunner::uvRunner(uv_work_t *req)
+	{
 		AsyncRunner *runner = static_cast<AsyncRunner*>(req->data);
 		(*(runner->func))(runner, runner->param);
 	}
 
-	void AsyncRunner::uvCallback(uv_work_t *req, int status) {
+	void AsyncRunner::uvCallback(uv_work_t *req, int status)
+	{
 		v8::HandleScope scope(v8::Isolate::GetCurrent());
 		AsyncRunner *runner = static_cast<AsyncRunner*>(req->data);
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
