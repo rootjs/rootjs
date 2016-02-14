@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 
 #include "PointerInfo.h"
 
@@ -43,4 +44,17 @@ namespace rootJS
 			}
 		}
 	}
+
+	const char* PointerInfo::getFullTypeName() {
+		return typeName;
+	};
+
+	const char* PointerInfo::getTypeName() {
+		std::string normalTypeName(typeName);
+
+		if(normalTypeName.find('*') != std::string::npos) {
+			normalTypeName = normalTypeName.substr(0, normalTypeName.find('*'));
+		}
+		return normalTypeName.c_str();
+	};
 }
