@@ -124,6 +124,7 @@ namespace rootJS {
 
 		private:
 			std::vector<void*> boundMallocs;
+			bool isWeak = false;
 			static void weakCallback(v8::WeakCallbackData<v8::Object, ObjectProxy> const& data);
 	};
 }

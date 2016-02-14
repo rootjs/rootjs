@@ -9,16 +9,16 @@
 namespace rootJS {
 
 	ObjectProxy::ObjectProxy(MetaInfo &info, TClass *scope) : Proxy(info, scope) {
-		if(!proxy.IsEmpty()) {
-			proxy.SetWeak(this, weakCallback);
-		}
+
 	}
 
 	ObjectProxy::~ObjectProxy()
 	{
-		DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
-		if(dictPtr != nullptr) {
-			dictPtr()->Destructor(*(void**)getAddress(), true);
+		if(isWeak) {
+			DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
+			if(dictPtr != nullptr) {
+				dictPtr()->Destructor(*(void**)getAddress(), true);
+			}
 		}
 
 		for(void* ptr : boundMallocs) {
@@ -89,6 +89,7 @@ namespace rootJS {
 
 	v8::Persistent<v8::Object> &ObjectProxy::getWeakPeristent() {
 		proxy.SetWeak(this, weakCallback);
+		isWeak = true;
 		return proxy;
 	}
 }

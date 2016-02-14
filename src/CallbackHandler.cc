@@ -176,22 +176,46 @@ namespace rootJS
 		//TODO: Callback!
 		// if(callback.IsEmpty()) ...
 
-		proxy->prepareCall(args);
-		ObjectProxy *resultProxy = proxy->call(nullptr);
-		if(resultProxy)
+
+
+		if(callback.IsEmpty())
 		{
-			if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
+			proxy->prepareCall(args);
+			ObjectProxy *resultProxy = proxy->call(nullptr);
+			delete proxy;
+			if(resultProxy)
 			{
-				info.GetReturnValue().Set(resultProxy->get());
-				delete resultProxy;
-			}
-			else
-			{
-				info.GetReturnValue().Set(resultProxy->get());
+				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
+				{
+					info.GetReturnValue().Set(resultProxy->get());
+					delete resultProxy;
+				}
+				else
+				{
+					info.GetReturnValue().Set(resultProxy->get());
+				}
 			}
 		}
+		else
+		{
+			AsyncCallParam *asyncCallParam = new AsyncCallParam();
+			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), args);
+			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
 
-		delete proxy;
+			/*
+			 * Clone the FunctionProxy because when the same function is called multiple times
+			 * prepareCall might be called with new data before the old call finished,
+			 * which leads to unexpected results (while testing: multiple frees of the param buffer)
+			 */
+			FunctionProxy* cloneProxy = proxy->clone();
+
+			asyncCallParam->params = persistentArgs;
+			asyncCallParam->proxy = cloneProxy;
+			asyncCallParam->selfAddress = nullptr;
+			cloneProxy->prepareCall(args);
+			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, persistentCallback);
+			runner->run();
+		}
 	}
 
 
@@ -255,13 +279,10 @@ namespace rootJS
 
 			info.GetReturnValue().Set(proxy->getWeakPeristent());
 			return;
+		} else {
+			Toolbox::throwException("Constructors can't be called async.");
+			return;
 		}
-
-		// create object asynchronously
-
-		// TODO: AsyncRunner...
-
-		info.GetReturnValue().Set(v8::Undefined(isolate)); // TODO remove this line
 	}
 
 	void CallbackHandler::memberGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)

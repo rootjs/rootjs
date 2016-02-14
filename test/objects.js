@@ -32,6 +32,15 @@ describe('Objects', function() {
 		  });
 		  AsyncWorks = true;
 	  });
+	  it('should be possible to call static methods asynchronously', function(done) {
+		  var t1 = new root.TString("test");
+		  var t2 = new root.TString("test");
+
+		  root._equals(t1, t2, function(result) {
+			  result.should.equal(true);
+			  done();
+		  });
+	  });
 	  it('should be possible to get return values as a param of a callback function', function(done) {
 		  root.gApplication.GetName(function(name) {
 			  name.should.equal("TApplication");
