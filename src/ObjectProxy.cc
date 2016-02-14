@@ -3,7 +3,6 @@
 #include "Toolbox.h"
 
 #include <TObject.h>
-#include <TObjectTable.h>
 #include <TGlobal.h>
 #include <TClassTable.h>
 
@@ -55,16 +54,15 @@ namespace rootJS
 		return getTypeInfo()->getOffset();
 	}
 
-	void ObjectProxy::set(ObjectProxy &value)
-	{
-		// TODO: validate type equality
-		//address = value.getAddress();
-	}
-
 	v8::Local<v8::Value> ObjectProxy::get()
 	{
 		// objects just return their holder - i.e the proxy member
 		return getProxy();
+	}
+
+	void ObjectProxy::setValue(v8::Local<v8::Value> value)
+	{
+		return;
 	}
 
 	void ObjectProxy::setProxy(v8::Local<v8::Object> proxy)
@@ -100,11 +98,6 @@ namespace rootJS
 	bool ObjectProxy::isStatic()
 	{
 		return getTypeInfo()->isStatic();
-	}
-
-	void ObjectProxy::setValue(v8::Local<v8::Value> value)
-	{
-		return;
 	}
 
 	void ObjectProxy::registerMallocedSpace(void *allocated)
