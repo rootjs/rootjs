@@ -92,25 +92,29 @@ namespace rootJS
 
 	void NodeHandler::exposeGlobalFunctions() throw (std::invalid_argument)
 	{
-		TCollection *globals = gROOT->GetListOfGlobals(kTRUE);
-		TIter next(globals);
 
-		while (TGlobal *global = (TGlobal*) next())
+		TCollection *functions = gROOT->GetListOfGlobalFunctions(kTRUE);
+
+		TIter next(functions);
+		while (TFunction *function = (TFunction*) next())
 		{
-			if( (!global->IsValid()) || (global->GetAddress() == nullptr))
+			if (!function->IsValid())
 			{
-				Toolbox::logError("Invalid global instance found.");
+				Toolbox::logError("Invalid global function found.");
 				continue;
 			}
 
-			GlobalInfo info(*global);
-			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, nullptr);
-			if (proxy != nullptr)
-			{
-				CallbackHandler::registerGlobalObject(std::string(global->GetName()), proxy);
-				this->exports->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()),
-										   CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
+			std::string exposeName(function->GetName());
+			if(function->ExtraProperty() & kIsOperator) {
+				std::map<std::string, std::string>::const_iterator opNameIt = Types::operatorNames.find(function->GetName());
+				if(opNameIt != Types::operatorNames.end()) {
+					exposeName = opNameIt->second;
+				}
 			}
+
+			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(function->GetName(), nullptr);
+			exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), exposeName.c_str()),
+			             v8::Function::New(v8::Isolate::GetCurrent(), CallbackHandler::globalFunctionCallback, data));
 		}
 	}
 
