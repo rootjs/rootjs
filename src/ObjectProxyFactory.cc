@@ -227,14 +227,6 @@ namespace rootJS
 		return dictFunc();
 	}
 
-
-	TEnumConstant* ObjectProxyFactory::getEnumConstant(std::string const& typeName)
-	{
-		// gROOT->GetListOfEnums()->Find();
-
-		return nullptr;
-	}
-
 	bool ObjectProxyFactory::resolveTypeName(MetaInfo &info, std::string &trueType)
 	{
 		std::string stdTypeName(info.getTypeName());
