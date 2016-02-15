@@ -57,7 +57,7 @@ namespace rootJS
 			 * @param value
 			 * 			the value to assign to this ObjectProxy
 			 */
-			virtual void set(ObjectProxy &value);
+			virtual void setValue(v8::Local<v8::Value> value);
 
 			/**
 			 * Return the encapsulating javascript value.
@@ -82,7 +82,6 @@ namespace rootJS
 			 */
 			virtual v8::Local<v8::Object> getProxy();
 
-			virtual void setValue(v8::Local<v8::Value> value);
 
 			/**
 			 * Check if this proxy encapsulates a primitive type.
@@ -121,11 +120,16 @@ namespace rootJS
 
 			v8::Persistent<v8::Object> &getWeakPeristent();
 
+			static void rootDesturcted(TObject* obj);
+
 		protected:
 			v8::Persistent<v8::Object> proxy; /**< the exposed javascript object */
 
 		private:
+			void removed();
+			static std::map<TObject*, ObjectProxy*> objMap;
 			std::vector<void*> boundMallocs;
+			bool isWeak = false;
 			static void weakCallback(v8::WeakCallbackData<v8::Object, ObjectProxy> const& data);
 	};
 }

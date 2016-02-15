@@ -34,7 +34,12 @@ namespace rootJS
 			static void registerGlobalObject(const std::string &name, ObjectProxy* proxy);
 
 			/**
-			 * 	TODO: fill in description
+			 * Gets invoked when an encapsulated global property was requested. The function
+			 * will not be mapped to a JavaScript function, but to a getter that is being
+			 * invoked whenever a variable is requested.
+			 * Therefore the ability to use callbacks does not have to be provided here, as
+			 * they could not be passed. In addition to that, it should not take long to read
+			 * a variable.
 			 *
 			 *	@param property
 			 *
@@ -46,7 +51,13 @@ namespace rootJS
 			static void globalGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
 
 			/**
-			 * 	TODO: fill in description
+			 * Gets invoked when an encapsulated global property was requested. The function
+			 * will not be mapped to a JavaScript function, but to a getter that is being
+			 * invoked whenever a variable is requested.
+			 * Therefore the ability to use callbacks does not have to be provided here, as
+			 * they could not be passed. In addition to that, it should not take long to read
+			 * a variable.
+			 *
 			 *
 			 *	@param property
 			 *
@@ -62,7 +73,11 @@ namespace rootJS
 
 
 			/**
-			 * TODO: fill in description
+			 * Gets invoked when an encapsulated static property is attempted to be set. The
+			 * function will not be mapped to a JavaScript function but to a setter that is
+			 * being invoked when a variable is saved using the \"=\" operator.
+			 * ̈Therefore the ability to use callbacks does not have to be provided here, as
+			 * they could not be passed. In addition to that, it should not take long to read a variable.
 			 *
 			 * @param  info
 			 *
@@ -84,7 +99,12 @@ namespace rootJS
 
 
 			/**
-			 * 	TODO: fill in description
+			 * Gets invoked when an encapsulated static property was requested. The function
+			 * will not be mapped to a JavaScript function, but to a getter that is being
+			 * invoked whenever a variable is requested.
+			 * Therefore the ability to use callbacks does not have to be provided here, as
+			 * they could not be passed. In addition to that, it should not take long to read
+			 * a variable.
 			 *
 			 *	@param property
 			 *
@@ -96,7 +116,11 @@ namespace rootJS
 			static void staticGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
 
 			/**
-			 * 	TODO: fill in description
+			 * Gets invoked when an encapsulated static property is attempted to be set. The
+			 * function will not be mapped to a JavaScript function but to a setter that is
+			 * being invoked when a variable is saved using the \"=\" operator.
+			 * ̈Therefore the ability to use callbacks does not have to be provided here, as
+			 * they could not be passed. In addition to that, it should not take long to read a variable.
 			 *
 			 *	@param property
 			 *
@@ -111,7 +135,9 @@ namespace rootJS
 			static void staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
 
 			/**
-			 * 	TODO: fill in description
+			 * This method gets invoked when a static method is called. First a method with
+			 * the correct signature is selected. The selected method will be called and the
+			 * result will be sent through the ProxyObjectFactory.
 			 *
 			 *	@param info
 			 *
@@ -136,19 +162,25 @@ namespace rootJS
 			static void ctorCallback(const v8::FunctionCallbackInfo<v8::Value>& info);
 
 			/**
-			 * 	TODO: fill in description
-			 *
-			 *	@param property
+			 * This method gets invoked when a constructor function of an encapsulated
+			 * ROOT class is being called. This method should determine which constructor
+			 * should be invoked, by checking constructor overloads.
+			 * This constructor needs to be called and the resulting object needs to be forwarded
+			 * to the ProxyObjectFactory in order to proxy the results.
 			 *
 			 *
 			 *	@param info
+			 *              information about the context
 			 *
 			 *
 			 */
 			static void memberGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
 
 			/**
-			 * 	TODO: fill in description
+			 * Gets invoked when an encapsulated (class) member was requested. The function will not be mapped to a
+			 * JavaScript function, but to a getter that is being invoked whenever a variable is requested.
+			 * Therefore the ability to use callbacks does not have to be provided here, as
+			 * they could not be passed. In addition to that, it should not take long to read a variable.
 			 *
 			 *	@param property
 			 *
@@ -163,7 +195,9 @@ namespace rootJS
 			static void memberSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
 
 			/**
-			 * TODO: fill in description
+			 * This method gets invoked when a method is called. First a method with the
+			 * correct signature is selected. The selected method will then be called and the
+			 * result will be sent through the ProxyObjectFactory.
 			 *
 			 * @param  info
 			 *

@@ -8,19 +8,27 @@
 
 namespace rootJS
 {
+	std::map<TObject*, ObjectProxy*> ObjectProxy::objMap;
 
 	ObjectProxy::ObjectProxy(MetaInfo &info, TClass *scope) : Proxy(info, scope)
 	{
-		if(!proxy.IsEmpty()) {
-			proxy.SetWeak(this, weakCallback);
-		}
 	}
 
 	ObjectProxy::~ObjectProxy()
 	{
-		DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
-		if(dictPtr != nullptr) {
-			dictPtr()->Destructor(*(void**)getAddress(), true);
+		if(isWeak) {
+			DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
+			if(dictPtr != nullptr) {
+				TClass *klass = dictPtr();
+				TClass *objClass = klass->GetBaseClass("TObject");
+				if(objClass) {
+					TObject *objPtr = *(TObject**)getAddress();
+					klass->Destructor(*(void**)getAddress(), true);
+					objMap.erase(objPtr);
+				} else {
+					dictPtr()->Destructor(*(void**)getAddress(), true);
+				}
+			}
 		}
 
 		for(void* ptr : boundMallocs) {
@@ -46,16 +54,15 @@ namespace rootJS
 		return getTypeInfo()->getOffset();
 	}
 
-	void ObjectProxy::set(ObjectProxy &value)
-	{
-		// TODO: validate type equality
-		//address = value.getAddress();
-	}
-
 	v8::Local<v8::Value> ObjectProxy::get()
 	{
 		// objects just return their holder - i.e the proxy member
 		return getProxy();
+	}
+
+	void ObjectProxy::setValue(v8::Local<v8::Value> value)
+	{
+		return;
 	}
 
 	void ObjectProxy::setProxy(v8::Local<v8::Object> proxy)
@@ -93,11 +100,6 @@ namespace rootJS
 		return getTypeInfo()->isStatic();
 	}
 
-	void ObjectProxy::setValue(v8::Local<v8::Value> value)
-	{
-		return;
-	}
-
 	void ObjectProxy::registerMallocedSpace(void *allocated)
 	{
 		boundMallocs.push_back(allocated);
@@ -106,6 +108,28 @@ namespace rootJS
 	v8::Persistent<v8::Object> &ObjectProxy::getWeakPeristent()
 	{
 		proxy.SetWeak(this, weakCallback);
+		DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
+		if(dictPtr != nullptr) {
+			TClass *klass = dictPtr();
+			TClass *objClass = klass->GetBaseClass("TObject");
+			if(objClass) {
+				objMap[*(TObject**)getAddress()] = this;
+			}
+		}
+		isWeak = true;
 		return proxy;
+	}
+
+	void ObjectProxy::removed() {
+		isWeak = false;
+		proxy.Reset();
+	}
+
+	void ObjectProxy::rootDesturcted(TObject* obj) {
+		if(objMap.find(obj) != objMap.end()) {
+			objMap[obj]->removed();
+			//delete objMap[obj];
+			objMap.erase(obj);
+		}
 	}
 }

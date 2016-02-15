@@ -19,7 +19,8 @@
 namespace rootJS
 {
 	enum class mappedTypes {
-		CHAR, INT, DOUBLE, BOOL, TSTRING
+		CHAR, CSTR, INT, DOUBLE, BOOL, UINT, LDOUBLE, SHORT, USHORT, UCHAR,
+		LONG, LLONG, ULONG, ULLONG, FLOAT
 	};
 
 	/**
@@ -142,12 +143,23 @@ namespace rootJS
 
 			static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg, bool &copied);
 
-			static char*    argToChar   (v8::Local<v8::Value> originalArg);
-			static double*  argToDouble (v8::Local<v8::Value> originalArg);
-			static int*     argToInt    (v8::Local<v8::Value> originalArg);
-			static bool*    argToBool   (v8::Local<v8::Value> originalArg);
-			static void* 	argToObj	(v8::Local<v8::Value> originalArg, int derefCount);
-			static TString* argToTString(v8::Local<v8::Value> originalArg);
+			static char*    			argToCstr   	(v8::Local<v8::Value> originalArg);
+			static char*    			argToChar   	(v8::Local<v8::Value> originalArg);
+			static double*  			argToDouble 	(v8::Local<v8::Value> originalArg);
+			static int*    		 		argToInt    	(v8::Local<v8::Value> originalArg);
+			static float*   			argToFloat 		(v8::Local<v8::Value> originalArg);
+			static bool*    			argToBool   	(v8::Local<v8::Value> originalArg);
+			static long double*			argToLDouble   	(v8::Local<v8::Value> originalArg);
+			static long long*			argToLLong   	(v8::Local<v8::Value> originalArg);
+			static long*				argToLong   	(v8::Local<v8::Value> originalArg);
+			static short*				argToShort   	(v8::Local<v8::Value> originalArg);
+			static unsigned short*		argToUShort   	(v8::Local<v8::Value> originalArg);
+			static unsigned char*		argToUChar   	(v8::Local<v8::Value> originalArg);
+			static unsigned int*		argToUInt   	(v8::Local<v8::Value> originalArg);
+			static unsigned long long*	argToULLong   	(v8::Local<v8::Value> originalArg);
+			static unsigned long*		argToULong   	(v8::Local<v8::Value> originalArg);
+			static void* 				argToObj		(v8::Local<v8::Value> originalArg, int derefCount);
+			static TString* 			argToTString	(v8::Local<v8::Value> originalArg);
 
 			static double   getDoubleFromArg(v8::Local<v8::Value> originalArg);
 	};

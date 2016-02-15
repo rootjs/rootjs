@@ -23,12 +23,12 @@ namespace rootJS
 
 	bool EnumConstInfo::isConst()
 	{
-		return (type.Property() & kIsConstant); // true
+		return true; // (type.Property() & kIsConstant);
 	}
 
 	bool EnumConstInfo::isStatic()
 	{
-		return (type.Property() & kIsStatic);	// true
+		return (type.Property() & kIsStatic);
 	}
 
 	const char* EnumConstInfo::getFullTypeName()

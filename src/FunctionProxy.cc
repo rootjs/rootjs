@@ -34,13 +34,34 @@ namespace rootJS
 {
 	std::map<TFunction*, CallFunc_t*> FunctionProxy::functions;
 	std::map<std::string, mappedTypes> FunctionProxy::typeMap = {
-		{"char", mappedTypes::CHAR},
-		{"TString", mappedTypes::TSTRING},
-		{"Int_t", mappedTypes::INT},
 		{"int", mappedTypes::INT},
-		{"Double_t", mappedTypes::DOUBLE},
-		{"Bool_t", mappedTypes::BOOL},
-		//{"_t", mappedTypes::CHAR}
+		{"unsigned int", mappedTypes::UINT},
+
+		{"double", mappedTypes::DOUBLE},
+		{"long double", mappedTypes::LDOUBLE},
+
+		{"short", mappedTypes::SHORT},
+		{"unsigned short", mappedTypes::USHORT},
+
+		{"unsigned char", mappedTypes::UCHAR},
+
+		{"long", mappedTypes::LONG},
+		{"long long", mappedTypes::LLONG},
+
+		{"unsigned long", mappedTypes::ULONG},
+		{"unsigned long long", mappedTypes::ULLONG},
+
+		{"float", mappedTypes::FLOAT},
+
+		{"char", mappedTypes::CHAR},
+		{"char*", mappedTypes::CSTR},
+
+		{"bool", mappedTypes::BOOL},
+
+		{"Double32_t", mappedTypes::DOUBLE},
+		{"Float16_t", mappedTypes::FLOAT},
+		{"Long64_t", mappedTypes::LLONG},
+		{"ULong64_t", mappedTypes::ULLONG}
 	};
 
 	std::vector<TFunction*> FunctionProxy::getMethodsFromName(TClassRef scope, std::string name)
@@ -216,7 +237,7 @@ namespace rootJS
 
 		ObjectProxy* proxy = nullptr;
 
-		PointerInfo mode(result, typeName.c_str(), ptrDepth + 1);
+		PointerInfo mode(result, typeName.c_str(), ptrDepth);
 		if(reuseLocal != nullptr) {
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());
 			if(dictFunc != nullptr) {
@@ -240,8 +261,9 @@ namespace rootJS
 
 	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg, bool& copied)
 	{
+		TDataType* fullType = Types::getTypeByName(std::string(arg->GetFullTypeName()));
 		TDataType* type = Types::getTypeByName(std::string(arg->GetTypeName()));
-		if(type == nullptr) {
+		if(type == nullptr && fullType == nullptr) {
 			//might be an object...
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(arg->GetTypeName());
 			if(dictFunc == nullptr) {
@@ -253,19 +275,26 @@ namespace rootJS
 			return argToObj(originalArg, std::count(fullTypeName.begin(), fullTypeName.end(), '*'));
 		}
 
-		TString typeName = type->GetTypeName();
+		TString typeName = fullType->GetTypeName();
 		std::string stdTypeName(typeName.Data());
 		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(stdTypeName);
 		if(iterator == typeMap.end()) {
-			//Might be an object
-			throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + stdTypeName);
-			return nullptr;
+			typeName = type->GetTypeName();
+			stdTypeName = typeName.Data();
+			iterator = typeMap.find(stdTypeName);
+			if(iterator == typeMap.end()) {
+				//Might be an object
+				throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + stdTypeName);
+				return nullptr;
+			}
 		}
 
 		copied = false;
 		switch(iterator->second) {
-		case mappedTypes::CHAR:
+		case mappedTypes::CSTR:
 			copied = true;
+			return argToCstr(originalArg);
+		case mappedTypes::CHAR:
 			return argToChar(originalArg);
 		case mappedTypes::INT:
 			return argToInt(originalArg);
@@ -273,20 +302,50 @@ namespace rootJS
 			return argToDouble(originalArg);
 		case mappedTypes::BOOL:
 			return argToBool(originalArg);
-		case mappedTypes::TSTRING:
-			copied = true;
-			return argToTString(originalArg);
+		case mappedTypes::FLOAT:
+			return argToFloat(originalArg);
+		case mappedTypes::LDOUBLE:
+			return argToLDouble(originalArg);
+		case mappedTypes::LLONG:
+			return argToLLong(originalArg);
+		case mappedTypes::LONG:
+			return argToLong(originalArg);
+		case mappedTypes::SHORT:
+			return argToShort(originalArg);
+		case mappedTypes::UCHAR:
+			return argToUChar(originalArg);
+		case mappedTypes::UINT:
+			return argToUInt(originalArg);
+		case mappedTypes::ULLONG:
+			return argToULLong(originalArg);
+		case mappedTypes::ULONG:
+			return argToULong(originalArg);
+		case mappedTypes::USHORT:
+			return argToUShort(originalArg);
 		}
 
 		//TODO: This will explode - huge fireball
 		return nullptr;
 	}
 
-	char* FunctionProxy::argToChar(v8::Local<v8::Value> originalArg)
+	char* FunctionProxy::argToCstr(v8::Local<v8::Value> originalArg)
 	{
 		v8::String::Utf8Value string(originalArg->ToString());
 		char *str = (char *) malloc(string.length() + 1);
 		strcpy(str, *string);
+		return str;
+	}
+
+	char* FunctionProxy::argToChar(v8::Local<v8::Value> originalArg)
+	{
+		v8::String::Utf8Value string(originalArg->ToString());
+		std::string stdStr(*string);
+		char *str = (char *) malloc(sizeof(char));
+		if(stdStr.length() < 1) {
+			*str = '\0';
+		} else {
+			*str = stdStr[0];
+		}
 		return str;
 	}
 
@@ -303,6 +362,77 @@ namespace rootJS
 		*intValue = (int)getDoubleFromArg(originalArg);
 		return intValue;
 	}
+
+	float* FunctionProxy::argToFloat(v8::Local<v8::Value> originalArg)
+	{
+		float *intValue = (float *)malloc(sizeof(float));
+		*intValue = (float)getDoubleFromArg(originalArg);
+		return intValue;
+	}
+
+	long double* FunctionProxy::argToLDouble(v8::Local<v8::Value> originalArg)
+	{
+		long double *intValue = (long double *)malloc(sizeof(long double));
+		*intValue = (long double)getDoubleFromArg(originalArg);
+		return intValue;
+	}
+
+	long long* FunctionProxy::argToLLong(v8::Local<v8::Value> originalArg)
+	{
+		long long *intValue = (long long *)malloc(sizeof(long long));
+		*intValue = (long long)getDoubleFromArg(originalArg);
+		return intValue;
+	}
+
+	long* FunctionProxy::argToLong(v8::Local<v8::Value> originalArg)
+	{
+		long *intValue = (long *)malloc(sizeof(long));
+		*intValue = (long)getDoubleFromArg(originalArg);
+		return intValue;
+	}
+
+	short* FunctionProxy::argToShort(v8::Local<v8::Value> originalArg)
+	{
+		short *intValue = (short *)malloc(sizeof(short));
+		*intValue = (short)getDoubleFromArg(originalArg);
+		return intValue;
+	}
+
+	unsigned short* FunctionProxy::argToUShort(v8::Local<v8::Value> originalArg)
+	{
+		unsigned short *intValue = (unsigned short *)malloc(sizeof(unsigned short));
+		*intValue = (unsigned short)getDoubleFromArg(originalArg);
+		return intValue;
+	}
+
+	unsigned char* FunctionProxy::argToUChar(v8::Local<v8::Value> originalArg)
+	{
+		unsigned char *intValue = (unsigned char *)malloc(sizeof(unsigned char));
+		*intValue = (unsigned char)getDoubleFromArg(originalArg);
+		return intValue;
+	}
+
+	unsigned int* FunctionProxy::argToUInt(v8::Local<v8::Value> originalArg)
+	{
+		unsigned int *intValue = (unsigned int *)malloc(sizeof(unsigned int));
+		*intValue = (unsigned int)getDoubleFromArg(originalArg);
+		return intValue;
+	}
+
+	unsigned long long* FunctionProxy::argToULLong(v8::Local<v8::Value> originalArg)
+	{
+		unsigned long long *intValue = (unsigned long long *)malloc(sizeof(unsigned long long));
+		*intValue = (unsigned long long)getDoubleFromArg(originalArg);
+		return intValue;
+	}
+
+	unsigned long* FunctionProxy::argToULong(v8::Local<v8::Value> originalArg)
+	{
+		unsigned long *intValue = (unsigned long *)malloc(sizeof(unsigned long));
+		*intValue = (unsigned long)getDoubleFromArg(originalArg);
+		return intValue;
+	}
+
 
 	bool* FunctionProxy::argToBool(v8::Local<v8::Value> originalArg)
 	{
@@ -324,7 +454,11 @@ namespace rootJS
 	void* FunctionProxy::argToObj(v8::Local<v8::Value> originalArg, int derefCount)
 	{
 		v8::Local<v8::Object> obj = v8::Local<v8::Object>::Cast(originalArg);
-		assert(obj->InternalFieldCount() == Toolbox::INTERNAL_FIELD_COUNT);
+		if(obj->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
+		{
+			Toolbox::throwException("Unexpected internal field count.");
+			return nullptr;
+		}
 
 		ObjectProxy *proxy = (ObjectProxy*)obj->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
 
