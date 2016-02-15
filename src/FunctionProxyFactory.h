@@ -13,6 +13,7 @@ namespace rootJS
 {
 	enum class v8BasicTypes {
 		BOOLEAN,
+		CHAR,
 		STRING,
 		NUMBER,
 		ARRAY,
@@ -32,7 +33,7 @@ namespace rootJS
 			static std::map<std::string, NumberInfo> basicNumberInfoMap;
 
 			static bool checkNumberBounds(const char *type, v8::Local<v8::Value> object, bool &prefer);
-			static bool paramMatches(const char *type, v8::Local<v8::Value> object, bool &prefer);
+			static bool paramMatches(const char *fullType, const char *type, v8::Local<v8::Value> object, bool &prefer);
 
 			FunctionProxyFactory(void);
 
