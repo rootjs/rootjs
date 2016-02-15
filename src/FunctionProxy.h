@@ -19,7 +19,7 @@
 namespace rootJS
 {
 	enum class mappedTypes {
-		CHAR, INT, DOUBLE, BOOL, UINT, LDOUBLE, SHORT, USHORT, UCHAR,
+		CHAR, CSTR, INT, DOUBLE, BOOL, UINT, LDOUBLE, SHORT, USHORT, UCHAR,
 		LONG, LLONG, ULONG, ULLONG, FLOAT
 	};
 
@@ -143,6 +143,7 @@ namespace rootJS
 
 			static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg, bool &copied);
 
+			static char*    			argToCstr   	(v8::Local<v8::Value> originalArg);
 			static char*    			argToChar   	(v8::Local<v8::Value> originalArg);
 			static double*  			argToDouble 	(v8::Local<v8::Value> originalArg);
 			static int*    		 		argToInt    	(v8::Local<v8::Value> originalArg);

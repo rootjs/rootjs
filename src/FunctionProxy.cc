@@ -54,6 +54,7 @@ namespace rootJS
 		{"float", mappedTypes::FLOAT},
 
 		{"char", mappedTypes::CHAR},
+		{"char*", mappedTypes::CSTR},
 
 		{"bool", mappedTypes::BOOL},
 
@@ -260,8 +261,9 @@ namespace rootJS
 
 	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg, bool& copied)
 	{
+		TDataType* fullType = Types::getTypeByName(std::string(arg->GetFullTypeName()));
 		TDataType* type = Types::getTypeByName(std::string(arg->GetTypeName()));
-		if(type == nullptr) {
+		if(type == nullptr && fullType == nullptr) {
 			//might be an object...
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(arg->GetTypeName());
 			if(dictFunc == nullptr) {
@@ -273,19 +275,26 @@ namespace rootJS
 			return argToObj(originalArg, std::count(fullTypeName.begin(), fullTypeName.end(), '*'));
 		}
 
-		TString typeName = type->GetTypeName();
+		TString typeName = fullType->GetTypeName();
 		std::string stdTypeName(typeName.Data());
 		std::map<std::string, mappedTypes>::iterator iterator = typeMap.find(stdTypeName);
 		if(iterator == typeMap.end()) {
-			//Might be an object
-			throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + stdTypeName);
-			return nullptr;
+			typeName = type->GetTypeName();
+			stdTypeName = typeName.Data();
+			iterator = typeMap.find(stdTypeName);
+			if(iterator == typeMap.end()) {
+				//Might be an object
+				throw std::invalid_argument(std::string("bufferParam does not know how to handle ") + stdTypeName);
+				return nullptr;
+			}
 		}
 
 		copied = false;
 		switch(iterator->second) {
-		case mappedTypes::CHAR:
+		case mappedTypes::CSTR:
 			copied = true;
+			return argToCstr(originalArg);
+		case mappedTypes::CHAR:
 			return argToChar(originalArg);
 		case mappedTypes::INT:
 			return argToInt(originalArg);
@@ -319,11 +328,24 @@ namespace rootJS
 		return nullptr;
 	}
 
-	char* FunctionProxy::argToChar(v8::Local<v8::Value> originalArg)
+	char* FunctionProxy::argToCstr(v8::Local<v8::Value> originalArg)
 	{
 		v8::String::Utf8Value string(originalArg->ToString());
 		char *str = (char *) malloc(string.length() + 1);
 		strcpy(str, *string);
+		return str;
+	}
+
+	char* FunctionProxy::argToChar(v8::Local<v8::Value> originalArg)
+	{
+		v8::String::Utf8Value string(originalArg->ToString());
+		std::string stdStr(*string);
+		char *str = (char *) malloc(sizeof(char));
+		if(stdStr.length() < 1) {
+			*str = '\0';
+		} else {
+			*str = stdStr[0];
+		}
 		return str;
 	}
 

@@ -19,7 +19,9 @@ namespace rootJS
 {
 
 	std::map<std::string, v8BasicTypes> FunctionProxyFactory::basicTypeMap = {
-		{"char", v8BasicTypes::STRING},
+		{"char*", v8BasicTypes::STRING},
+		{"char", v8BasicTypes::CHAR},
+
 		{"Bool_t", v8BasicTypes::BOOLEAN},
 
 		{"int", v8BasicTypes::NUMBER},
@@ -113,7 +115,7 @@ namespace rootJS
 			bool prefer = true;
 
 			for(int i = 0; i < (int)args->Length(); i++) {
-				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i), prefer)) {
+				if(!paramMatches(((TMethodArg*)funcArgs->At(i))->GetFullTypeName(), ((TMethodArg*)funcArgs->At(i))->GetTypeName(), args->Get(i), prefer)) {
 					argsMatch = false;
 					break;
 				}
@@ -169,11 +171,11 @@ namespace rootJS
 		}
 	}
 
-	bool FunctionProxyFactory::paramMatches(const char *typeName, v8::Local<v8::Value> arg, bool &prefer)
+	bool FunctionProxyFactory::paramMatches(const char *fullTypeName, const char *typeName, v8::Local<v8::Value> arg, bool &prefer)
 	{
 		if (Types::isV8Primitive(arg)) {
 			//Resolve the type
-			TDataType* type = Types::getTypeByName(std::string(typeName));
+			TDataType* type = Types::getTypeByName(std::string(fullTypeName));
 			if(type == nullptr) {
 				return false; //Not primitive...
 			}
@@ -186,6 +188,14 @@ namespace rootJS
 				switch(it->second) {
 				case v8BasicTypes::STRING:
 					return Types::isV8String(arg);
+				case v8BasicTypes::CHAR:
+					if(Types::isV8String(arg)) {
+						v8::String::Utf8Value string(arg->ToString());
+						std::string stdStr(*string);
+						return stdStr.length() == 1;
+					} else {
+						return false;
+					}
 				case v8BasicTypes::NUMBER:
 					if(Types::isV8Number(arg)) {
 						return checkNumberBounds(typeName, arg, prefer);

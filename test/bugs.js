@@ -28,6 +28,18 @@ describe('Bugs', function() {
 		  }).should.not.throw()
 	  });
   });
+  describe('#51', function() {
+	  it('should be possible to use _set on a TString with a js string as parameter', function() {
+		  var str = new root.TString("");
+		  str._set("test");
+		  str.Data().should.equal("test");
+	  });
+	  it('should be possible to use _set on a TString with a js string that is a char', function() {
+		  var str = new root.TString("");
+		  str._set("t");
+		  str.Data().should.equal("t");
+	  });
+  });
   describe('constants', function() {
 	  it('constants should really be constant!', function() {
 		  (function() {
