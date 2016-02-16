@@ -263,17 +263,18 @@ namespace rootJS
 		v8::Local<v8::Function> callback;
 		v8::Local<v8::Array> args = getInfoArgs(&callback, info);
 
+		FunctionProxy *funcProxy = FunctionProxyFactory::fromArgs(name, clazz, args);
+
+		if(funcProxy == nullptr)
+		{
+			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("No suitable constructor found for the supplied arguments. Could not create a new '" + std::string(clazz->GetName()) + "'.");
+			return;
+		}
+
+
 		if(callback.IsEmpty())
 		{	// create object on current thread
-			FunctionProxy *funcProxy = FunctionProxyFactory::fromArgs(name, clazz, args);
-
-			if(funcProxy == nullptr)
-			{
-				info.GetReturnValue().Set(v8::Undefined(isolate));
-				Toolbox::throwException("No suitable constructor found for the supplied arguments. Could not create a new '" + std::string(clazz->GetName()) + "'.");
-				return;
-			}
-
 			funcProxy->prepareCall(args);
 			ObjectProxy *proxy = funcProxy->call(nullptr, true, &instance);
 			delete funcProxy;
@@ -290,8 +291,25 @@ namespace rootJS
 		}
 		else
 		{
-			Toolbox::throwException("Constructors can't be called async.");
-			return;
+			AsyncCallParam *asyncCallParam = new AsyncCallParam();
+			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), args);
+			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
+
+			/*
+			 * Clone the FunctionProxy because when the same function is called multiple times
+			 * prepareCall might be called with new data before the old call finished,
+			 * which leads to unexpected results (while testing: multiple frees of the param buffer)
+			 */
+			FunctionProxy* cloneProxy = funcProxy->clone();
+
+			asyncCallParam->params = persistentArgs;
+			asyncCallParam->proxy = cloneProxy;
+			asyncCallParam->selfAddress = nullptr;
+			asyncCallParam->construction = true;
+			//asyncCallParam->instance = &instance;
+			cloneProxy->prepareCall(args);
+			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, persistentCallback);
+			runner->run();
 		}
 	}
 
@@ -440,7 +458,7 @@ namespace rootJS
 		AsyncCallParam *asyncCallParam = (AsyncCallParam*)param;
 
 		std::vector<ObjectProxy*> resultVector;
-		ObjectProxy* resultProxy = asyncCallParam->proxy->call(asyncCallParam->selfAddress);
+		ObjectProxy* resultProxy = asyncCallParam->proxy->call(asyncCallParam->selfAddress, asyncCallParam->construction, asyncCallParam->instance);
 
 		resultVector.push_back(resultProxy);
 		runner->setResult(resultVector);

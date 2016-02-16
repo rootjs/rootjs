@@ -21,4 +21,12 @@ describe('Functions', function() {
 		  }).should.not.throw();
 	  });
   });
+  describe('callback returns', function() {
+	  it('should be possible to return objects via callback functions', function(done) {
+		  root.gApplication.GetSignalHandler(function(result) {
+			  result.should.be.type('object');
+			  done();
+		  })
+	  });
+  });
 });
