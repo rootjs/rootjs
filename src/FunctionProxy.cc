@@ -1,8 +1,6 @@
 #include "FunctionProxy.h"
 
 #include "FunctionProxyFactory.h"
-#include "ObjectProxyFactory.h"
-#include "ObjectProxy.h"
 #include "BooleanProxy.h"
 #include "NumberProxy.h"
 #include "StringProxy.h"
@@ -191,7 +189,7 @@ namespace rootJS
 		}
 	}
 
-	ObjectProxy* FunctionProxy::call(void *self, bool isConstructorCall /* false */, v8::Local<v8::Object> *reuseLocal /* = nullptr */)
+	void FunctionProxy::call(void *self, ObjectProxyBuilder &builder, bool isConstructorCall /* false */)
 	{
 		void *result = nullptr;
 		void **resultPtr;
@@ -235,28 +233,18 @@ namespace rootJS
 			}
 		}
 
-		ObjectProxy* proxy = nullptr;
-
 		PointerInfo mode(result, typeName.c_str(), ptrDepth);
-		if(reuseLocal != nullptr) {
-			DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());
-			if(dictFunc != nullptr) {
-				proxy = ObjectProxyFactory::createObjectProxy(mode, dictFunc(), *reuseLocal);
-			}
-		} else {
-			proxy = ObjectProxyFactory::createObjectProxy(mode, nullptr);
+		builder.setResultInfo(mode);
+		
+		DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());
+		if(dictFunc != nullptr) {
+			builder.setClass(dictFunc());
 		}
 
-		if(proxy != nullptr) {
-			if(allocated) {
-				proxy->registerMallocedSpace(allocated);
-			}
-			return proxy;
-		} else if(allocated) {
-			free(allocated);
-		}
 
-		return nullptr;
+		if(allocated) {
+			builder.bindAllocatedMemory(allocated);
+		}
 	}
 
 	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg, bool& copied)

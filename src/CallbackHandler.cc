@@ -74,17 +74,21 @@ namespace rootJS
 		if(callback.IsEmpty())
 		{
 			proxy->prepareCall(args);
-			ObjectProxy *resultProxy = proxy->call(nullptr);
-			if(resultProxy)
+			ObjectProxyBuilder builder;
+			proxy->call(nullptr, builder);
+			if(builder.isValid())
 			{
-				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
-				{
-					info.GetReturnValue().Set(resultProxy->get());
-					delete resultProxy;
-				}
-				else
-				{
-					info.GetReturnValue().Set(resultProxy->get());
+				ObjectProxy *resultProxy = builder.createObjectProxy();
+				if(resultProxy) {
+					if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
+					{
+						info.GetReturnValue().Set(resultProxy->get());
+						delete resultProxy;
+					}
+					else
+					{
+						info.GetReturnValue().Set(resultProxy->get());
+					}
 				}
 			}
 			delete proxy;
@@ -192,16 +196,23 @@ namespace rootJS
 		if(callback.IsEmpty())
 		{
 			proxy->prepareCall(args);
-			ObjectProxy *resultProxy = proxy->call(nullptr);
+			ObjectProxyBuilder builder;
+			proxy->call(nullptr, builder);
 			delete proxy;
-			if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
-			{
-				info.GetReturnValue().Set(resultProxy->get());
-				delete resultProxy;
-			}
-			else
-			{
-				info.GetReturnValue().Set(resultProxy->get());
+
+			if(builder.isValid()) {
+				ObjectProxy *resultProxy = builder.createObjectProxy();
+				if(resultProxy) {
+					if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
+					{
+						info.GetReturnValue().Set(resultProxy->get());
+						delete resultProxy;
+					}
+					else
+					{
+						info.GetReturnValue().Set(resultProxy->get());
+					}
+				}
 			}
 		}
 		else
@@ -276,17 +287,21 @@ namespace rootJS
 		if(callback.IsEmpty())
 		{	// create object on current thread
 			funcProxy->prepareCall(args);
-			ObjectProxy *proxy = funcProxy->call(nullptr, true, &instance);
+			ObjectProxyBuilder builder;
+			builder.setBaseInstance(instance);
+			funcProxy->call(nullptr, builder, true);
 			delete funcProxy;
 
-			if(proxy == nullptr)
+			if(!builder.isValid())
 			{
 				info.GetReturnValue().Set(v8::Undefined(isolate));
 				Toolbox::throwException("Constructor call failed. Could not create a new '" + std::string(clazz->GetName()) + "'.");
 				return;
 			}
-
-			info.GetReturnValue().Set(proxy->getWeakPeristent());
+			ObjectProxy *proxy = builder.createObjectProxy();
+			if(proxy) {
+				info.GetReturnValue().Set(proxy->getWeakPeristent());
+			}
 			return;
 		}
 		else
@@ -416,18 +431,22 @@ namespace rootJS
 		if(callback.IsEmpty())
 		{
 			proxy->prepareCall(args);
-			ObjectProxy *resultProxy = proxy->call(*(void**)holder->getAddress());
+			ObjectProxyBuilder builder;
+			proxy->call(*(void**)holder->getAddress(), builder);
 			delete proxy;
-			if(resultProxy)
+			if(builder.isValid())
 			{
-				if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
-				{
-					info.GetReturnValue().Set(resultProxy->get());
-					delete resultProxy;
-				}
-				else
-				{
-					info.GetReturnValue().Set(resultProxy->get());
+				ObjectProxy *resultProxy = builder.createObjectProxy();
+				if(resultProxy) {
+					if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
+					{
+						info.GetReturnValue().Set(resultProxy->get());
+						delete resultProxy;
+					}
+					else
+					{
+						info.GetReturnValue().Set(resultProxy->get());
+					}
 				}
 			}
 		}
@@ -457,10 +476,16 @@ namespace rootJS
 	{
 		AsyncCallParam *asyncCallParam = (AsyncCallParam*)param;
 
-		std::vector<ObjectProxy*> resultVector;
-		ObjectProxy* resultProxy = asyncCallParam->proxy->call(asyncCallParam->selfAddress, asyncCallParam->construction, asyncCallParam->instance);
+		std::vector<ObjectProxyBuilder> resultVector;
+		ObjectProxyBuilder *builder = new ObjectProxyBuilder();
+		builder->bindAllocatedMemory(builder);
+		if(asyncCallParam->instance != nullptr) {
+			builder->setBaseInstance(*(asyncCallParam->instance));
+		}
 
-		resultVector.push_back(resultProxy);
+		asyncCallParam->proxy->call(asyncCallParam->selfAddress, *builder, asyncCallParam->construction);
+
+		resultVector.push_back(*builder);
 		runner->setResult(resultVector);
 
 		delete asyncCallParam->proxy;
