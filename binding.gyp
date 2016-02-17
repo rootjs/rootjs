@@ -34,7 +34,8 @@
 				'src/CallbackHandler.cc',
 				'src/AsyncRunner.cc',
 				'src/Toolbox.cc',
-				'src/Types.cc'
+				'src/Types.cc',
+				'src/ObjectProxyBuilder.cc'
 			],
 
 			'cflags_cc!'  : [ '-fno-rtti', '-fno-exceptions'],

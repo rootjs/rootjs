@@ -29,11 +29,11 @@ namespace rootJS
 		std::vector<v8::Local<v8::Value>> passParams;
 
 		for(int i = 0; i < (int)runner->result.size(); i++) {
-			if(runner->result[i] == nullptr) {
+			if(!runner->result[i].isValid()) {
 				continue;
 			}
-			passParams.push_back(runner->result[i]->get());
-			delete runner->result[i];
+			ObjectProxy* proxy = runner->result[i].createObjectProxy();
+			passParams.push_back(proxy->get());
 		}
 
 		v8::Local<v8::Function> cb = v8::Local<v8::Function>::New(isolate, runner->callback);

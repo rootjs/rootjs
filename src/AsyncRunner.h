@@ -1,7 +1,7 @@
 #ifndef ASYNC_RUNNER_H
 #define ASYNC_RUNNER_H
 
-#include "ObjectProxy.h"
+#include "ObjectProxyBuilder.h"
 
 #include <vector>
 #include <v8.h>
@@ -21,7 +21,7 @@ namespace rootJS
 			AsyncFunction func;
 			void *param;
 			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> callback;
-			std::vector<ObjectProxy*> result;
+			std::vector<ObjectProxyBuilder> result;
 
 		public:
 			/**
@@ -45,7 +45,7 @@ namespace rootJS
 			 *
 			 * @param result The result of the asynchronous function.
 			 */
-			void setResult(std::vector<ObjectProxy*> result)
+			void setResult(std::vector<ObjectProxyBuilder> &result)
 			{
 				this->result = result;
 			};

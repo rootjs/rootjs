@@ -64,6 +64,15 @@ describe('Objects', function() {
 		  var testSring = new root.TString("test");
 		  testSring.Data().should.equal("test");
 	  });
+	  it('should be possible to create a new TString asynchronously', function(done){
+		  var asyncBarriere = false;
+		  new root.TString("test", function(testString) {
+			   testString.Data().should.equal("test");
+			   asyncBarriere.should.equal(true);
+			   done();
+		  });
+		  asyncBarriere = true;
+	  });
   });
   describe('Operators', function() {
 	  it('should be possible to use _equals', function() {
