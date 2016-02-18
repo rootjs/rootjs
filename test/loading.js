@@ -11,7 +11,7 @@ describe('Dynamic Loading', function() {
                 root.loadlibrary("libSpectrumPainter.so");
             }).should.not.throw();
         });
-        it('should be possible to call reloadLibrary', function () {
+        it('should be possible to call reloadExports', function () {
             (function () {
             root.refreshExports()
             }).should.not.throw();
