@@ -40,6 +40,17 @@ describe('Bugs', function() {
 		  str.Data().should.equal("t");
 	  });
   });
+  describe('#56', function() {
+	  it('should be possible to handle functionpointers as return values', function() {
+		 var dictFunc = root.TClassTable.GetDict(root.TClassTable.At(0));
+		 (function() {
+			 dictFunc().Dump();
+		 }).should.not.throw();
+		 (function() {
+			 dictFunc.Dump();
+		 }).should.throw();
+	  });
+  });
   describe('constants', function() {
 	  it('constants should really be constant!', function() {
 		  (function() {
