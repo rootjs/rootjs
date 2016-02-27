@@ -108,6 +108,14 @@ describe('Interface', function() {
 			  }).should.throw();
 			  root.kFALSE.should.equal(false);
 		  });
+		  it('should be possible to set a boolean', function() {
+			  //There is no global bool which is writable :(
+			  var test = new root.TString("test");
+			  var b = test.Contains("test");
+			  b.should.equal(true);
+			  b = false;
+			  b.should.equal(false);
+		  })
 	  });
 	  describe('functions', function() {
 		  it('should not be possible to call Printf without the corect args', function() {
