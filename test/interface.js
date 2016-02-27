@@ -110,14 +110,22 @@ describe('Interface', function() {
 		  });
 		  it('should be possible to set a boolean', function() {
 			  //There is no global bool which is writable :(
-			  root.gCling.ProcessLine("bool test = true")
-			  root.refreshExports()
+			  root.gCling.ProcessLine("bool test = true");
+			  root.refreshExports();
 			  root.test.should.equal(true);
 			  root.test = false;
 			  root.test.should.equal(false);
 			  root.test = new Boolean(true);
 			  root.test.should.equal(true);
-		  })
+		  });
+		  it('should not be possible to store something else then a boolean in a boolean variable', function () {
+			  root.gCling.ProcessLine("bool test = true");
+			  root.refreshExports();
+			  (function() {
+				  root.test = "asdf";
+			  }).should.throw();
+			  root.test.should.equal(true);
+		  });
 	  });
 	  describe('functions', function() {
 		  it('should not be possible to call Printf without the corect args', function() {
