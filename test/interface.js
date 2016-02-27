@@ -115,6 +115,8 @@ describe('Interface', function() {
 			  root.test.should.equal(true);
 			  root.test = false;
 			  root.test.should.equal(false);
+			  root.test = new Boolean(true);
+			  root.test.should.equal(true);
 		  })
 	  });
 	  describe('functions', function() {
