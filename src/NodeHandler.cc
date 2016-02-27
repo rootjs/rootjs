@@ -72,6 +72,10 @@ namespace rootJS
 				continue;
 			}
 
+			if(exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),global->GetName()))) {
+				continue;
+			}
+
 			GlobalInfo info(*global);
 			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, nullptr);
 			if (proxy != nullptr) {
@@ -87,10 +91,16 @@ namespace rootJS
 
 		TCollection *functions = gROOT->GetListOfGlobalFunctions(kTRUE);
 
+		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
+
 		TIter next(functions);
 		while (TFunction *function = (TFunction*) next()) {
 			if (!function->IsValid()) {
 				Toolbox::logInfo("Invalid global function found.",1);
+				continue;
+			}
+
+			if(exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),function->GetName()))) {
 				continue;
 			}
 
@@ -103,7 +113,7 @@ namespace rootJS
 			}
 
 			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(function->GetName(), nullptr);
-			exports->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), exposeName.c_str()),
+			exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), exposeName.c_str()),
 			             v8::Function::New(v8::Isolate::GetCurrent(), CallbackHandler::globalFunctionCallback, data));
 		}
 	}
@@ -225,6 +235,8 @@ namespace rootJS
 
 	void NodeHandler::refreshExports()
 	{
+		exposeGlobals();
+		exposeGlobalFunctions();
 		exposeClasses();
 	}
 
