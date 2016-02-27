@@ -97,5 +97,15 @@ describe('Objects', function() {
 			  t1._at(10).should.equal('')
 		  });
 	  });
-  })
+  });
+  describe('static', function()  {
+	  it('should be possible to read static attributes', function() {
+		  root.TApplication.kExit.should.equal(1);
+	  });
+	  it('should not be possible to write static const attributes', function() {
+		  (function() {
+			  root.TApplication.kExit = 2;
+		  }).should.throw();
+	  });
+  });
 });

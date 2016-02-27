@@ -21,7 +21,7 @@ namespace rootJS
 
 	bool MemberInfo::isConst()
 	{
-		return (type.Property() & kIsConstant);
+		return (type.Property() & (kIsConstant | kIsEnum));
 	}
 
 	bool MemberInfo::isStatic()

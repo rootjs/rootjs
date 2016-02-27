@@ -131,6 +131,9 @@ describe('Interface', function() {
 				  root.Printf("test");
 			  }).should.not.throw();
 		  });
+		  it('should be possible to call functions which return non-scalar values', function() {
+			  root.ToUpper(new root.TString("test")).Data().should.equal("TEST");
+		  })
 	  });
   });
 });
