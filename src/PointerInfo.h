@@ -37,6 +37,9 @@ namespace rootJS
 
 			virtual const char* getTypeName();
 			virtual const char* getFullTypeName();
+			virtual const char* getName() {
+				return "anonymous";
+			};
 
 			virtual PointerInfo* clone()
 			{
