@@ -21,7 +21,7 @@ You can use rootJS in a node shell by using require on the provided index.js fil
 var root = require('./index.js');
 ```
 
-Afterwards you have access to root's functionality through the required `root` object which copies it's structure from ROOT.
+Afterwards you have access to root's functionality through the required `root` object which copies its structure from ROOT.
 
 ```javascript
 > root.gProgName //You can access globals
@@ -30,7 +30,7 @@ Afterwards you have access to root's functionality through the required `root` o
 'compressthistext'
 > var browser = new root.TBrowser() //You can create new objects (even GUI elements)
 undefined
-> browser.SetName("test") //And run it's methods
+> browser.SetName("test") //And run its methods
 '165781144'
 > browser.GetName()
 'test'
