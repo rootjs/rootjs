@@ -37,6 +37,18 @@ describe('Functions', function() {
 		  }).should.not.throw();
 		  test.Data().should.equal("test0.01");
 	  });
+	  it('should not be possible to call static functions async', function(done) {
+		  root.TString.LLtoa(64, 2, function(result) {
+			  result.Data().should.equal('1000000');
+			  done();
+		  })
+	  });
+	  it('should not be possible to call member functions without matching arguments', function() {
+		  var test = new root.TString("test");
+		  (function() {
+			  test.Data(true);
+		  }).should.throw();
+	  });
   });
   describe('parameter types', function() {
 	  it('should be possible to pass objects', function() {

@@ -64,6 +64,16 @@ describe('Objects', function() {
 		  var testSring = new root.TString("test");
 		  testSring.Data().should.equal("test");
 	  });
+	  it('should not be possible to create a new TString without the new operator', function(){
+		 (function() {
+			 var testSring = root.TString("test");
+		 }).should.throw();
+	 });
+	 it('should not be possible to create a new TString without passing matching arguments', function(){
+		(function() {
+			var testSring = root.TString(true);
+		}).should.throw();
+	});
 	  it('should be possible to create a new TString asynchronously', function(done){
 		  var asyncBarriere = false;
 		  new root.TString("test", function(testString) {
