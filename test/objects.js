@@ -59,6 +59,7 @@ describe('Objects', function() {
 		  }
 	  });
   });
+
   describe('Constructor', function() {
 	  it('should be possible to create a new TString', function(){
 		  var testSring = new root.TString("test");
@@ -71,7 +72,7 @@ describe('Objects', function() {
 	 });
 	 it('should not be possible to create a new TString without passing matching arguments', function(){
 		(function() {
-			var testSring = root.TString(true);
+			var testSring = new root.TString(true);
 		}).should.throw();
 	});
 	  it('should be possible to create a new TString asynchronously', function(done){

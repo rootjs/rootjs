@@ -49,6 +49,11 @@ describe('Functions', function() {
 			  test.Data(true);
 		  }).should.throw();
 	  });
+	  it('should not be possible to call static functions without matching arguments', function() {
+		 (function() {
+			 root.TString.LLtoa(64, 2, true, false);
+		 }).should.throw();
+	 });
   });
   describe('parameter types', function() {
 	  it('should be possible to pass objects', function() {
