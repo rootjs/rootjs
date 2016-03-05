@@ -8,8 +8,4 @@ namespace rootJS
 
 	}
 
-	bool PrimitiveProxy::isPrimitive()
-	{
-		return true;
-	}
 }

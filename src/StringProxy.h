@@ -41,13 +41,6 @@ namespace rootJS
 			 */
 			StringProxy(MetaInfo &info, TClass *scope);
 
-			/**
-			 * Check if the type is a boolean type.
-			 *
-			 * @param type the type to be checked
-			 * @return if the type is a string type.
-			 */
-			static bool isString(std::string type);
 
 			~StringProxy();
 

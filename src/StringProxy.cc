@@ -8,11 +8,6 @@ namespace rootJS
 	StringProxy::StringProxy(MetaInfo &info, TClass *scope) : PrimitiveProxy(info, scope)
 	{}
 
-	bool StringProxy::isString(std::string type)
-	{
-		// TODO Why?!
-		return false;
-	}
 
 	StringProxy::~StringProxy()
 	{
