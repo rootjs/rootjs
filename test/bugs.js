@@ -42,11 +42,8 @@ describe('Bugs', function() {
   });
   describe('#59', function() {
 	  it('should be possible to use resolve typedefs and inheritance for parameters', function() {
-		  var functor =  new root.ROOT.Math.Functor1D();
-		  var derivator = new root.ROOT.Math.RichardsonDerivator();
-		  (function() {
-			  derivator.Derivative3(functor, 1, 1);
-		  }).should.not.throw();
+		  var tf1 = new root.TF1("fa1", "sin(x)/x",1,10);
+		  tf1.IsEqual(tf1).should.equal(true);
 	  });
   });
   describe('constants', function() {
