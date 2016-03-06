@@ -29,6 +29,7 @@
 
 namespace rootJS
 {
+	std::map<void*, ObjectProxy*> ObjectProxyFactory::propertyCache;
 
 	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope, ObjectProxy *holder) throw(std::invalid_argument)
 	{
@@ -60,7 +61,7 @@ namespace rootJS
 				}
 
 				MemberInfo memberInfo(*member, info.getAddress());
-				ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(memberInfo, scope);
+				ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(memberInfo, scope, nullptr, true);
 				if(memberProxy == nullptr)
 				{
 					// Delete properties that could not be encapsulated
@@ -78,16 +79,35 @@ namespace rootJS
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope) throw(std::invalid_argument)
 	{
-		return createObjectProxy(info, scope, nullptr);
+		return createObjectProxy(info, scope, nullptr, false);
 	}
 
 	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope, v8::Local<v8::Object> instance) throw(std::invalid_argument)
 	{
-		return createObjectProxy(info, scope, &instance);
+		return createObjectProxy(info, scope, &instance, false);
 	}
 
-	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope,  v8::Local<v8::Object>* instancePtr) throw(std::invalid_argument)
+	ObjectProxy* ObjectProxyFactory::createObjectProxy(MetaInfo &info, TClass *scope,  v8::Local<v8::Object>* instancePtr, bool recursiveCall) throw(std::invalid_argument)
 	{
+		if(recursiveCall)
+		{
+			// check for cyclic references
+			if(info.getAddress() != nullptr && propertyCache[info.getAddress()] != nullptr)
+			{
+				Toolbox::logInfo("Cyclic reference detected.", 1);
+				return propertyCache[info.getAddress()];
+			}
+		}
+		else
+		{
+			// Clear cache for cyclic reference handling
+			propertyCache.clear();
+			if(!propertyCache.empty())
+			{
+				throw std::invalid_argument("Could not clear cash for cyclic reference handling.");
+			}
+		}
+
 		std::string trueTypeName = info.getFullTypeName();
 
 		//Try without resolving the type first:
@@ -121,9 +141,9 @@ namespace rootJS
 		if(type == nullptr)
 		{
 			Toolbox::logInfo(std::string("Resolved Type '" + trueTypeName
-			                 + "' from '" + std::string(info.getName())
-			                 + "' with type '" + std::string(info.getTypeName())
-			                 + "' in scope '" +  ((scope == nullptr) ? "global" : std::string(scope->GetName())) + "' could not be encapsulated."), 1);
+			                             + "' from '" + std::string(info.getName())
+			                             + "' with type '" + std::string(info.getTypeName())
+			                             + "' in scope '" +  ((scope == nullptr) ? "global" : std::string(scope->GetName())) + "' could not be encapsulated."), 1);
 			return nullptr;
 		}
 
@@ -139,6 +159,9 @@ namespace rootJS
 
 		proxy = new ObjectProxy(info, scope);
 		proxy->setProxy(instance);
+
+		propertyCache[proxy->getAddress()] = proxy; // add to cache for cyclic reference detection
+
 		std::map<std::string, ObjectProxy*>* propertyMap = createPropertyMap(info, type, proxy);
 
 		instance->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, proxy);
@@ -182,42 +205,42 @@ namespace rootJS
 	const std::map<std::string, ProxyInitializator> ObjectProxyFactory::primitiveProxyMap
 	{
 
-	    {"int", &NumberProxy::intConstruct
+	    {"int",                &NumberProxy::intConstruct
 	    },
-	    {"unsigned int", &NumberProxy::uintConstruct},
+	    {"unsigned int",       &NumberProxy::uintConstruct},
 
-	    {"double", &NumberProxy::doubleConstruct},
-	    {"long double", &NumberProxy::ldoubleConstruct},
+	    {"double",             &NumberProxy::doubleConstruct},
+	    {"long double",        &NumberProxy::ldoubleConstruct},
 
-	    {"short", &NumberProxy::shortConstruct},
-	    {"unsigned short", &NumberProxy::ushortConstruct},
+	    {"short",              &NumberProxy::shortConstruct},
+	    {"unsigned short",     &NumberProxy::ushortConstruct},
 
-	    {"unsigned char", &NumberProxy::ucharConstruct},
+	    {"unsigned char",      &NumberProxy::ucharConstruct},
 
-	    {"long", &NumberProxy::longConstruct},
-	    {"long long", &NumberProxy::llongConstruct},
+	    {"long",               &NumberProxy::longConstruct},
+	    {"long long",          &NumberProxy::llongConstruct},
 
-	    {"unsigned long", &NumberProxy::ulongConstruct},
+	    {"unsigned long",      &NumberProxy::ulongConstruct},
 	    {"unsigned long long", &NumberProxy::ullongConstruct},
 
-	    {"float", &NumberProxy::floatConstruct},
+	    {"float",              &NumberProxy::floatConstruct},
 
-	    {"char", &StringProxy::singleCharConstruct},
-	    {"char*", &StringProxy::charConstruct},
-	    {"const char*", &StringProxy::charConstruct},
-	    {"char&", &StringProxy::singleCharConstruct},
+	    {"char",               &StringProxy::singleCharConstruct},
+	    {"char*",              &StringProxy::charConstruct},
+	    {"const char*",        &StringProxy::charConstruct},
+	    {"char&",              &StringProxy::singleCharConstruct},
 
-	    {"string", &StringProxy::stringConstruct},	// = std::string
+	    {"string",             &StringProxy::stringConstruct},    // = std::string
 
-	    {"bool", &BooleanProxy::boolConstruct},
+	    {"bool",               &BooleanProxy::boolConstruct},
 
-	    {"void", &VoidPointerProxy::voidConstruct},
+	    {"void",               &VoidPointerProxy::voidConstruct},
 
 	    // Special typedefs
-	    {"Double32_t", &NumberProxy::doubleConstruct},
-	    {"Float16_t", &NumberProxy::floatConstruct},
-	    {"Long64_t", &NumberProxy::llongConstruct},
-	    {"ULong64_t", &NumberProxy::ullongConstruct}
+	    {"Double32_t",         &NumberProxy::doubleConstruct},
+	    {"Float16_t",          &NumberProxy::floatConstruct},
+	    {"Long64_t",           &NumberProxy::llongConstruct},
+	    {"ULong64_t",          &NumberProxy::ullongConstruct}
 
 	};
 
