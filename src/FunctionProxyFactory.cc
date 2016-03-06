@@ -55,8 +55,8 @@ namespace rootJS
 		{"int", {false, INT_MAX, INT_MIN}},
 		{"unsigned int", {false, UINT_MAX, 0}},
 
-		{"double", {true, DBL_MAX, DBL_MIN}},
-		{"long double", {true, LDBL_MAX, LDBL_MIN}},
+		{"double", {true, DBL_MAX, - DBL_MAX}},
+		{"long double", {true, LDBL_MAX, - LDBL_MAX}},
 
 		{"short", {false, SHRT_MAX, SHRT_MIN}},
 		{"unsigned short", {false, USHRT_MAX, 0}},
@@ -68,11 +68,11 @@ namespace rootJS
 		{"unsigned long", {false, ULONG_MAX, 0}},
 		{"unsigned long long", {false, ULLONG_MAX, 0}},
 
-		{"float", {true, FLT_MAX, FLT_MIN}},
+		{"float", {true, FLT_MAX, - FLT_MAX}},
 
-		{"Double32_t", {true, DBL_MAX, DBL_MIN}},
-		{"Float16_t", {true, FLT_MAX, FLT_MIN}},
-		{"Long64_t", {true, LLONG_MAX, LLONG_MIN}},
+		{"Double32_t", {true, DBL_MAX, - DBL_MAX}},
+		{"Float16_t", {true, FLT_MAX, - FLT_MAX}},
+		{"Long64_t", {true, LLONG_MAX, - LLONG_MAX}},
 		{"ULong64_t", {true, ULLONG_MAX, 0}}
 	};
 
