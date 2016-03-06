@@ -135,11 +135,14 @@ namespace rootJS
 		private:
 			static std::map<TFunction*, CallFunc_t*> functions;
 			static std::map<std::string, mappedTypes> typeMap;
+			static std::vector<void*> pointerAlignmentBuffer;
 
 			TInterpreter::CallFuncIFacePtr_t facePtr;
 			TFunction* function;
 			std::vector<void*> buf;
 			std::vector<bool> bufCopied;
+
+			static void *alignPointerCount(void *param, int derefCount);
 
 
 			static void* bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg, bool &copied);

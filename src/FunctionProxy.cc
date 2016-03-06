@@ -55,12 +55,14 @@ namespace rootJS
 		{"char*", mappedTypes::CSTR},
 
 		{"bool", mappedTypes::BOOL},
+		{"Bool_t", mappedTypes::BOOL},
 
 		{"Double32_t", mappedTypes::DOUBLE},
 		{"Float16_t", mappedTypes::FLOAT},
 		{"Long64_t", mappedTypes::LLONG},
 		{"ULong64_t", mappedTypes::ULLONG}
 	};
+	std::vector<void*> FunctionProxy::pointerAlignmentBuffer;
 
 	std::vector<TFunction*> FunctionProxy::getMethodsFromName(TClassRef scope, std::string name)
 	{
@@ -233,9 +235,14 @@ namespace rootJS
 			}
 		}
 
+		for(void *ptr: pointerAlignmentBuffer) {
+			free(ptr);
+		}
+		pointerAlignmentBuffer = std::vector<void*>();
+
 		PointerInfo mode(result, typeName.c_str(), ptrDepth);
 		builder.setResultInfo(mode);
-		
+
 		DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());
 		if(dictFunc != nullptr) {
 			builder.setClass(dictFunc());
@@ -249,9 +256,11 @@ namespace rootJS
 
 	void* FunctionProxy::bufferParam(TMethodArg* arg, v8::Local<v8::Value> originalArg, bool& copied)
 	{
-		TDataType* fullType = Types::getTypeByName(std::string(arg->GetFullTypeName()));
+		std::string fullTypeName = std::string(arg->GetFullTypeName());
+		TDataType* fullType = Types::getTypeByName(fullTypeName);
 		TDataType* type = Types::getTypeByName(std::string(arg->GetTypeName()));
-		if(type == nullptr && fullType == nullptr) {
+		int derefCount = std::count(fullTypeName.begin(), fullTypeName.end(), '*');
+		if(type == nullptr || fullType == nullptr) {
 			//might be an object...
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(arg->GetTypeName());
 			if(dictFunc == nullptr) {
@@ -259,8 +268,9 @@ namespace rootJS
 				return nullptr;
 			}
 			copied = false;
-			std::string fullTypeName(arg->GetFullTypeName());
-			return argToObj(originalArg, std::count(fullTypeName.begin(), fullTypeName.end(), '*'));
+			fullTypeName = std::string(arg->GetFullTypeName());
+
+			return argToObj(originalArg, derefCount);
 		}
 
 		TString typeName = fullType->GetTypeName();
@@ -278,42 +288,58 @@ namespace rootJS
 		}
 
 		copied = false;
+		void *result = nullptr;
 		switch(iterator->second) {
 		case mappedTypes::CSTR:
 			copied = true;
-			return argToCstr(originalArg);
+			result = argToCstr(originalArg);
+			derefCount--;
+			break;
 		case mappedTypes::CHAR:
-			return argToChar(originalArg);
+			result = argToChar(originalArg);
+			break;
 		case mappedTypes::INT:
-			return argToInt(originalArg);
+			result = argToInt(originalArg);
+			break;
 		case mappedTypes::DOUBLE:
-			return argToDouble(originalArg);
+			result = argToDouble(originalArg);
+			break;
 		case mappedTypes::BOOL:
-			return argToBool(originalArg);
+			result = argToBool(originalArg);
+			break;
 		case mappedTypes::FLOAT:
-			return argToFloat(originalArg);
+			result = argToFloat(originalArg);
+			break;
 		case mappedTypes::LDOUBLE:
-			return argToLDouble(originalArg);
+			result = argToLDouble(originalArg);
+			break;
 		case mappedTypes::LLONG:
-			return argToLLong(originalArg);
+			result = argToLLong(originalArg);
+			break;
 		case mappedTypes::LONG:
-			return argToLong(originalArg);
+			result = argToLong(originalArg);
+			break;
 		case mappedTypes::SHORT:
-			return argToShort(originalArg);
+			result = argToShort(originalArg);
+			break;
 		case mappedTypes::UCHAR:
-			return argToUChar(originalArg);
+			result = argToUChar(originalArg);
+			break;
 		case mappedTypes::UINT:
-			return argToUInt(originalArg);
+			result = argToUInt(originalArg);
+			break;
 		case mappedTypes::ULLONG:
-			return argToULLong(originalArg);
+			result = argToULLong(originalArg);
+			break;
 		case mappedTypes::ULONG:
-			return argToULong(originalArg);
+			result = argToULong(originalArg);
+			break;
 		case mappedTypes::USHORT:
-			return argToUShort(originalArg);
+			result = argToUShort(originalArg);
+			break;
 		}
 
-		//TODO: This will explode - huge fireball
-		return nullptr;
+		return alignPointerCount(result, derefCount);
 	}
 
 	char* FunctionProxy::argToCstr(v8::Local<v8::Value> originalArg)
@@ -451,10 +477,7 @@ namespace rootJS
 		ObjectProxy *proxy = (ObjectProxy*)obj->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
 
 		void *result = proxy->getAddress();
-		for(; derefCount < 1; derefCount++) {
-			result = *(void**)result;
-		}
-		return result;
+		return alignPointerCount(result, derefCount - 1);
 	}
 
 
@@ -467,6 +490,19 @@ namespace rootJS
 		} else {
 			return -1;
 		}
+	}
+
+	void *FunctionProxy::alignPointerCount(void *param, int derefCount) {
+		for(; derefCount < 0; derefCount++) {
+			param = *(void**)param;
+		}
+		for(; derefCount > 0; derefCount--) {
+			void **paramBuffer = (void**)malloc(sizeof(void*));
+			*paramBuffer = (void*)&param;
+			param = (void*)paramBuffer;
+			pointerAlignmentBuffer.push_back(paramBuffer);
+		}
+		return param;
 	}
 
 }

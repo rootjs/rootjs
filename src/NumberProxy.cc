@@ -6,12 +6,6 @@
 
 namespace rootJS
 {
-	bool NumberProxy::isNumber(std::string type)
-	{
-		// TODO
-		return false;
-	}
-
 	NumberProxy::NumberProxy(MetaInfo &info, TClass *scope): PrimitiveProxy(info, scope)
 	{}
 

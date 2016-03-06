@@ -11,6 +11,7 @@
 #include <TGlobal.h>
 #include <TClass.h>
 #include <TClassRef.h>
+#include <TClassTable.h>
 #include <TMethodArg.h>
 #include <limits.h>
 #include <float.h>
@@ -23,6 +24,7 @@ namespace rootJS
 		{"char", v8BasicTypes::CHAR},
 
 		{"Bool_t", v8BasicTypes::BOOLEAN},
+		{"bool", v8BasicTypes::BOOLEAN},
 
 		{"int", v8BasicTypes::NUMBER},
 		{"unsigned int", v8BasicTypes::NUMBER},
@@ -53,8 +55,8 @@ namespace rootJS
 		{"int", {false, INT_MAX, INT_MIN}},
 		{"unsigned int", {false, UINT_MAX, 0}},
 
-		{"double", {true, DBL_MAX, DBL_MIN}},
-		{"long double", {true, LDBL_MAX, LDBL_MIN}},
+		{"double", {true, DBL_MAX, - DBL_MAX}},
+		{"long double", {true, LDBL_MAX, - LDBL_MAX}},
 
 		{"short", {false, SHRT_MAX, SHRT_MIN}},
 		{"unsigned short", {false, USHRT_MAX, 0}},
@@ -66,11 +68,11 @@ namespace rootJS
 		{"unsigned long", {false, ULONG_MAX, 0}},
 		{"unsigned long long", {false, ULLONG_MAX, 0}},
 
-		{"float", {true, FLT_MAX, FLT_MIN}},
+		{"float", {true, FLT_MAX, - FLT_MAX}},
 
-		{"Double32_t", {true, DBL_MAX, DBL_MIN}},
-		{"Float16_t", {true, FLT_MAX, FLT_MIN}},
-		{"Long64_t", {true, LLONG_MAX, LLONG_MIN}},
+		{"Double32_t", {true, DBL_MAX, - DBL_MAX}},
+		{"Float16_t", {true, FLT_MAX, - FLT_MAX}},
+		{"Long64_t", {true, LLONG_MAX, - LLONG_MAX}},
 		{"ULong64_t", {true, ULLONG_MAX, 0}}
 	};
 
@@ -204,14 +206,7 @@ namespace rootJS
 					}
 				case v8BasicTypes::BOOLEAN:
 					return Types::isV8Boolean(arg);
-				case v8BasicTypes::ARRAY:
-					//TODO: Check array contents...
-					return false;
-				case v8BasicTypes::OBJECT:
-					//TODO: Check object type
-					return false;
 				default:
-					Toolbox::throwException("Jonas was too lazy to implement this...");
 					return false;
 				}
 			}
@@ -223,7 +218,12 @@ namespace rootJS
 			}
 
 			ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
-			return strcmp(typeName, argProxy->getTypeName()) == 0; // TODO: this will not work
+			DictFuncPtr_t dictFunc = gClassTable->GetDict(argProxy->getTypeName());
+			if(dictFunc == nullptr) {
+				return false;
+			} else {
+				return strcmp(typeName, argProxy->getTypeName()) == 0 || dictFunc()->GetBaseClass(typeName) != nullptr;
+			}
 		}
 
 		return false;
