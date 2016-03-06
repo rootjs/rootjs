@@ -40,6 +40,19 @@ describe('Bugs', function() {
 		  str.Data().should.equal("t");
 	  });
   });
+  describe('#59', function() {
+	  it('should be possible to use resolve typedefs and inheritance for parameters', function() {
+		  var tf1 = new root.TF1("fa1", "sin(x)/x",1,10);
+		  tf1.IsEqual(tf1).should.equal(true);
+      });
+  });
+  describe('#61', function() {
+	  it('parameter 0 should be handled correctly', function() {
+		  (function() {
+			  var tf1 = new root.TF1("fa1", "sin(x)/x",0,10);
+		  }).should.not.throw();
+	  });
+  });
   describe('constants', function() {
 	  it('constants should really be constant!', function() {
 		  (function() {
