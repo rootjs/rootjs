@@ -23,7 +23,7 @@ namespace rootJS
 	{
 		private:
 			static const std::map<std::string, ProxyInitializator> primitiveProxyMap;
-			static std::map<void*, ObjectProxy*> propertyCash;
+			static std::map<void*, ObjectProxy*> propertyCache;
 
 			static ObjectProxy* createObjectProxy(MetaInfo &info, TClass *scope, v8::Local<v8::Object>* instancePtr, bool recursiveCall) throw(std::invalid_argument);
 			static std::map<std::string, ObjectProxy*>* createPropertyMap(MetaInfo &info, TClass *clazz, ObjectProxy *holder) throw(std::invalid_argument);

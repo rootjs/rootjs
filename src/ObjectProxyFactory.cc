@@ -29,7 +29,7 @@
 
 namespace rootJS
 {
-	std::map<void*, ObjectProxy*> ObjectProxyFactory::propertyCash;
+	std::map<void*, ObjectProxy*> ObjectProxyFactory::propertyCache;
 
 	std::map<std::string, ObjectProxy*>* ObjectProxyFactory::createPropertyMap(MetaInfo &info, TClass *scope, ObjectProxy *holder) throw(std::invalid_argument)
 	{
@@ -92,17 +92,17 @@ namespace rootJS
 		if(recursiveCall)
 		{
 			// check for cyclic references
-			if(info.getAddress() != nullptr && propertyCash[info.getAddress()] != nullptr)
+			if(info.getAddress() != nullptr && propertyCache[info.getAddress()] != nullptr)
 			{
 				Toolbox::logInfo("Cyclic reference detected.", 1);
-				return propertyCash[info.getAddress()];
+				return propertyCache[info.getAddress()];
 			}
 		}
 		else
 		{
-			// Clear cash for cyclic reference handling
-			propertyCash.clear();
-			if(!propertyCash.empty())
+			// Clear cache for cyclic reference handling
+			propertyCache.clear();
+			if(!propertyCache.empty())
 			{
 				throw std::invalid_argument("Could not clear cash for cyclic reference handling.");
 			}
@@ -160,7 +160,7 @@ namespace rootJS
 		proxy = new ObjectProxy(info, scope);
 		proxy->setProxy(instance);
 
-		propertyCash[proxy->getAddress()] = proxy; // add to cash for cyclic reference detection
+		propertyCache[proxy->getAddress()] = proxy; // add to cache for cyclic reference detection
 
 		std::map<std::string, ObjectProxy*>* propertyMap = createPropertyMap(info, type, proxy);
 
