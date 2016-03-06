@@ -44,7 +44,7 @@ describe('Bugs', function() {
 	  it('should be possible to use resolve typedefs and inheritance for parameters', function() {
 		  var tf1 = new root.TF1("fa1", "sin(x)/x",1,10);
 		  tf1.IsEqual(tf1).should.equal(true);
-          });
+      });
   });
   describe('#61', function() {
 	  it('parameter 0 should be handled correctly', function() {
