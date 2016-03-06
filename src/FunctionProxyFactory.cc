@@ -23,6 +23,7 @@ namespace rootJS
 		{"char", v8BasicTypes::CHAR},
 
 		{"Bool_t", v8BasicTypes::BOOLEAN},
+		{"bool", v8BasicTypes::BOOLEAN},
 
 		{"int", v8BasicTypes::NUMBER},
 		{"unsigned int", v8BasicTypes::NUMBER},

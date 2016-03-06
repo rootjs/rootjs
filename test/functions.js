@@ -61,5 +61,11 @@ describe('Functions', function() {
 		  var test2 = new root.TString(test);
 		  test2.Data().should.equal("test");
 	  });
+	  it('should be possible to pass booleans', function() {
+		  (function() {
+			  root.TObject.SetObjectStat(false);
+		  }).should.not.throw();
+		  root.TObject.GetObjectStat().should.equal(false);
+	  });
   });
 });
