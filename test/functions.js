@@ -62,10 +62,15 @@ describe('Functions', function() {
 		  test2.Data().should.equal("test");
 	  });
 	  it('should be possible to pass booleans', function() {
+		  var statTrue;
 		  (function() {
-			  root.TObject.SetObjectStat(false);
+			root.TObject.SetObjectStat(true);
+			statTrue = root.TObject.GetObjectStat();
+			root.TObject.SetObjectStat(false);
+
 		  }).should.not.throw();
 		  root.TObject.GetObjectStat().should.equal(false);
+		  statTrue.should.equal(true);
 	  });
   });
 });
