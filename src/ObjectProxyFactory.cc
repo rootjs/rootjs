@@ -104,7 +104,7 @@ namespace rootJS
 			propertyCache.clear();
 			if(!propertyCache.empty())
 			{
-				throw std::invalid_argument("Could not clear cash for cyclic reference handling.");
+				throw std::invalid_argument("Could not clear cache for cyclic reference handling.");
 			}
 		}
 
@@ -133,6 +133,9 @@ namespace rootJS
 		proxy = createEnumProxy(trueTypeName, info, scope);
 		if(proxy != nullptr)
 		{
+			Toolbox::logInfo("Created enum proxy for '" + std::string(info.getName())
+			                 + "' of type '"  + std::string(info.getTypeName())
+			                 + "' in scope '" + ((scope == nullptr) ? "global" : std::string(scope->GetName())) + "'.", 2);
 			return proxy;
 		}
 
