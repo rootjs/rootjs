@@ -260,7 +260,7 @@ namespace rootJS
 		TDataType* fullType = Types::getTypeByName(fullTypeName);
 		TDataType* type = Types::getTypeByName(std::string(arg->GetTypeName()));
 		int derefCount = std::count(fullTypeName.begin(), fullTypeName.end(), '*');
-		if(type == nullptr && fullType == nullptr) {
+		if(type == nullptr || fullType == nullptr) {
 			//might be an object...
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(arg->GetTypeName());
 			if(dictFunc == nullptr) {
