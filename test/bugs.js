@@ -40,6 +40,13 @@ describe('Bugs', function() {
 		  str.Data().should.equal("t");
 	  });
   });
+  describe('#61', function() {
+	  it('parameter 0 should be handled correctly', function() {
+		  (function() {
+			  var tf1 = new root.TF1("fa1", "sin(x)/x",0,10);
+		  }).should.not.throw();
+	  });
+  });
   describe('constants', function() {
 	  it('constants should really be constant!', function() {
 		  (function() {
