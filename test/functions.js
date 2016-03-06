@@ -77,5 +77,15 @@ describe('Functions', function() {
 		  	axis.SetLabelOffset(3.14);
 		  (Math.abs(axis.GetLabelOffset() - 3.14)<0.000001).should.equal(true);
 	  });
+	  it('should be possible to pass unsigned integers', function(){
+		  var obj =new  root.TObject();
+		  var b = obj.TestBit(42);
+		  if(b){
+				obj.ResetBit(42);
+			} else {
+				obj.SetBit(42);
+			}
+		  b.should.not.equal(obj.TestBit(42))
+	  });
   });
 });
