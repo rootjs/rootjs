@@ -25,18 +25,14 @@ namespace rootJS
 			{
 				this->baseAddress = baseAddress;
 			};
-			virtual ~MetaInfo()
-			{}
-			;
+
+			virtual ~MetaInfo() {};
 
 			/**
 			 * Checks if the TObject is global.
 			 * @return If the TObject is global
 			 */
-			virtual bool isGlobal()
-			{
-				return false;
-			};
+			virtual bool isGlobal() = 0;
 
 			/**
 			 * Get the offset. This calls up
@@ -76,10 +72,7 @@ namespace rootJS
 			 * Returns the name of the TObject.
 			 * @return name of the TObject
 			 */
-			virtual const char* getName()
-			{
-				return "undefined";
-			};
+			virtual const char* getName() = 0;
 
 			/**
 			 * Returns the base address of the TObject.

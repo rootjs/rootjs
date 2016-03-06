@@ -59,11 +59,22 @@ describe('Objects', function() {
 		  }
 	  });
   });
+
   describe('Constructor', function() {
 	  it('should be possible to create a new TString', function(){
 		  var testSring = new root.TString("test");
 		  testSring.Data().should.equal("test");
 	  });
+	  it('should not be possible to create a new TString without the new operator', function(){
+		 (function() {
+			 var testSring = root.TString("test");
+		 }).should.throw();
+	 });
+	 it('should not be possible to create a new TString without passing matching arguments', function(){
+		(function() {
+			var testSring = new root.TString(true);
+		}).should.throw();
+	});
 	  it('should be possible to create a new TString asynchronously', function(done){
 		  var asyncBarriere = false;
 		  new root.TString("test", function(testString) {
@@ -97,5 +108,15 @@ describe('Objects', function() {
 			  t1._at(10).should.equal('')
 		  });
 	  });
-  })
+  });
+  describe('static', function()  {
+	  it('should be possible to read static attributes', function() {
+		  root.TApplication.kExit.should.equal(1);
+	  });
+	  it('should not be possible to write static const attributes', function() {
+		  (function() {
+			  root.TApplication.kExit = 2;
+		  }).should.throw();
+	  });
+  });
 });

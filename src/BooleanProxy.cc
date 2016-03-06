@@ -4,17 +4,6 @@
 
 namespace rootJS
 {
-	bool BooleanProxy::isBoolean(std::string type)
-	{
-		if (std::regex_match(type, std::regex("bool"))) {
-			return true;
-		} else if (std::regex_match(type, std::regex("Bool_t"))) {
-			return true;
-		}
-
-		// TODO
-		return false;
-	}
 
 	BooleanProxy::BooleanProxy(MetaInfo &info, TClass *scope) : PrimitiveProxy(info, scope)
 	{

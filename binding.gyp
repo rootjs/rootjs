@@ -1,10 +1,12 @@
 {
 	'variables' : {
-		'root_cflags' :  '<!(root-config --cflags)', 		# compiler flags + includes directory
-		'root_ldflags':  '<!(root-config --ldflags)',		# linker flags
-		'root_incdir' :  '<!(root-config --incdir)', 		# header directory
-		'root_libdir' :  '<!(root-config --libdir)', 		# library directory
-		'root_glibs'  :  '<!(root-config --glibs)'   		# core + graphical library directory
+		'root_cflags' 		:  '<!(root-config --cflags)', 		# compiler flags + includes directory
+		'root_ldflags'		:  '<!(root-config --ldflags)',		# linker flags
+		'root_incdir' 		:  '<!(root-config --incdir)', 		# header directory
+		'root_libdir' 		:  '<!(root-config --libdir)', 		# library directory
+		'root_glibs'  		:  '<!(root-config --glibs)',   		# core + graphical library directory
+		'rootjs_add_cflags'	:  '<!(echo $ROOTJS_ADD_CFLAGS)',
+		'rootjs_add_ldflags':  '<!(echo $ROOTJS_ADD_LDLAGS)'
 	},
 
 	'targets': [
@@ -39,8 +41,8 @@
 			],
 
 			'cflags_cc!'  : [ '-fno-rtti', '-fno-exceptions'],
-			'cflags_cc'   : [ '<@(root_cflags)'],
-			'ldflags_cc'  : [ '<@(root_ldflags)' ],
+			'cflags_cc'   : [ '<@(root_cflags)', '<@(rootjs_add_cflags)'],
+			'ldflags'  : [ '<@(root_ldflags)', '<@(rootjs_add_ldflags)'],
 			'include_dirs': [ '<@(root_incdir)' ], 			# using variable instead of '/usr/include/root'
 			'libraries'   : [ '<@(root_glibs)' ],   		# using variable instead of '/usr/lib/root/libXXX.so'
 

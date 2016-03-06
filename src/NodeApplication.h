@@ -23,11 +23,6 @@ namespace rootJS
 			    const char* acn, Int_t* argc, char** argv);
 
 			/**
-			 * Destructor for NodeApplication
-			 */
-			virtual ~NodeApplication() { }
-
-			/**
 			 * Instamciates a new NdoeApplication and puts it to the right place (gApplicaiton)
 			 */
 			static Bool_t CreateNodeApplication( );

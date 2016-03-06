@@ -55,6 +55,7 @@ namespace rootJS
 		{"char*", mappedTypes::CSTR},
 
 		{"bool", mappedTypes::BOOL},
+		{"Bool_t", mappedTypes::BOOL},
 
 		{"Double32_t", mappedTypes::DOUBLE},
 		{"Float16_t", mappedTypes::FLOAT},
@@ -235,7 +236,7 @@ namespace rootJS
 
 		PointerInfo mode(result, typeName.c_str(), ptrDepth);
 		builder.setResultInfo(mode);
-		
+
 		DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());
 		if(dictFunc != nullptr) {
 			builder.setClass(dictFunc());
