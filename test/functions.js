@@ -72,5 +72,10 @@ describe('Functions', function() {
 		  root.TObject.GetObjectStat().should.equal(false);
 		  statTrue.should.equal(true);
 	  });
+	  it('should be possible to pass floats', function(){
+			var axis = new root.TAxis3D();
+		  	axis.SetLabelOffset(3.14);
+		  (Math.abs(axis.GetLabelOffset() - 3.14)<0.000001).should.equal(true);
+	  });
   });
 });
