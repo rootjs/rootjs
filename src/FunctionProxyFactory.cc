@@ -11,6 +11,7 @@
 #include <TGlobal.h>
 #include <TClass.h>
 #include <TClassRef.h>
+#include <TClassTable.h>
 #include <TMethodArg.h>
 #include <limits.h>
 #include <float.h>
@@ -205,14 +206,7 @@ namespace rootJS
 					}
 				case v8BasicTypes::BOOLEAN:
 					return Types::isV8Boolean(arg);
-				case v8BasicTypes::ARRAY:
-					//TODO: Check array contents...
-					return false;
-				case v8BasicTypes::OBJECT:
-					//TODO: Check object type
-					return false;
 				default:
-					Toolbox::throwException("Jonas was too lazy to implement this...");
 					return false;
 				}
 			}
@@ -224,7 +218,12 @@ namespace rootJS
 			}
 
 			ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
-			return strcmp(typeName, argProxy->getTypeName()) == 0; // TODO: this will not work
+			DictFuncPtr_t dictFunc = gClassTable->GetDict(argProxy->getTypeName());
+			if(dictFunc == nullptr) {
+				return false;
+			} else {
+				return strcmp(typeName, argProxy->getTypeName()) == 0 || dictFunc()->GetBaseClass(typeName) != nullptr;
+			}
 		}
 
 		return false;
