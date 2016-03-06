@@ -3,6 +3,8 @@
 
 #include <RtypesCore.h>
 
+#include <TString.h>
+
 namespace rootJS
 {
 
@@ -17,11 +19,15 @@ namespace rootJS
 			 * The base address of the specific TObject
 			 */
 			void* baseAddress;
+
+			int ptrDepth;
+			void *startAddress;
+			void **ptr;
 		public:
 			/**
 			 * Creates MetaInfo with a specific TObject and its base address
 			 */
-			MetaInfo(void *baseAddress)
+			MetaInfo(void *baseAddress, int ptrDepth = 2): ptrDepth(ptrDepth)
 			{
 				this->baseAddress = baseAddress;
 			};
@@ -89,7 +95,21 @@ namespace rootJS
 			 */
 			virtual void* getAddress()
 			{
-				return (void*)((char*)getBaseAddress() + getOffset());
+				startAddress = (void*)((char*)getBaseAddress() + getOffset());
+
+				if(ptrDepth == 2) {
+					return startAddress;
+				} else if(ptrDepth >= 1) {
+					void* result = &startAddress;
+					for(int i = ptrDepth; i > 1; i--) {
+						result = (void*)(*(void**)result);
+					}
+					return result;
+				} else {
+					ptr = &startAddress;
+
+					return ptr;
+				}
 			};
 
 			/**

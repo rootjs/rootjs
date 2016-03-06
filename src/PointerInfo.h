@@ -12,7 +12,7 @@ namespace rootJS
 	class PointerInfo: public MetaInfo
 	{
 		public:
-			PointerInfo(void* baseAddr, const char* typeName, int ptrDepth = 2);
+			PointerInfo(void* baseAddr, const char* typeName, int ptrDepth = 1);
 			~PointerInfo();
 
 			virtual bool isGlobal()
@@ -43,19 +43,14 @@ namespace rootJS
 
 			virtual PointerInfo* clone()
 			{
-				return new PointerInfo(baseAddress, typeName);
+				return new PointerInfo(baseAddress, typeName, ptrDepth);
 			};
-
-			virtual void* getAddress();
 
 		protected:
 			/**
 			 * Type of the pointer
 			 */
 			char *typeName;
-			int ptrDepth;
-			void **ptr;
-			void ***ptrptr;
 	};
 }
 

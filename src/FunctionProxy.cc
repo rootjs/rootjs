@@ -259,7 +259,10 @@ namespace rootJS
 		std::string fullTypeName = std::string(arg->GetFullTypeName());
 		TDataType* fullType = Types::getTypeByName(fullTypeName);
 		TDataType* type = Types::getTypeByName(std::string(arg->GetTypeName()));
+
 		int derefCount = std::count(fullTypeName.begin(), fullTypeName.end(), '*');
+		derefCount += std::count(fullTypeName.begin(), fullTypeName.end(), '&');
+
 		if(type == nullptr || fullType == nullptr) {
 			//might be an object...
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(arg->GetTypeName());
@@ -476,7 +479,7 @@ namespace rootJS
 
 		ObjectProxy *proxy = (ObjectProxy*)obj->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
 
-		void *result = proxy->getAddress();
+		void *result = *(void**)proxy->getAddress();
 		return alignPointerCount(result, derefCount - 1);
 	}
 
@@ -493,6 +496,7 @@ namespace rootJS
 	}
 
 	void *FunctionProxy::alignPointerCount(void *param, int derefCount) {
+		Printf("%i", derefCount);
 		for(; derefCount < 0; derefCount++) {
 			param = *(void**)param;
 		}
