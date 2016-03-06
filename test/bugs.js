@@ -40,6 +40,15 @@ describe('Bugs', function() {
 		  str.Data().should.equal("t");
 	  });
   });
+  describe('#59', function() {
+	  it('should be possible to use resolve typedefs and inheritance for parameters', function() {
+		  var functor =  new root.ROOT.Math.Functor1D();
+		  var derivator = new root.ROOT.Math.RichardsonDerivator();
+		  (function() {
+			  derivator.Derivative3(functor, 1, 1);
+		  }).should.not.throw();
+	  });
+  });
   describe('constants', function() {
 	  it('constants should really be constant!', function() {
 		  (function() {
