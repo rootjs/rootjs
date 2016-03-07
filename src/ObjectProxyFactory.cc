@@ -210,8 +210,7 @@ namespace rootJS
 	const std::map<std::string, ProxyInitializator> ObjectProxyFactory::primitiveProxyMap
 	{
 
-	    {"int",                &NumberProxy::intConstruct
-	    },
+	    {"int",                &NumberProxy::intConstruct},
 	    {"unsigned int",       &NumberProxy::uintConstruct},
 
 	    {"double",             &NumberProxy::doubleConstruct},
@@ -235,7 +234,7 @@ namespace rootJS
 	    {"const char*",        &StringProxy::charConstruct},
 	    {"char&",              &StringProxy::singleCharConstruct},
 
-	    {"string",             &StringProxy::stringConstruct},    // = std::string
+	    //{"string",             &StringProxy::stringConstruct},    // = std::string
 
 	    {"bool",               &BooleanProxy::boolConstruct},
 
