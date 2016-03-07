@@ -55,9 +55,11 @@ describe('Bugs', function() {
   });
   describe('#66', function() {
 	  it('should be possible to instantiate std::string', function() {
+		  var test;
 		  (function() {
-			  var test = new root.string("test");
+			  test = new root.string("test");
 		  }).should.not.throw();
+		  test.c_str().should.equal("test");
 	  });
   });
   describe('constants', function() {
