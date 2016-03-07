@@ -40,6 +40,17 @@ describe('Bugs', function() {
 		  str.Data().should.equal("t");
 	  });
   });
+  describe('#56', function() {
+	 it('should be possible to handle functionpointers as return values', function() {
+		var dictFunc = root.TClassTable.GetDict(root.TClassTable.At(0));
+		(function() {
+			dictFunc().Dump();
+		}).should.not.throw();
+		(function() {
+			dictFunc.Dump();
+		}).should.throw();
+	 });
+  });
   describe('#59', function() {
 	  it('should be possible to use resolve typedefs and inheritance for parameters', function() {
 		  var tf1 = new root.TF1("fa1", "sin(x)/x",1,10);
