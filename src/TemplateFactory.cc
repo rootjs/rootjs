@@ -226,8 +226,12 @@ namespace rootJS
 		return nspace;
 	}
 
-	v8::Local<v8::Object> TemplateFactory::initializeEnum(TEnum *eNum) throw(std::invalid_argument)
+	v8::Local<v8::Object> TemplateFactory::encapsulateEnum(TEnum *eNum) throw(std::invalid_argument)
 	{
+		if(eNum == nullptr || !eNum->IsValid()) {
+			throw std::invalid_argument("Specified TEnum is null or not loaded.");
+		}
+
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		v8::EscapableHandleScope handle_scope(isolate);
 
@@ -522,7 +526,7 @@ namespace rootJS
 			}
 
 			// can not use eNum->Property() & kIsPublic
-			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) initializeEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) encapsulateEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
 			tmplt->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
 		}
 
@@ -542,7 +546,7 @@ namespace rootJS
 			}
 
 			// can not use eNum->Property() & kIsPublic
-			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) initializeEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) encapsulateEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
 			tmplt->SetNativeDataProperty(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
 		}
 
