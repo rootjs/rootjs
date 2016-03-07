@@ -31,12 +31,6 @@ namespace rootJS
 	std::map<std::string, v8::Persistent<v8::FunctionTemplate>> TemplateFactory::classTemplates;
 	std::map<std::string, v8::Persistent<v8::FunctionTemplate>> TemplateFactory::structTemplates;
 
-	TemplateFactory::TemplateFactory()
-	{}
-
-	TemplateFactory::~TemplateFactory()
-	{}
-
 	v8::Local<v8::Object> TemplateFactory::getInstance(TClass *clazz) throw(std::invalid_argument)
 	{
 		if(!isValid(clazz))
