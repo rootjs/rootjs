@@ -271,6 +271,12 @@ namespace rootJS
 			return;
 		}
 
+		if(clazz->Property() & kIsAbstract) {
+			info.GetReturnValue().Set(v8::Undefined(isolate));
+			Toolbox::throwException("This class is abstract.");
+			return;
+		}
+
 		v8::Local<v8::Function> callback;
 		v8::Local<v8::Array> args = getInfoArgs(&callback, info);
 
