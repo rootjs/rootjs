@@ -73,6 +73,31 @@ describe('enums', function() {
         root.kCoffee.should.equal(old);
      });
 
+     it('should not be possible to assign an encapsulated object of different type to kCoffee', function() {
+        var old = root.kCoffee;
+
+        (function() {
+         root.kCoffee = new root.TString("asdf");
+       }).should.throw();
+
+        root.kCoffee.should.equal(old);
+     });
+
+     it('should not be possible to assign an object of different type to kCoffee', function() {
+        var old = root.kCoffee;
+
+        function dummy(name) {
+          this.name = name;
+        }
+        var obj = new dummy("test");
+
+        (function() {
+         root.kCoffee = obj;
+       }).should.throw();
+
+        root.kCoffee.should.equal(old);
+     });
+
      it('should not be possible to assign a number not present in EColorPalette to kCoffee', function() {
         var old = root.kCoffee;
 
