@@ -129,6 +129,8 @@ function getValidConstructorParams(name, classRef, reflectionName) {
 
 describe('Coverage', function() {
 	it('Should be possible to call the constructor of every class', function() {
+	 	this.timeout(10000000);
+		global.gc();
 		var workingCount = 0;
 		var allCount = root.gClassTable.Classes();
 		var errors = {};
@@ -166,5 +168,7 @@ describe('Coverage', function() {
 		}
 
 		console.warn(workingCount + ' constructors of ' + allCount + ' available classes have been called', errors);
+		instanceCache = {}; //Destructors :)
+		global.gc();
 	});
 });
