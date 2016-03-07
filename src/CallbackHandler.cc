@@ -25,20 +25,35 @@ namespace rootJS
 
 	void CallbackHandler::globalGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
 	{
-		ObjectProxy* proxy = globalObjectMap[std::string(*v8::String::Utf8Value(property->ToString()))];
-		if(proxy)
+		std::string propertyName = Toolbox::Stringv8toStd(property);
+
+		if(globalObjectMap.find(propertyName) == globalObjectMap.end())
 		{
-			info.GetReturnValue().Set(proxy->get());
+			info.GetReturnValue().Set(v8::Undefined(v8::Isolate::GetCurrent()));
+			Toolbox::throwException("Property '" + propertyName + "' not found.");
+			return;
 		}
+
+		info.GetReturnValue().Set(globalObjectMap[propertyName]->get());
 	}
 
 	void CallbackHandler::globalSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
 	{
-		ObjectProxy* proxy = globalObjectMap[std::string(*v8::String::Utf8Value(property->ToString()))];
-		if(proxy)
+		std::string propertyName = Toolbox::Stringv8toStd(property);
+
+		if(globalObjectMap.find(propertyName) == globalObjectMap.end())
 		{
-			proxy->setValue(value);
+			Toolbox::throwException("Property '" + propertyName + "' not found.");
+			return;
 		}
+
+		if(globalObjectMap[propertyName]->isConst())
+		{
+			Toolbox::throwException("Property '" + propertyName + "' is a constant. Its value may not be changed.");
+			return;
+		}
+
+		globalObjectMap[propertyName]->setValue(value);
 	}
 
 	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
@@ -79,7 +94,8 @@ namespace rootJS
 			if(builder.isValid())
 			{
 				ObjectProxy *resultProxy = builder.createObjectProxy();
-				if(resultProxy) {
+				if(resultProxy)
+				{
 					if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
 					{
 						info.GetReturnValue().Set(resultProxy->get());
@@ -200,9 +216,11 @@ namespace rootJS
 			proxy->call(nullptr, builder);
 			delete proxy;
 
-			if(builder.isValid()) {
+			if(builder.isValid())
+			{
 				ObjectProxy *resultProxy = builder.createObjectProxy();
-				if(resultProxy) {
+				if(resultProxy)
+				{
 					if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
 					{
 						info.GetReturnValue().Set(resultProxy->get());
@@ -299,7 +317,8 @@ namespace rootJS
 				return;
 			}
 			ObjectProxy *proxy = builder.createObjectProxy();
-			if(proxy) {
+			if(proxy)
+			{
 				info.GetReturnValue().Set(proxy->getWeakPeristent());
 			}
 			return;
@@ -437,7 +456,8 @@ namespace rootJS
 			if(builder.isValid())
 			{
 				ObjectProxy *resultProxy = builder.createObjectProxy();
-				if(resultProxy) {
+				if(resultProxy)
+				{
 					if(Types::isV8Primitive(resultProxy->get()) || resultProxy->isPrimitive())
 					{
 						info.GetReturnValue().Set(resultProxy->get());
@@ -479,7 +499,8 @@ namespace rootJS
 		std::vector<ObjectProxyBuilder> resultVector;
 		ObjectProxyBuilder *builder = new ObjectProxyBuilder();
 		builder->bindAllocatedMemory(builder);
-		if(asyncCallParam->instance != nullptr) {
+		if(asyncCallParam->instance != nullptr)
+		{
 			builder->setBaseInstance(*(asyncCallParam->instance));
 		}
 
@@ -531,7 +552,7 @@ namespace rootJS
 
 	TClass* CallbackHandler::resolveCallbackScope(v8::Local<v8::Value> data, bool allowNull) throw(std::invalid_argument)
 	{
-		std::string scopeName = toString(data);
+		std::string scopeName = Toolbox::Stringv8toStd(data->ToString());
 		std::size_t idx = scopeName.find_last_of(CALLBACK_DATA_DELIMITER);
 
 		DictFuncPtr_t dictPtr = nullptr;
@@ -573,7 +594,7 @@ namespace rootJS
 
 	std::string CallbackHandler::resolveCallbackName(v8::Local<v8::Value> data) throw(std::invalid_argument)
 	{
-		std::string functionName = toString(data);
+		std::string functionName = Toolbox::Stringv8toStd(data->ToString());
 		std::size_t idx = functionName.find_last_of(CALLBACK_DATA_DELIMITER);
 
 		if(idx != std::string::npos)
@@ -582,11 +603,6 @@ namespace rootJS
 		}
 
 		return functionName;
-	}
-
-	std::string CallbackHandler::toString(v8::Local<v8::Value> data) throw(std::invalid_argument)
-	{
-		return std::string(*v8::String::Utf8Value(data->ToString()));
 	}
 
 	v8::Local<v8::Array> CallbackHandler::getInfoArgs(v8::Local<v8::Function> *callback, v8::FunctionCallbackInfo<v8::Value> const& info)

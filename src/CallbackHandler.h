@@ -247,8 +247,6 @@ namespace rootJS
 			static TClass* resolveCallbackScope(v8::Local<v8::Value> data, bool allowNull) throw(std::invalid_argument);
 			static std::string resolveCallbackName(v8::Local<v8::Value> data) throw(std::invalid_argument);
 
-			static std::string toString(v8::Local<v8::Value> data) throw(std::invalid_argument);
-
 			static void asyncMemberCall(AsyncRunner *runner, void *param);
 	};
 }
