@@ -8,6 +8,7 @@ var instanceCache = { //Also blacklist
 	TGraphDelaunay2D: false, //Needs a valid 2d graph, segfaults without
 	THnSparseArrayChunk: false, //Doc: "don't use directly.    "
 	TROOT: false, //Simply not allowed (new is privte)
+	TGuiBuilder: false, //Does not work headless (Jenkins)
 	'TStreamerInfoActions::TConfiguredAction': false //Would be instantiated with a malformed TConfigureAction and therefore crash
 };
 
