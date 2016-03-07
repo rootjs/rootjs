@@ -49,6 +49,7 @@ namespace rootJS
 			void exposeROOT();
 			void exposeHierarchy(TClass*,v8::Local<v8::Object>) throw(std::invalid_argument);
 			void exposeGlobals() throw(std::invalid_argument);
+			void exposeGlobalEnums() throw(std::invalid_argument);
 			void exposeGlobalFunctions() throw(std::invalid_argument);
 			void exposeClasses() throw(std::invalid_argument);
 			void refreshExports();

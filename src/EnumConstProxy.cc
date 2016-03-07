@@ -61,6 +61,7 @@ namespace rootJS
 			}
 			else
 			{
+				/*
 				// check if both proxies belong to a corporate enum
 				std::string typeA(getTypeName());
 				std::string typeB(proxy->getTypeName());
@@ -78,6 +79,9 @@ namespace rootJS
 					Toolbox::throwException("Invalid types. Can not assign value of type '" + typeB + "' to a '" + typeA + "'.");
 					return;
 				}
+				*/
+				Toolbox::throwException("Unexpected type.");
+				return;
 			}
 		}
 		else

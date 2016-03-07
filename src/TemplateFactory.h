@@ -17,15 +17,13 @@ namespace rootJS
 	class TemplateFactory
 	{
 		public:
-			virtual ~TemplateFactory();
-
 			/**
 			 * Finds out the type of the given TClass and calls the correct member function
 			 * to create a v8 template of it, then returns the template.
 			 *
 			 * @param *clazz Pointer to the TClass to be converted to a v8 template.
 			 *
-			 * @return The generated v8 template
+			 * @return The generated v8 instance
 			 */
 			static v8::Local<v8::Object> getInstance(TClass *clazz) throw(std::invalid_argument);
 
@@ -38,6 +36,15 @@ namespace rootJS
 			 * @return The v8 constructor for the given TClass
 			 */
 			static v8::Local<v8::Function> getConstructor(TClass *clazz) throw(std::invalid_argument);
+
+			/**
+			 * Encapsulate the specified TEnum.
+			 *
+			 * @param eNum the enum to encapsulate
+			 *
+			 * @return the encapsulated enum object
+			 */
+			static v8::Local<v8::Object> encapsulateEnum(TEnum *eNum) throw(std::invalid_argument);
 
 		private:
 			static std::map<std::string, v8::Persistent<v8::FunctionTemplate>> classTemplates;
@@ -53,7 +60,6 @@ namespace rootJS
 			static v8::Local<v8::ObjectTemplate> createNamespaceTemplate(TClass *clazz) throw(std::invalid_argument);
 			static v8::Local<v8::Object> initializeNamespace(TClass *clazz) throw(std::invalid_argument);
 
-			static v8::Local<v8::Object> initializeEnum(TEnum *eNum) throw(std::invalid_argument);
 			static v8::Local<v8::ObjectTemplate> createEnumTemplate(TEnum *eNum) throw(std::invalid_argument);
 
 			static v8::Local<v8::ObjectTemplate> createArrayTemplate(TClass *clazz) throw(std::invalid_argument);

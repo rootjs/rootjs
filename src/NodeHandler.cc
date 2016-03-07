@@ -2,13 +2,16 @@
 
 #include "NodeApplication.h"
 #include "GlobalInfo.h"
+#include "EnumInfo.h"
 #include "Toolbox.h"
 #include "Types.h"
-#include <iostream>
+
+#include <queue>
+
 #include <TROOT.h>
+#include <TEnum.h>
 #include <TClassTable.h>
 #include <TSystem.h>
-#include <queue>
 
 namespace rootJS
 {
@@ -59,6 +62,7 @@ namespace rootJS
 		try
 		{
 			exposeGlobals();
+			exposeGlobalEnums();
 			exposeGlobalFunctions();
 			exposeClasses();
 			exposeInterfaceFunctions();
@@ -99,6 +103,36 @@ namespace rootJS
 				exportsLocal->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()),
 				                          CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
 			}
+		}
+	}
+
+	void NodeHandler::exposeGlobalEnums() throw (std::invalid_argument)
+	{
+		TCollection *enums = gROOT->GetListOfEnums(kTRUE);
+		TIter next(enums);
+		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(), exportPersistent);
+
+		while (TEnum *eNum = (TEnum*) next())
+		{
+			// skip non global enums
+			if(eNum->GetClass() != nullptr)
+			{
+				continue;
+			}
+
+			if(!eNum->IsValid())
+			{
+				Toolbox::logInfo("Invalid enum found.", 1);
+				continue;
+			}
+
+			if(exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName())))
+			{
+				continue;
+			}
+
+			CallbackHandler::registerGlobalObject(eNum->GetName(), (ObjectProxy*) TemplateFactory::encapsulateEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			exportsLocal->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
 		}
 	}
 
@@ -162,13 +196,13 @@ namespace rootJS
 			{
 				if ((clazz->Property() & kIsClass))
 				{
-					Toolbox::logInfo(std::string("loading class ").append(clazz->GetName()),2);
+					Toolbox::logInfo(std::string("loading class ").append(clazz->GetName()), 2);
 					exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), clazz->GetName()), TemplateFactory::getConstructor(clazz));
 					continue;
 				}
 				if((clazz->Property() & kIsNamespace))
 				{
-					Toolbox::logInfo(std::string("loading namespace ").append(clazz->GetName()),2);
+					Toolbox::logInfo(std::string("loading namespace ").append(clazz->GetName()), 2);
 					exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName()),TemplateFactory::getInstance(clazz));
 					continue;
 				}
