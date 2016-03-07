@@ -88,7 +88,10 @@ namespace rootJS
 				continue;
 			}
 
-			GlobalInfo info(*global);
+			std::string fullTypeName(global->GetFullTypeName());
+			int derefCount = std::count(fullTypeName.begin(), fullTypeName.end(), '*');
+
+			GlobalInfo info(*global, derefCount + 2);
 			ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, nullptr);
 			if (proxy != nullptr)
 			{

@@ -6,12 +6,12 @@ namespace rootJS
 	EnumConstInfo::EnumConstInfo(const  TEnumConstant& type) : EnumConstInfo(type, false)
 	{}
 
-	EnumConstInfo::EnumConstInfo(const  TEnumConstant& type, bool isConst) : MetaInfo(nullptr), type(type), mIsConst(isConst)
+	EnumConstInfo::EnumConstInfo(const  TEnumConstant& type, bool isConst) : MetaInfo(nullptr, 2), type(type), mIsConst(isConst)
 	{
 		baseAddress = type.GetAddress();
 	}
 
-	EnumConstInfo::EnumConstInfo(const EnumConstInfo & info) : MetaInfo(info.baseAddress), type(info.type), mIsConst(info.mIsConst)
+	EnumConstInfo::EnumConstInfo(const EnumConstInfo & info) : MetaInfo(info.baseAddress, 2), type(info.type), mIsConst(info.mIsConst)
 	{
 	}
 
@@ -21,6 +21,7 @@ namespace rootJS
 		this->baseAddress = info.baseAddress;
 		this->type = info.type;
 		this->pseudoConst = info.pseudoConst;
+		this->ptrDepth = info.ptrDepth;
 
 		return *this;
 	} */

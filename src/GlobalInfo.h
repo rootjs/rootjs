@@ -15,7 +15,7 @@ namespace rootJS
 	{
 		public:
 
-			GlobalInfo(const TGlobal & type);
+			GlobalInfo(const TGlobal & type, int ptrDepth);
 			~GlobalInfo();
 
 			virtual Long_t GetOffset();

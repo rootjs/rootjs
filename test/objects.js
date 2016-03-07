@@ -60,7 +60,18 @@ describe('Objects', function() {
 	  });
 
   });
-
+  describe('Attributes', function() {
+	  it('should be possible to read public attributes', function() {
+		  var test = new root.TArrayL(1)
+		  test.fArray.should.equal(0);
+	  });
+	  it('should be possible to write public attributes', function() {
+		  var test = new root.TArrayL(1)
+		  test.fArray.should.equal(0);
+		  test.fArray = 1;
+		  test.fArray.should.equal(1);
+	  });
+  });
   describe('Constructor', function() {
 	  it('should be possible to create a new TString', function(){
 		  var testSring = new root.TString("test");
