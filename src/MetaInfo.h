@@ -3,6 +3,8 @@
 
 #include <RtypesCore.h>
 
+#include "Toolbox.h"
+
 #include <TString.h>
 
 namespace rootJS
@@ -102,6 +104,9 @@ namespace rootJS
 				} else if(ptrDepth > 2) {
 					void* result = startAddress;
 					for(int i = ptrDepth; i > 2; i--) {
+						if(result == nullptr) {
+							throw std::invalid_argument(std::string("This address is a nullpointer: ") + getName());
+						}
 						result = (void*)(*(void**)result);
 					}
 					return result;
