@@ -24,13 +24,13 @@ namespace rootJS
 				TClass *objClass = klass->GetBaseClass("TObject");
 				if(objClass)
 				{
-					TObject *objPtr = *(TObject**)getAddress();
-					klass->Destructor(*(void**)getAddress(), true);
+					TObject *objPtr = (TObject*)getAddress();
+					klass->Destructor(getAddress(), true);
 					objMap.erase(objPtr);
 				}
 				else
 				{
-					dictPtr()->Destructor(*(void**)getAddress(), true);
+					dictPtr()->Destructor(getAddress(), true);
 				}
 			}
 		}
