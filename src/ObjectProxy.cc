@@ -11,27 +11,32 @@ namespace rootJS
 	std::map<TObject*, ObjectProxy*> ObjectProxy::objMap;
 
 	ObjectProxy::ObjectProxy(MetaInfo &info, TClass *scope) : Proxy(info, scope)
-	{
-	}
+	{}
 
 	ObjectProxy::~ObjectProxy()
 	{
-		if(isWeak) {
+		if(isWeak)
+		{
 			DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
-			if(dictPtr != nullptr) {
+			if(dictPtr != nullptr)
+			{
 				TClass *klass = dictPtr();
 				TClass *objClass = klass->GetBaseClass("TObject");
-				if(objClass) {
+				if(objClass)
+				{
 					TObject *objPtr = *(TObject**)getAddress();
 					klass->Destructor(*(void**)getAddress(), true);
 					objMap.erase(objPtr);
-				} else {
+				}
+				else
+				{
 					dictPtr()->Destructor(*(void**)getAddress(), true);
 				}
 			}
 		}
 
-		for(void* ptr : boundMallocs) {
+		for(void* ptr : boundMallocs)
+		{
 			free(ptr);
 		}
 	}
@@ -62,7 +67,14 @@ namespace rootJS
 
 	void ObjectProxy::setValue(v8::Local<v8::Value> value)
 	{
-		return;
+		if(isConst())
+		{
+			Toolbox::throwException("Variable '" + std::string(info->getName()) + "' is constant. Can not assign the specified value.");
+			return;
+		}
+
+		// VERIFYME: just do nothing?
+		Toolbox::logInfo("Direct assignment is not yet supported. Exposed assignment operators may be used instead.", 0);
 	}
 
 	void ObjectProxy::setProxy(v8::Local<v8::Object> proxy)
@@ -109,10 +121,12 @@ namespace rootJS
 	{
 		proxy.SetWeak(this, weakCallback);
 		DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
-		if(dictPtr != nullptr) {
+		if(dictPtr != nullptr)
+		{
 			TClass *klass = dictPtr();
 			TClass *objClass = klass->GetBaseClass("TObject");
-			if(objClass) {
+			if(objClass)
+			{
 				objMap[*(TObject**)getAddress()] = this;
 			}
 		}
@@ -120,13 +134,16 @@ namespace rootJS
 		return proxy;
 	}
 
-	void ObjectProxy::removed() {
+	void ObjectProxy::removed()
+	{
 		isWeak = false;
 		proxy.Reset();
 	}
 
-	void ObjectProxy::rootDesturcted(TObject* obj) {
-		if(objMap.find(obj) != objMap.end()) {
+	void ObjectProxy::rootDesturcted(TObject* obj)
+	{
+		if(objMap.find(obj) != objMap.end())
+		{
 			objMap[obj]->removed();
 			//delete objMap[obj];
 			objMap.erase(obj);
