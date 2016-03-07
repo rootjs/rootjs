@@ -16,6 +16,7 @@ namespace rootJS
 		public:
 			FunctionInfo(const TFunction& type, void* baseAddress);
 			FunctionInfo(const TFunction& type, void* baseAddress, bool isGlobal);
+			FunctionInfo(const FunctionInfo & info);
 			~FunctionInfo();
 
 			virtual Long_t getOffset();

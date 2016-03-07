@@ -1,7 +1,7 @@
 #include "TemplateFactory.h"
 
 #include "ObjectProxy.h"
-#include "NumberProxy.h"
+// #include "NumberProxy.h"
 #include "ObjectProxyFactory.h"
 #include "FunctionProxy.h"
 #include "FunctionProxyFactory.h"
@@ -9,6 +9,7 @@
 #include "PointerInfo.h"
 #include "EnumInfo.h"
 #include "EnumConstInfo.h"
+#include "EnumConstProxy.h"
 #include "Types.h"
 #include "Toolbox.h"
 
@@ -245,8 +246,8 @@ namespace rootJS
 		{
 			if(eConst->IsValid() && (eConst->Property() & kIsEnum))
 			{
-				EnumConstInfo constInfo(*eConst);
-				(*propertyMap)[std::string(eConst->GetName())] = NumberProxy::llongConstruct(constInfo, eNum->GetClass());
+				EnumConstInfo constInfo(*eConst, true);	// make explicitly constant
+				(*propertyMap)[std::string(eConst->GetName())] = new EnumConstProxy(constInfo, eNum->GetClass());
 			}
 		}
 		instance->SetAlignedPointerInInternalField(Toolbox::PropertyMapPtr, propertyMap);
@@ -515,11 +516,12 @@ namespace rootJS
 		while ((eNum = (TEnum*) enumIter()))
 		{
 			if (eNum == nullptr || !eNum->IsValid())
-			{ // assert eNum->GetClass() == clazz
-				Toolbox::logError("Invalid enum found in '" + std::string(clazz->GetName()) + "'.");
+			{
+				Toolbox::logInfo("Invalid enum found in '" + std::string(clazz->GetName()) + "'.", 1);
 				continue;
 			}
 
+			// can not use eNum->Property() & kIsPublic
 			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) initializeEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
 			tmplt->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
 		}
@@ -534,11 +536,12 @@ namespace rootJS
 		while ((eNum = (TEnum*) enumIter()))
 		{
 			if (eNum == nullptr || !eNum->IsValid())
-			{ // assert eNum->GetClass() == clazz
-				Toolbox::logError("Invalid enum found in '" + std::string(clazz->GetName()) + "'.");
+			{
+				Toolbox::logInfo("Invalid enum found in '" + std::string(clazz->GetName()) + "'.", 1);
 				continue;
 			}
 
+			// can not use eNum->Property() & kIsPublic
 			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) initializeEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
 			tmplt->SetNativeDataProperty(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
 		}

@@ -9,6 +9,9 @@ namespace rootJS
 	FunctionInfo::FunctionInfo(const TFunction& type, void* baseAddress, bool isGlobal) : MetaInfo(baseAddress, 2), type(type), mIsGlobal(isGlobal)
 	{}
 
+	FunctionInfo::FunctionInfo(const FunctionInfo & info) : MetaInfo(info.baseAddress), type(info.type), mIsGlobal(info.mIsGlobal)
+	{}
+
 	FunctionInfo::~FunctionInfo()
 	{}
 
@@ -49,6 +52,6 @@ namespace rootJS
 
 	FunctionInfo* FunctionInfo::clone()
 	{
-		return new FunctionInfo(type, baseAddress);
+		return new FunctionInfo(type, baseAddress, mIsGlobal);
 	}
 }

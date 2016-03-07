@@ -3,14 +3,31 @@
 namespace rootJS
 {
 
-	EnumConstInfo::EnumConstInfo(const  TEnumConstant& type) : MetaInfo(nullptr, 2), type(type)
+	EnumConstInfo::EnumConstInfo(const  TEnumConstant& type) : EnumConstInfo(type, false)
+	{}
+
+	EnumConstInfo::EnumConstInfo(const  TEnumConstant& type, bool isConst) : MetaInfo(nullptr, 2), type(type), mIsConst(isConst)
 	{
 		baseAddress = type.GetAddress();
 	}
 
+	EnumConstInfo::EnumConstInfo(const EnumConstInfo & info) : MetaInfo(info.baseAddress, 2), type(info.type), mIsConst(info.mIsConst)
+	{
+	}
+
+	/*
+	EnumConstInfo& EnumConstInfo::operator=(const EnumConstInfo & info)
+	{
+		this->baseAddress = info.baseAddress;
+		this->type = info.type;
+		this->pseudoConst = info.pseudoConst;
+		this->ptrDepth = info.ptrDepth;
+
+		return *this;
+	} */
+
 	EnumConstInfo::~EnumConstInfo()
 	{}
-
 	Long_t EnumConstInfo::GetOffset()
 	{
 		return 0;
@@ -23,7 +40,7 @@ namespace rootJS
 
 	bool EnumConstInfo::isConst()
 	{
-		return true; // (type.Property() & kIsConstant);
+		return (((bool) (type.Property() & kIsConstant)) || mIsConst);
 	}
 
 	bool EnumConstInfo::isStatic()
@@ -48,7 +65,7 @@ namespace rootJS
 
 	EnumConstInfo* EnumConstInfo::clone()
 	{
-		return new EnumConstInfo(type);
+		return new EnumConstInfo(type, mIsConst);
 	};
 
 }
