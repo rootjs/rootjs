@@ -9,7 +9,7 @@ namespace rootJS
 	FunctionInfo::FunctionInfo(const TFunction& type, void* baseAddress, bool isGlobal) : MetaInfo(baseAddress, 2), type(type), mIsGlobal(isGlobal)
 	{}
 
-	FunctionInfo::FunctionInfo(const FunctionInfo & info) : MetaInfo(info.baseAddress), type(info.type), mIsGlobal(info.mIsGlobal)
+	FunctionInfo::FunctionInfo(const FunctionInfo & info) : MetaInfo(info.baseAddress, 2), type(info.type), mIsGlobal(info.mIsGlobal)
 	{}
 
 	FunctionInfo::~FunctionInfo()
