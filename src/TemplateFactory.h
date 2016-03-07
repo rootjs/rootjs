@@ -17,8 +17,6 @@ namespace rootJS
 	class TemplateFactory
 	{
 		public:
-			virtual ~TemplateFactory();
-
 			/**
 			 * Finds out the type of the given TClass and calls the correct member function
 			 * to create a v8 template of it, then returns the template.
