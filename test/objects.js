@@ -58,6 +58,7 @@ describe('Objects', function() {
 			  root.gSystem.Exec("sleep 0.1", cb);
 		  }
 	  });
+
   });
 
   describe('Constructor', function() {

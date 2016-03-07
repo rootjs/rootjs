@@ -13,6 +13,11 @@ namespace rootJS
 		public:
 
 			EnumConstInfo(const TEnumConstant & type);
+			EnumConstInfo(const TEnumConstant & type, bool isConst);
+
+			EnumConstInfo(const EnumConstInfo & info);
+			// EnumConstInfo& operator=(const EnumConstInfo & info);
+
 			~EnumConstInfo();
 
 			virtual Long_t GetOffset();
@@ -30,6 +35,7 @@ namespace rootJS
 		private:
 			/** The type the EnumConstInfo is holding.  */
 			const TEnumConstant &type;
+			const bool mIsConst;
 	};
 
 }
