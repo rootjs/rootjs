@@ -2,7 +2,8 @@
 
 namespace rootJS
 {
-	GlobalInfo::GlobalInfo(const  TGlobal& type) : MetaInfo(nullptr), type(type)
+	GlobalInfo::GlobalInfo(const  TGlobal& type, int ptrDepth):
+	MetaInfo(nullptr, ptrDepth), type(type)
 	{
 		baseAddress = type.GetAddress();
 	}
@@ -48,6 +49,6 @@ namespace rootJS
 
 	GlobalInfo* GlobalInfo::clone()
 	{
-		return new GlobalInfo(type);
+		return new GlobalInfo(type, ptrDepth);
 	};
 }

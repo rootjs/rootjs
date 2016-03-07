@@ -3,6 +3,10 @@
 
 #include <RtypesCore.h>
 
+#include "Toolbox.h"
+
+#include <TString.h>
+
 namespace rootJS
 {
 
@@ -17,11 +21,15 @@ namespace rootJS
 			 * The base address of the specific TObject
 			 */
 			void* baseAddress;
+
+			int ptrDepth;
+			void *startAddress;
+			void **ptr;
 		public:
 			/**
 			 * Creates MetaInfo with a specific TObject and its base address
 			 */
-			MetaInfo(void *baseAddress)
+			MetaInfo(void *baseAddress, int ptrDepth): ptrDepth(ptrDepth)
 			{
 				this->baseAddress = baseAddress;
 			};
@@ -89,7 +97,27 @@ namespace rootJS
 			 */
 			virtual void* getAddress()
 			{
-				return (void*)((char*)getBaseAddress() + getOffset());
+				startAddress = (void*)((char*)getBaseAddress() + getOffset());
+
+				if(ptrDepth == 2) {
+					return startAddress;
+				} else if(ptrDepth > 2) {
+					void* result = startAddress;
+					for(int i = ptrDepth; i > 2; i--) {
+						if(result == nullptr) {
+							throw std::invalid_argument(std::string("This address is a nullpointer: ") + getName());
+						}
+						result = (void*)(*(void**)result);
+					}
+					return result;
+				} else {
+					ptr = &startAddress;
+					if(ptrDepth == 1) {
+						return ptr;
+					} else {
+						return &ptr;
+					}
+				}
 			};
 
 			/**

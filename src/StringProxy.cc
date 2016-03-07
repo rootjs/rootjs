@@ -28,7 +28,7 @@ namespace rootJS
 	{
 		switch(strType) {
 		case StringType::CHAR:
-			return *(char**)getAddress();
+			return (char*)getAddress();
 		case StringType::STRING: {
 			std::string *str = (std::string*)getAddress();
 			return str->c_str();
