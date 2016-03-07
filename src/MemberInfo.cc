@@ -3,7 +3,9 @@
 namespace rootJS
 {
 
-	MemberInfo::MemberInfo(const TDataMember& type, void* baseAddress): MetaInfo(baseAddress), type(type)
+	MemberInfo::MemberInfo(const TDataMember& type, void* baseAddress, int ptrDepth):
+	MetaInfo(baseAddress, ptrDepth),
+	type(type)
 	{}
 
 	MemberInfo::~MemberInfo()
@@ -46,6 +48,6 @@ namespace rootJS
 
 	MemberInfo* MemberInfo::clone()
 	{
-		return new MemberInfo(type, baseAddress);
+		return new MemberInfo(type, baseAddress, ptrDepth);
 	}
 }

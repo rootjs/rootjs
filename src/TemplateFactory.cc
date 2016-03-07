@@ -208,7 +208,10 @@ namespace rootJS
 
 			if(member->Property() & kIsStatic)
 			{
-				MemberInfo info(*member, (void*)(member->GetOffsetCint()));	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
+				std::string fullTypeName(member->GetFullTypeName());
+				int derefCount = std::count(fullTypeName.begin(), fullTypeName.end(), '*');
+
+				MemberInfo info(*member, (void*)(member->GetOffsetCint()), derefCount + 2);	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
 				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
 
 				if(proxy != nullptr)	// don't expose members that could not be encapsulated
@@ -484,7 +487,10 @@ namespace rootJS
 
 			if(member->Property() & kIsStatic)
 			{
-				MemberInfo info(*member, (void*)(member->GetOffsetCint()));	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
+				std::string fullTypeName(member->GetFullTypeName());
+				int derefCount = std::count(fullTypeName.begin(), fullTypeName.end(), '*');
+
+				MemberInfo info(*member, (void*)(member->GetOffsetCint()), derefCount + 2);	// direct cast to void* works because sizeof(void*) equals sizeof(Long_t)
 				ObjectProxy *proxy = ObjectProxyFactory::createObjectProxy(info, clazz);
 
 				if(proxy != nullptr)	// don't expose members that could not be encapsulated

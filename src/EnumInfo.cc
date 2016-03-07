@@ -3,7 +3,7 @@
 namespace rootJS
 {
 
-	EnumInfo::EnumInfo(const  TEnum& type) : MetaInfo(nullptr), type(type)
+	EnumInfo::EnumInfo(const  TEnum& type) : MetaInfo(nullptr, 2), type(type)
 	{}
 
 	EnumInfo::~EnumInfo()

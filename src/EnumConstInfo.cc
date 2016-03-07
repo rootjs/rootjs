@@ -3,7 +3,7 @@
 namespace rootJS
 {
 
-	EnumConstInfo::EnumConstInfo(const  TEnumConstant& type) : MetaInfo(nullptr), type(type)
+	EnumConstInfo::EnumConstInfo(const  TEnumConstant& type) : MetaInfo(nullptr, 2), type(type)
 	{
 		baseAddress = type.GetAddress();
 	}

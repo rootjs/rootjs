@@ -199,13 +199,17 @@ namespace rootJS
 		void *allocated = nullptr;
 
 		std::string returnTypeName(function->GetReturnTypeName());
-		int ptrDepth = std::count(returnTypeName.begin(), returnTypeName.end(), '*');
+		int ptrDepth = std::count(returnTypeName.begin(), returnTypeName.end(), '*') + 1;
+		if(isConstructorCall) {
+			ptrDepth += 1;
+		}
 		std::string typeName = function->GetReturnTypeNormalizedName();
 
 
 		if(!isConstructorCall) {
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(typeName.c_str());
 			if(dictFunc) {
+				ptrDepth += 1;
 				TClass *klass = dictFunc();
 				result = malloc(klass->Size());
 				allocated = result;
@@ -261,7 +265,6 @@ namespace rootJS
 		TDataType* type = Types::getTypeByName(std::string(arg->GetTypeName()));
 
 		int derefCount = std::count(fullTypeName.begin(), fullTypeName.end(), '*');
-		derefCount += std::count(fullTypeName.begin(), fullTypeName.end(), '&');
 
 		if(type == nullptr || fullType == nullptr) {
 			//might be an object...
@@ -479,8 +482,8 @@ namespace rootJS
 
 		ObjectProxy *proxy = (ObjectProxy*)obj->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
 
-		void *result = *(void**)proxy->getAddress();
-		return alignPointerCount(result, derefCount - 1);
+		void *result = proxy->getAddress();
+		return alignPointerCount(result, derefCount);
 	}
 
 
@@ -496,13 +499,12 @@ namespace rootJS
 	}
 
 	void *FunctionProxy::alignPointerCount(void *param, int derefCount) {
-		Printf("%i", derefCount);
 		for(; derefCount < 0; derefCount++) {
 			param = *(void**)param;
 		}
 		for(; derefCount > 0; derefCount--) {
 			void **paramBuffer = (void**)malloc(sizeof(void*));
-			*paramBuffer = (void*)&param;
+			*paramBuffer = param;
 			param = (void*)paramBuffer;
 			pointerAlignmentBuffer.push_back(paramBuffer);
 		}

@@ -27,7 +27,7 @@ namespace rootJS
 			/**
 			 * Creates MetaInfo with a specific TObject and its base address
 			 */
-			MetaInfo(void *baseAddress, int ptrDepth = 2): ptrDepth(ptrDepth)
+			MetaInfo(void *baseAddress, int ptrDepth): ptrDepth(ptrDepth)
 			{
 				this->baseAddress = baseAddress;
 			};
@@ -99,16 +99,19 @@ namespace rootJS
 
 				if(ptrDepth == 2) {
 					return startAddress;
-				} else if(ptrDepth >= 1) {
-					void* result = &startAddress;
-					for(int i = ptrDepth; i > 1; i--) {
+				} else if(ptrDepth > 2) {
+					void* result = startAddress;
+					for(int i = ptrDepth; i > 2; i--) {
 						result = (void*)(*(void**)result);
 					}
 					return result;
 				} else {
 					ptr = &startAddress;
-
-					return ptr;
+					if(ptrDepth == 1) {
+						return ptr;
+					} else {
+						return &ptr;
+					}
 				}
 			};
 

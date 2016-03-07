@@ -66,7 +66,7 @@ describe('Objects', function() {
 		  //This was actually a false positive, fArray is a nullptr :/
 		  test.fArray.should.equal(0);
 	  });
-	  it('should be possible to write public attributes', function() {
+	  xit('should be possible to write public attributes', function() {
 		  var test = new root.TArrayL()
 		  //test.fArray.should.equal(0);
 		  test.fArray = 1;

@@ -432,7 +432,7 @@ namespace rootJS
 		{
 			proxy->prepareCall(args);
 			ObjectProxyBuilder builder;
-			proxy->call(*(void**)holder->getAddress(), builder);
+			proxy->call(holder->getAddress(), builder);
 			delete proxy;
 			if(builder.isValid())
 			{
@@ -465,7 +465,7 @@ namespace rootJS
 
 			asyncCallParam->params = persistentArgs;
 			asyncCallParam->proxy = cloneProxy;
-			asyncCallParam->selfAddress = *(void**)holder->getAddress();
+			asyncCallParam->selfAddress = holder->getAddress();
 			cloneProxy->prepareCall(args);
 			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, persistentCallback);
 			runner->run();

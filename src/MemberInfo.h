@@ -14,7 +14,7 @@ namespace rootJS
 	class MemberInfo : public MetaInfo
 	{
 		public:
-			MemberInfo(const TDataMember &, void* baseAddress);
+			MemberInfo(const TDataMember &, void* baseAddress, int ptrDepth);
 			~MemberInfo();
 
 			virtual Long_t getOffset();

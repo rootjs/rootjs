@@ -59,8 +59,10 @@ namespace rootJS
 					                        + "' of type '" + std::string(member->GetTypeName()) + "'.");
 					continue;
 				}
+				std::string fullTypeName(member->GetFullTypeName());
+				int derefCount = std::count(fullTypeName.begin(), fullTypeName.end(), '*');
 
-				MemberInfo memberInfo(*member, info.getAddress());
+				MemberInfo memberInfo(*member, info.getAddress(), derefCount + 2);
 				ObjectProxy *memberProxy = ObjectProxyFactory::createObjectProxy(memberInfo, scope, nullptr, true);
 				if(memberProxy == nullptr)
 				{

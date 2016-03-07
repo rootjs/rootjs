@@ -1,4 +1,4 @@
-module.exports = require('./build/Release/rootjs.node');
+module.exports = require('./build/Debug/rootjs.node');
 
 var uicallback = function() {
 	module.exports.gSystem.ProcessEvents();
