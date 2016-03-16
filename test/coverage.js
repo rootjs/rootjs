@@ -11,6 +11,7 @@ var instanceCache = { //Also blacklist
 	TGuiBuilder: false, //Does not work headless (Jenkins)
 	'TStreamerInfoActions::TConfiguredAction': false, //Would be instantiated with a malformed TConfigureAction and therefore crash
 	'TRootCanvas': false, //GUI on Jenkins...
+	'TInspectCanvas': false, //Seems to crash randomly on Jenkins
 	'TRedirectOutputGuard': false //just for resuming test on jenkins
 };
 
