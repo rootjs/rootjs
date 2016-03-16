@@ -130,7 +130,7 @@ function getValidConstructorParams(name, classRef, reflectionName) {
 }
 
 
-describe('Coverage', function() {
+xdescribe('Coverage', function() {
 	it('Should be possible to call the constructor of every class', function() {
 	 	this.timeout(10000000);
 		var workingCount = 0;
