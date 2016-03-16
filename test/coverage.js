@@ -10,6 +10,7 @@ var instanceCache = { //Also blacklist
 	TROOT: false, //Simply not allowed (new is privte)
 	TGuiBuilder: false, //Does not work headless (Jenkins)
 	'TStreamerInfoActions::TConfiguredAction': false, //Would be instantiated with a malformed TConfigureAction and therefore crash
+	'TRootCanvas': false, //GUI on Jenkins...
 	'TRedirectOutputGuard': false //just for resuming test on jenkins
 };
 
