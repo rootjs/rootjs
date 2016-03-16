@@ -171,6 +171,5 @@ describe('Coverage', function() {
 
 		console.warn(workingCount + ' constructors of ' + allCount + ' available classes have been called', errors);
 		instanceCache = {}; //Destructors :)
-		global.gc();
 	});
 });
