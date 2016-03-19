@@ -1,9 +1,13 @@
 #include "Types.h"
 
+#include "Toolbox.h"
+
 #include <v8.h>
 
 #include <TROOT.h>
 #include <TString.h>
+#include <TEnum.h>
+#include <TEnumConstant.h>
 
 namespace rootJS
 {
@@ -27,7 +31,11 @@ namespace rootJS
 
 	bool Types::resolveTypeName(MetaInfo &info, std::string &trueType)
 	{
-		std::string stdTypeName(info.getTypeName());
+		return resolveTypeName(info.getTypeName(), trueType);
+	}
+
+	bool Types::resolveTypeName(std::string stdTypeName, std::string &trueType)
+	{
 		TDataType* type = Types::getTypeByName(stdTypeName);
 		if(type == nullptr)
 		{
@@ -43,6 +51,77 @@ namespace rootJS
 		trueType = std::string(typeName.Data());
 		return true;
 	}
+
+	/*
+		bool Types::isDuplicateConstant(MetaInfo &info, TCollection* enumCollection)
+		{
+			if(enumCollection == nullptr)
+			{
+				return false;
+			}
+
+			TEnum* eNum = TEnum::GetEnum(info.getTypeName());
+			if(eNum == nullptr || !eNum->IsValid())
+			{
+				return false;
+			}
+
+			TIter enumIter(enumCollection);
+			TEnum *comp = nullptr;
+			bool found = false;
+			while ((comp = (TEnum*) enumIter()))
+			{
+				if (comp == nullptr || !comp->IsValid())
+				{
+					continue;
+				}
+				else if(eNum == comp)
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if(!found)
+			{
+				return false;
+			}
+
+			TIter eConstIter(eNum->GetConstants());
+			TEnumConstant *eConst = nullptr;
+			std::string varName(info.getName());
+			while ( (eConst = (TEnumConstant*) eConstIter()))
+			{
+				if(!eConst->IsValid() || eConst->GetValue() != *((Long64_t*) info.getAddress()))
+				{
+					continue;
+				}
+
+				if(eConst->GetAddress() == (void*) info.getAddress()) // will not happen
+				{
+					Toolbox::logInfo("equal address of constant '" + std::string(eConst->GetName())
+					                 + "' and member '" + std::string(info.getName())
+					                 + "' in scope '" + std::string(comp->GetQualifiedName()) + "'.", 1);
+					return true;
+				}
+				else if(varName.compare(eConst->GetName()) == 0)
+				{
+					Toolbox::logInfo("equal name of constant '" + std::string(eConst->GetName())
+					                 + "' and member '" + std::string(info.getName())
+					                 + "' in scope '" + std::string(comp->GetQualifiedName()) + "'.", 1);
+					return false; // return true
+				}
+				else
+				{
+					Toolbox::logInfo("equal value of constant '" + std::string(eConst->GetName())
+					                 + "' and member '" + std::string(info.getName())
+					                 + "' in scope '" + std::string(comp->GetQualifiedName()) + "'.", 1);
+				}
+			}
+
+			return false;
+		}
+		*/
 
 	bool Types::isV8Boolean(v8::Local<v8::Value> value)
 	{
