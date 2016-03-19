@@ -1,7 +1,6 @@
 #include "TemplateFactory.h"
 
 #include "ObjectProxy.h"
-// #include "NumberProxy.h"
 #include "ObjectProxyFactory.h"
 #include "FunctionProxy.h"
 #include "FunctionProxyFactory.h"
@@ -14,7 +13,6 @@
 #include "Toolbox.h"
 
 #include <string>
-#include <iostream>
 
 #include <TClassTable.h>
 #include <TMethod.h>
@@ -222,7 +220,8 @@ namespace rootJS
 
 	v8::Local<v8::Object> TemplateFactory::encapsulateEnum(TEnum *eNum) throw(std::invalid_argument)
 	{
-		if(eNum == nullptr || !eNum->IsValid()) {
+		if(eNum == nullptr || !eNum->IsValid())
+		{
 			throw std::invalid_argument("Specified TEnum is null or not loaded.");
 		}
 
