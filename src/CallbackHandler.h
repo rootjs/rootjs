@@ -114,6 +114,8 @@ namespace rootJS
 			 *
 			 */
 			static void staticGetterCallback(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info);
+			static void staticGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+			static v8::Local<v8::Value> staticGetterCallback(v8::Local<v8::String> property, const std::string& info);
 
 			/**
 			 * Gets invoked when an encapsulated static property is attempted to be set. The
@@ -133,6 +135,8 @@ namespace rootJS
 			 *
 			 */
 			static void staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info);
+			static void staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+			static void staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const std::string& info);
 
 			/**
 			 * This method gets invoked when a static method is called. First a method with

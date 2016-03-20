@@ -494,20 +494,25 @@ namespace rootJS
 				if(proxy != nullptr)	// don't expose members that could not be encapsulated
 				{
 					v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
-					Nan::SetAccessor(tmplt->PrototypeTemplate(),
+					#if (NODE_MODULE_VERSION < NODE_0_12_MODULE_VERSION)
+					tmplt->Set(v8::String::NewFromUtf8(isolate, member->GetName()),
+						v8::String::NewFromUtf8("Not supported in node 0.10"),
+						v8::ReadOnly);
+					#else
+					tmplt->SetNativeDataProperty(
 							v8::String::NewFromUtf8(isolate, member->GetName()),
 							CallbackHandler::staticGetterCallback,
 							CallbackHandler::staticSetterCallback,
 							data);
+					#endif
 				}
 			}
-			else
-			{
-				Nan::SetAccessor(instance,
-						v8::String::NewFromUtf8(isolate, member->GetName()),
-						CallbackHandler::memberGetterCallback,
-						CallbackHandler::memberSetterCallback);
-			}
+
+			Nan::SetAccessor(instance,
+					v8::String::NewFromUtf8(isolate, member->GetName()),
+					CallbackHandler::memberGetterCallback,
+					CallbackHandler::memberSetterCallback);
+
 
 		}
 	}
@@ -551,11 +556,17 @@ namespace rootJS
 
 			// can not use eNum->Property() & kIsPublic
 			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) encapsulateEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
-			Nan::SetAccessor(tmplt->PrototypeTemplate(),
-				v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()),
-				CallbackHandler::staticGetterCallback,
-				CallbackHandler::staticSetterCallback,
-				data);
+			#if (NODE_MODULE_VERSION < NODE_0_12_MODULE_VERSION)
+			tmplt->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()),
+				v8::String::NewFromUtf8("Not supported in node < 0.12"),
+				v8::ReadOnly);
+			#else
+			tmplt->SetNativeDataProperty(
+					v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()),
+					CallbackHandler::staticGetterCallback,
+					CallbackHandler::staticSetterCallback,
+					data);
+			#endif
 		}
 
 	}

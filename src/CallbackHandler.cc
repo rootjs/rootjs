@@ -145,24 +145,39 @@ namespace rootJS
 		}
 	}
 
-	void CallbackHandler::staticGetterCallback(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info)
-	{
+	void CallbackHandler::staticGetterCallback(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info) {
 		std::string propertyName(Toolbox::Stringv8toStd(info.Data()->ToString()));
-
-		if(staticObjectMap.find(propertyName) == staticObjectMap.end())
-		{
-			info.GetReturnValue().Set(v8::Undefined(v8::Isolate::GetCurrent()));
-			Toolbox::throwException("Property '" + propertyName + "' not found.");
-			return;
-		}
-
-		info.GetReturnValue().Set(staticObjectMap[propertyName]->get());
+		info.GetReturnValue().Set(staticGetterCallback(property, propertyName));
 	}
 
-	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info)
-	{
+	void CallbackHandler::staticGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info){
 		std::string propertyName(Toolbox::Stringv8toStd(info.Data()->ToString()));
+		info.GetReturnValue().Set(staticGetterCallback(property, propertyName));
+	}
 
+	v8::Local<v8::Value> CallbackHandler::staticGetterCallback(v8::Local<v8::String> property, const std::string& propertyName)
+	{
+		if(staticObjectMap.find(propertyName) == staticObjectMap.end())
+		{
+			Toolbox::throwException("Property '" + propertyName + "' not found.");
+			return v8::Undefined(v8::Isolate::GetCurrent());
+		}
+
+		return staticObjectMap[propertyName]->get();
+	}
+
+	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info) {
+		std::string propertyName(Toolbox::Stringv8toStd(info.Data()->ToString()));
+		staticSetterCallback(property, value, propertyName);
+	}
+
+	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+		std::string propertyName(Toolbox::Stringv8toStd(info.Data()->ToString()));
+		staticSetterCallback(property, value, propertyName);
+	}
+
+	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const std::string& propertyName)
+	{
 		if(staticObjectMap.find(propertyName) == staticObjectMap.end())
 		{
 			Toolbox::throwException("Property '" + propertyName + "' not found.");
