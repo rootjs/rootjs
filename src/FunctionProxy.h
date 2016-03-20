@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include <v8.h>
+#include <nan.h>
 
 #include <TClassRef.h>
 #include <TInterpreter.h>
@@ -83,7 +83,7 @@ namespace rootJS
 			 *
 			 * @param args contains the arguments which shall be validated
 			 * @return an array of proxies for the validated arguments
-			std::vector<ObjectProxy*> validateArgs(v8::FunctionCallbackInfo<v8::Value> args);
+			std::vector<ObjectProxy*> validateArgs(Nan::FunctionCallbackInfo<v8::Value> args);
 
 			**
 			 * Determines which overloaded function is wanted

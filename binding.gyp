@@ -43,7 +43,7 @@
 			'cflags_cc!'  : [ '-fno-rtti', '-fno-exceptions'],
 			'cflags_cc'   : [ '<@(root_cflags)', '<@(rootjs_add_cflags)'],
 			'ldflags'  : [ '<@(root_ldflags)', '<@(rootjs_add_ldflags)'],
-			'include_dirs': [ '<@(root_incdir)' ], 			# using variable instead of '/usr/include/root'
+			'include_dirs': [ '<@(root_incdir)', "<!(node -e \"require('nan')\")" ], 			# using variable instead of '/usr/include/root'
 			'libraries'   : [ '<@(root_glibs)' ],   		# using variable instead of '/usr/lib/root/libXXX.so'
 
 			"conditions": [

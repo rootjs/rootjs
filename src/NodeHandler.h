@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include <node.h>
-#include <v8.h>
+#include <nan.h>
 
 namespace rootJS
 {
@@ -20,7 +20,7 @@ namespace rootJS
 			 * Has the NodeHandler been initialized yet?
 			 */
 			static bool initialized;
-			v8::Persistent<v8::Object> exportPersistent;
+			Nan::Persistent<v8::Object> exportPersistent;
 			/**
 			 * Singleton holder for NodeHandler
 			 */
@@ -75,7 +75,7 @@ namespace rootJS
 			*              the arguments passed in node.js
 			*
 			*/
-			static void loadlibraryCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
+			static void loadlibraryCallback(const Nan::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
 
 			/**
 			* CallbackMethod for user initiated refreshing of the exposed functions
@@ -84,7 +84,7 @@ namespace rootJS
 			*              the arguments passed in node.js (expected are none)
 			*
 			*/
-			static void refreshExportsCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
+			static void refreshExportsCallback(const Nan::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument);
 
 			static NodeHandler* getInstance();
 

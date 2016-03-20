@@ -2,7 +2,7 @@
 
 namespace rootJS
 {
-	AsyncRunner::AsyncRunner(AsyncFunction func, void *param, v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> callback):
+	AsyncRunner::AsyncRunner(AsyncFunction func, void *param, v8::Local<v8::Function> callback):
 		func(func), param(param), callback(callback)
 	{
 

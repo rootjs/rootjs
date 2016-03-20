@@ -5,7 +5,7 @@
 
 #include <map>
 
-#include <v8.h>
+#include <nan.h>
 #include <TDataType.h>
 
 namespace rootJS

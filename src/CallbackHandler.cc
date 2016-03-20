@@ -23,7 +23,7 @@ namespace rootJS
 		globalObjectMap[name] = proxy;
 	}
 
-	void CallbackHandler::globalGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
+	void CallbackHandler::globalGetterCallback(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info)
 	{
 		std::string propertyName = Toolbox::Stringv8toStd(property);
 
@@ -37,7 +37,7 @@ namespace rootJS
 		info.GetReturnValue().Set(globalObjectMap[propertyName]->get());
 	}
 
-	void CallbackHandler::globalSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
+	void CallbackHandler::globalSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info)
 	{
 		std::string propertyName = Toolbox::Stringv8toStd(property);
 
@@ -56,7 +56,7 @@ namespace rootJS
 		globalObjectMap[propertyName]->setValue(value);
 	}
 
-	void CallbackHandler::globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
+	void CallbackHandler::globalFunctionCallback(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
@@ -112,18 +112,17 @@ namespace rootJS
 		else
 		{
 			AsyncCallParam *asyncCallParam = new AsyncCallParam();
-			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), args);
-			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
+			Nan::Persistent<v8::Array> persistentArgs(args);
 
 			/*
 			 * Instead of member calls: we do not need to clone the proxy here because
 			 * it is being created in this callback (not during initialization)
 			 */
-			asyncCallParam->params = persistentArgs;
+			asyncCallParam->params.Reset(persistentArgs);
 			asyncCallParam->proxy = proxy;
 			asyncCallParam->selfAddress = nullptr;
 			proxy->prepareCall(args);
-			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, persistentCallback);
+			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, callback);
 			runner->run();
 		}
 	}
@@ -137,16 +136,16 @@ namespace rootJS
 		if(scope == nullptr || !scope->IsLoaded())
 		{
 			staticObjectMap[name] = proxy;
-			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, name.c_str()));
+			return handle_scope.Escape(Nan::New(name).ToLocalChecked());
 		}
 		else
 		{
 			staticObjectMap[std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + name)] = proxy;
-			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + name).c_str()));
+			return handle_scope.Escape(Nan::New(std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + name)).ToLocalChecked());
 		}
 	}
 
-	void CallbackHandler::staticGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
+	void CallbackHandler::staticGetterCallback(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info)
 	{
 		std::string propertyName(Toolbox::Stringv8toStd(info.Data()->ToString()));
 
@@ -160,7 +159,7 @@ namespace rootJS
 		info.GetReturnValue().Set(staticObjectMap[propertyName]->get());
 	}
 
-	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
+	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info)
 	{
 		std::string propertyName(Toolbox::Stringv8toStd(info.Data()->ToString()));
 
@@ -178,7 +177,7 @@ namespace rootJS
 		staticObjectMap[propertyName]->setValue(value);
 	}
 
-	void CallbackHandler::staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
+	void CallbackHandler::staticFunctionCallback(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
@@ -236,8 +235,7 @@ namespace rootJS
 		else
 		{
 			AsyncCallParam *asyncCallParam = new AsyncCallParam();
-			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), args);
-			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
+			Nan::Persistent<v8::Array> persistentArgs(args);
 
 			/*
 			 * Clone the FunctionProxy because when the same function is called multiple times
@@ -246,17 +244,17 @@ namespace rootJS
 			 */
 			FunctionProxy* cloneProxy = proxy->clone();
 
-			asyncCallParam->params = persistentArgs;
+			asyncCallParam->params.Reset(persistentArgs);
 			asyncCallParam->proxy = cloneProxy;
 			asyncCallParam->selfAddress = nullptr;
 			cloneProxy->prepareCall(args);
-			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, persistentCallback);
+			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, callback);
 			runner->run();
 		}
 	}
 
 
-	void CallbackHandler::ctorCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
+	void CallbackHandler::ctorCallback(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		v8::Isolate* isolate = info.GetIsolate();
 		v8::Local<v8::Object> instance = info.This();
@@ -326,8 +324,7 @@ namespace rootJS
 		else
 		{
 			AsyncCallParam *asyncCallParam = new AsyncCallParam();
-			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), args);
-			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
+			Nan::Persistent<v8::Array> persistentArgs(args);
 
 			/*
 			 * Clone the FunctionProxy because when the same function is called multiple times
@@ -336,18 +333,18 @@ namespace rootJS
 			 */
 			FunctionProxy* cloneProxy = funcProxy->clone();
 
-			asyncCallParam->params = persistentArgs;
+			asyncCallParam->params.Reset(persistentArgs);
 			asyncCallParam->proxy = cloneProxy;
 			asyncCallParam->selfAddress = nullptr;
 			asyncCallParam->construction = true;
 			//asyncCallParam->instance = &instance;
 			cloneProxy->prepareCall(args);
-			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, persistentCallback);
+			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, callback);
 			runner->run();
 		}
 	}
 
-	void CallbackHandler::memberGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info)
+	void CallbackHandler::memberGetterCallback(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info)
 	{
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		v8::Local<v8::Object> instance = info.This();
@@ -372,7 +369,7 @@ namespace rootJS
 		info.GetReturnValue().Set((*propertyMap)[propertyName]->get());
 	}
 
-	void CallbackHandler::memberSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
+	void CallbackHandler::memberSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info)
 	{
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		v8::Local<v8::Object> instance = info.This();
@@ -402,7 +399,7 @@ namespace rootJS
 		(*propertyMap)[propertyName]->setValue(value);
 	}
 
-	void CallbackHandler::memberFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
+	void CallbackHandler::memberFunctionCallback(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		v8::Local<v8::Object> instance = info.This();
@@ -473,8 +470,7 @@ namespace rootJS
 		else
 		{
 			AsyncCallParam *asyncCallParam = new AsyncCallParam();
-			v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> persistentArgs(v8::Isolate::GetCurrent(), args);
-			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> persistentCallback(v8::Isolate::GetCurrent(), callback);
+			Nan::Persistent<v8::Array> persistentArgs(args);
 
 			/*
 			 * Clone the FunctionProxy because when the same function is called multiple times
@@ -483,11 +479,11 @@ namespace rootJS
 			 */
 			FunctionProxy* cloneProxy = proxy->clone();
 
-			asyncCallParam->params = persistentArgs;
+			asyncCallParam->params.Reset(persistentArgs);
 			asyncCallParam->proxy = cloneProxy;
 			asyncCallParam->selfAddress = holder->getAddress();
 			cloneProxy->prepareCall(args);
-			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, persistentCallback);
+			AsyncRunner *runner = new AsyncRunner(&asyncMemberCall, asyncCallParam, callback);
 			runner->run();
 		}
 	}
@@ -521,11 +517,11 @@ namespace rootJS
 
 		if(scope != nullptr && scope->IsLoaded())
 		{
-			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + functionName).c_str()));
+			return handle_scope.Escape(Nan::New(std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + functionName)).ToLocalChecked());
 		}
 		else
 		{
-			return handle_scope.Escape(v8::String::NewFromUtf8(isolate, functionName.c_str()));
+			return handle_scope.Escape(Nan::New(functionName).ToLocalChecked());
 		}
 	}
 
@@ -547,7 +543,7 @@ namespace rootJS
 			className = className.substr(idx+1);
 		}
 
-		return handle_scope.Escape(v8::String::NewFromUtf8(isolate, std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + className).c_str()));
+		return handle_scope.Escape(Nan::New(std::string(scope->GetName() + CALLBACK_DATA_DELIMITER + className)).ToLocalChecked());
 	}
 
 	TClass* CallbackHandler::resolveCallbackScope(v8::Local<v8::Value> data, bool allowNull) throw(std::invalid_argument)
@@ -605,7 +601,7 @@ namespace rootJS
 		return functionName;
 	}
 
-	v8::Local<v8::Array> CallbackHandler::getInfoArgs(v8::Local<v8::Function> *callback, v8::FunctionCallbackInfo<v8::Value> const& info)
+	v8::Local<v8::Array> CallbackHandler::getInfoArgs(v8::Local<v8::Function> *callback, Nan::FunctionCallbackInfo<v8::Value> const& info)
 	{
 		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		v8::EscapableHandleScope handle_scope(isolate);

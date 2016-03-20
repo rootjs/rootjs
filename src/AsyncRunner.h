@@ -4,7 +4,7 @@
 #include "ObjectProxyBuilder.h"
 
 #include <vector>
-#include <v8.h>
+#include <nan.h>
 #include <uv.h>
 
 namespace rootJS
@@ -20,7 +20,7 @@ namespace rootJS
 		private:
 			AsyncFunction func;
 			void *param;
-			v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> callback;
+			Nan::Persistent<v8::Function> callback;
 			std::vector<ObjectProxyBuilder> result;
 
 		public:
@@ -32,7 +32,7 @@ namespace rootJS
 			 * @param callback The callback to be executed in the node thread after the
 			 * 		asynchronous function is finished.
 			 */
-			AsyncRunner(AsyncFunction func, void *param, v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> callback);
+			AsyncRunner(AsyncFunction func, void *param, v8::Local<v8::Function> callback);
 
 			/**
 			 * Runs the function given with the constructor asynchronously.

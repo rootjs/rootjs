@@ -1,6 +1,6 @@
 #include "NumberProxy.h"
 #include "PointerInfo.h"
-#include <v8.h>
+#include <nan.h>
 
 #include "Toolbox.h"
 

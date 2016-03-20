@@ -1,7 +1,7 @@
 #ifndef CALLBACK_HANDLER_H
 #define CALLBACK_HANDLER_H
 
-#include <v8.h>
+#include <nan.h>
 #include <map>
 #include <string>
 
@@ -48,7 +48,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void globalGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+			static void globalGetterCallback(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info);
 
 			/**
 			 * Gets invoked when an encapsulated global property was requested. The function
@@ -69,7 +69,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void globalSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+			static void globalSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info);
 
 
 			/**
@@ -83,7 +83,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void globalFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info);
+			static void globalFunctionCallback(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
 			/**
 			 * 	TODO: fill in description
@@ -113,7 +113,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void staticGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+			static void staticGetterCallback(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info);
 
 			/**
 			 * Gets invoked when an encapsulated static property is attempted to be set. The
@@ -132,7 +132,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+			static void staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info);
 
 			/**
 			 * This method gets invoked when a static method is called. First a method with
@@ -143,7 +143,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void staticFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info);
+			static void staticFunctionCallback(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
 			/**
 			 * 	This callback method may be invoked whenever a JavaScript prototype function of an encapsulated ROOT class was called.
@@ -159,7 +159,7 @@ namespace rootJS
 			 *			the argument information given to this function call callback
 			 *
 			 */
-			static void ctorCallback(const v8::FunctionCallbackInfo<v8::Value>& info);
+			static void ctorCallback(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
 			/**
 			 * This method gets invoked when a constructor function of an encapsulated
@@ -174,7 +174,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void memberGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+			static void memberGetterCallback(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info);
 
 			/**
 			 * Gets invoked when an encapsulated (class) member was requested. The function will not be mapped to a
@@ -192,7 +192,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void memberSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+			static void memberSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info);
 
 			/**
 			 * This method gets invoked when a method is called. First a method with the
@@ -203,7 +203,7 @@ namespace rootJS
 			 *
 			 *
 			 */
-			static void memberFunctionCallback(const v8::FunctionCallbackInfo<v8::Value>& info);
+			static void memberFunctionCallback(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
 			/**
 			 * Encapsulate the callback data for a function.
@@ -232,7 +232,7 @@ namespace rootJS
 
 		private:
 			struct AsyncCallParam {
-				v8::Persistent<v8::Array, v8::CopyablePersistentTraits<v8::Array>> params;
+				Nan::Persistent<v8::Array> params;
 				FunctionProxy* proxy;
 				void* selfAddress;
 				bool construction = false;
@@ -242,7 +242,7 @@ namespace rootJS
 			static std::map<std::string, ObjectProxy*> globalObjectMap;
 			static std::map<std::string, ObjectProxy*> staticObjectMap;
 
-			static v8::Local<v8::Array> getInfoArgs(v8::Local<v8::Function> *callback, v8::FunctionCallbackInfo<v8::Value> const& info);
+			static v8::Local<v8::Array> getInfoArgs(v8::Local<v8::Function> *callback, Nan::FunctionCallbackInfo<v8::Value> const& info);
 
 			static TClass* resolveCallbackScope(v8::Local<v8::Value> data, bool allowNull) throw(std::invalid_argument);
 			static std::string resolveCallbackName(v8::Local<v8::Value> data) throw(std::invalid_argument);

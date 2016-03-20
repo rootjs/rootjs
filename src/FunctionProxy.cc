@@ -15,7 +15,7 @@
 #include <vector>
 #include <assert.h>
 
-#include <v8.h>
+#include <nan.h>
 
 #include <TROOT.h>
 #include <TClassTable.h>

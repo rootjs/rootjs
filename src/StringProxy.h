@@ -4,7 +4,7 @@
 #include "PrimitiveProxy.h"
 
 #include <string>
-#include <v8.h>
+#include <nan.h>
 
 namespace rootJS
 {

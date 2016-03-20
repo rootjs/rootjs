@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <map>
 
-#include <v8.h>
+#include <nan.h>
 
 #include <TGlobal.h>
 #include <TDataMember.h>

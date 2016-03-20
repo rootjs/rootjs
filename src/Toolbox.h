@@ -2,7 +2,7 @@
 #define TOOLBOX_H
 
 #include <string>
-#include <v8.h>
+#include <nan.h>
 
 namespace rootJS
 {

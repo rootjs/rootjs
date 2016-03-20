@@ -41,7 +41,7 @@ namespace rootJS
 		}
 	}
 
-	void ObjectProxy::weakCallback(v8::WeakCallbackData<v8::Object, ObjectProxy> const& data)
+	void ObjectProxy::weakCallback(const Nan::WeakCallbackInfo<ObjectProxy> &data)
 	{
 		ObjectProxy *objectProxy = data.GetParameter();
 		objectProxy->proxy.Reset();
@@ -79,7 +79,7 @@ namespace rootJS
 
 	void ObjectProxy::setProxy(v8::Local<v8::Object> proxy)
 	{
-		this->proxy.Reset(v8::Isolate::GetCurrent(), proxy);
+		this->proxy.Reset(proxy);
 	}
 
 	v8::Local<v8::Object> ObjectProxy::getProxy()
@@ -117,9 +117,9 @@ namespace rootJS
 		boundMallocs.push_back(allocated);
 	}
 
-	v8::Persistent<v8::Object> &ObjectProxy::getWeakPeristent()
+	Nan::Global<v8::Object> &ObjectProxy::getWeakPeristent()
 	{
-		proxy.SetWeak(this, weakCallback);
+		proxy.SetWeak(this, weakCallback, Nan::WeakCallbackType::kParameter);
 		DictFuncPtr_t dictPtr = gClassTable->GetDict(getTypeName());
 		if(dictPtr != nullptr)
 		{

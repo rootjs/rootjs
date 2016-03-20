@@ -28,8 +28,8 @@
 
 namespace rootJS
 {
-	std::map<std::string, v8::Persistent<v8::FunctionTemplate>> TemplateFactory::classTemplates;
-	std::map<std::string, v8::Persistent<v8::FunctionTemplate>> TemplateFactory::structTemplates;
+	std::map<std::string, Nan::Persistent<v8::FunctionTemplate>> TemplateFactory::classTemplates;
+	std::map<std::string, Nan::Persistent<v8::FunctionTemplate>> TemplateFactory::structTemplates;
 
 	v8::Local<v8::Object> TemplateFactory::getInstance(TClass *clazz) throw(std::invalid_argument)
 	{
@@ -177,14 +177,14 @@ namespace rootJS
 					else
 					{
 						v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
-						nspace->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+						nspace->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
 					}
 				}
 				break;
 			default:
 
 				v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
-				nspace->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+				nspace->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
 				break;
 			}
 		}
@@ -212,7 +212,7 @@ namespace rootJS
 				if(proxy != nullptr)	// don't expose members that could not be encapsulated
 				{
 					v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
-					nspace->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+					Nan::SetAccessor(nspace, v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
 				}
 			}
 		}
@@ -272,7 +272,7 @@ namespace rootJS
 		{
 			if(eConst->IsValid() && (eConst->Property() & kIsEnum))
 			{
-				tmplt->SetAccessor(v8::String::NewFromUtf8(isolate, eConst->GetName()), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
+				Nan::SetAccessor(tmplt, v8::String::NewFromUtf8(isolate, eConst->GetName()), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
 			}
 		}
 
@@ -312,14 +312,14 @@ namespace rootJS
 			return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, structTemplates[structName]));
 		}
 
-		v8::Local<v8::FunctionTemplate> tmplt = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
+		v8::Local<v8::FunctionTemplate> tmplt = Nan::New<v8::FunctionTemplate>(CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
 		tmplt->SetClassName(v8::String::NewFromUtf8(isolate, structName.c_str()));
 
 		// create template
 		createInstantiableTemplate(clazz, tmplt);
 
 		// store template in map
-		structTemplates[structName].Reset(isolate, tmplt);
+		structTemplates[structName].Reset(tmplt);
 
 		return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, structTemplates[structName]));
 	}
@@ -352,14 +352,14 @@ namespace rootJS
 			return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]));
 		}
 
-		v8::Local<v8::FunctionTemplate> tmplt = v8::FunctionTemplate::New(isolate, CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
+		v8::Local<v8::FunctionTemplate> tmplt = Nan::New<v8::FunctionTemplate>(CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
 		tmplt->SetClassName(v8::String::NewFromUtf8(isolate, className.c_str()));
 
 		// create template
 		createInstantiableTemplate(clazz, tmplt);
 
 		// store template in map
-		classTemplates[className].Reset(isolate, tmplt);
+		classTemplates[className].Reset(tmplt);
 
 		return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]));
 	}
@@ -444,12 +444,12 @@ namespace rootJS
 						if (property & kIsStatic)
 						{
 							v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
-							tmplt->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+							tmplt->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
 						}
 						else
 						{
 							v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
-							instance->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, data));
+							instance->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), Nan::New<v8::Function>(CallbackHandler::memberFunctionCallback, data));
 						}
 					}
 				}
@@ -459,12 +459,12 @@ namespace rootJS
 				if (property & kIsStatic)
 				{
 					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
-					tmplt->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::staticFunctionCallback, data));
+					tmplt->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
 				}
 				else
 				{
 					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
-					instance->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), v8::Function::New(isolate, CallbackHandler::memberFunctionCallback, data));
+					instance->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), Nan::New<v8::Function>(CallbackHandler::memberFunctionCallback, data));
 				}
 				break;
 			}
@@ -495,12 +495,19 @@ namespace rootJS
 				if(proxy != nullptr)	// don't expose members that could not be encapsulated
 				{
 					v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
-					tmplt->SetNativeDataProperty(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+					Nan::SetAccessor(tmplt->PrototypeTemplate(),
+							v8::String::NewFromUtf8(isolate, member->GetName()),
+							CallbackHandler::staticGetterCallback,
+							CallbackHandler::staticSetterCallback,
+							data);
 				}
 			}
 			else
 			{
-				instance->SetAccessor(v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
+				Nan::SetAccessor(instance,
+						v8::String::NewFromUtf8(isolate, member->GetName()),
+						CallbackHandler::memberGetterCallback,
+						CallbackHandler::memberSetterCallback);
 			}
 
 		}
@@ -521,7 +528,11 @@ namespace rootJS
 
 			// can not use eNum->Property() & kIsPublic
 			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) encapsulateEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
-			tmplt->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+			Nan::SetAccessor(tmplt,
+					v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()),
+					CallbackHandler::staticGetterCallback,
+					CallbackHandler::staticSetterCallback,
+					data);
 		}
 
 	}
@@ -541,7 +552,11 @@ namespace rootJS
 
 			// can not use eNum->Property() & kIsPublic
 			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) encapsulateEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
-			tmplt->SetNativeDataProperty(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+			Nan::SetAccessor(tmplt->PrototypeTemplate(),
+				v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()),
+				CallbackHandler::staticGetterCallback,
+				CallbackHandler::staticSetterCallback,
+				data);
 		}
 
 	}

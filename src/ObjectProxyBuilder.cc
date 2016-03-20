@@ -20,7 +20,7 @@ namespace rootJS {
 
 	ObjectProxyBuilder& ObjectProxyBuilder::operator=(const ObjectProxyBuilder &o) {
 		boundAllocatedMemory = o.boundAllocatedMemory;
-		instance = o.instance;
+		instance.Reset(o.instance);
 
 		if(o.info != nullptr) {
 			this->info = o.info->clone();
@@ -45,7 +45,7 @@ namespace rootJS {
 	}
 
 	void ObjectProxyBuilder::setBaseInstance(v8::Local<v8::Object> instance) {
-		this->instance.Reset(v8::Isolate::GetCurrent(), instance);
+		this->instance.Reset(instance);
 	}
 
 	void ObjectProxyBuilder::setResultInfo(MetaInfo &info) {

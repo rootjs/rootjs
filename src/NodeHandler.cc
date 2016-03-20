@@ -37,7 +37,7 @@ namespace rootJS
 
 	NodeHandler::NodeHandler(v8::Local<v8::Object> exports)
 	{
-		this->exportPersistent.Reset(v8::Isolate::GetCurrent(),exports);
+		this->exportPersistent.Reset(exports);
 		this->exports = exports;
 		initialized = true;
 	}
@@ -78,7 +78,7 @@ namespace rootJS
 	{
 		TCollection *globals = gROOT->GetListOfGlobals(kTRUE);
 		TIter next(globals);
-		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
+		v8::Local<v8::Object> exportsLocal = Nan::New(exportPersistent);
 		while (TGlobal *global = (TGlobal*) next())
 		{
 			if( (!global->IsValid()) || (global->GetAddress() == nullptr))
@@ -87,7 +87,7 @@ namespace rootJS
 				continue;
 			}
 
-			if(exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),global->GetName())))
+			if(exportsLocal->Has(Nan::New(global->GetName()).ToLocalChecked()))
 			{
 				continue;
 			}
@@ -100,8 +100,9 @@ namespace rootJS
 			if (proxy != nullptr)
 			{
 				CallbackHandler::registerGlobalObject(std::string(global->GetName()), proxy);
-				exportsLocal->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), global->GetName()),
-				                          CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
+				Nan::SetAccessor(exportsLocal, Nan::New(global->GetName()).ToLocalChecked(),
+											CallbackHandler::globalGetterCallback,
+											CallbackHandler::globalSetterCallback);
 			}
 		}
 	}
@@ -132,7 +133,9 @@ namespace rootJS
 			}
 
 			CallbackHandler::registerGlobalObject(eNum->GetName(), (ObjectProxy*) TemplateFactory::encapsulateEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
-			exportsLocal->SetAccessor(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()), CallbackHandler::globalGetterCallback, CallbackHandler::globalSetterCallback);
+			Nan::SetAccessor(exportsLocal, Nan::New(eNum->GetName()).ToLocalChecked(),
+										CallbackHandler::globalGetterCallback,
+										CallbackHandler::globalSetterCallback);
 		}
 	}
 
@@ -169,7 +172,7 @@ namespace rootJS
 
 			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(function->GetName(), nullptr);
 			exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), exposeName.c_str()),
-			                  v8::Function::New(v8::Isolate::GetCurrent(), CallbackHandler::globalFunctionCallback, data));
+			                  Nan::New<v8::Function>(CallbackHandler::globalFunctionCallback, data));
 		}
 	}
 
@@ -287,7 +290,7 @@ namespace rootJS
 
 	}
 
-	void NodeHandler::loadlibraryCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument)
+	void NodeHandler::loadlibraryCallback(const Nan::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument)
 	{
 		v8::Local<v8::Value> arg;
 		if(!((info.Length() == 1) && ((arg = info[0])->IsString())))
@@ -303,7 +306,7 @@ namespace rootJS
 		}
 	}
 
-	void NodeHandler::refreshExportsCallback(const v8::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument)
+	void NodeHandler::refreshExportsCallback(const Nan::FunctionCallbackInfo<v8::Value> &info) throw (std::invalid_argument)
 	{
 		if(info.Length() != 0)
 		{
@@ -324,8 +327,8 @@ namespace rootJS
 	{
 		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
 		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"loadlibrary"),
-		                  v8::Function::New(v8::Isolate::GetCurrent(), NodeHandler::loadlibraryCallback));
-		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"refreshExports"),v8::Function::New(v8::Isolate::GetCurrent(),NodeHandler::refreshExportsCallback));
+		                  Nan::New<v8::Function>(NodeHandler::loadlibraryCallback));
+		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"refreshExports"),Nan::New<v8::Function>(NodeHandler::refreshExportsCallback));
 	}
 
 

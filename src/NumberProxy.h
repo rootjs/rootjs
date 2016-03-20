@@ -4,7 +4,7 @@
 #include "ObjectProxy.h"
 #include "PrimitiveProxy.h"
 
-#include <v8.h>
+#include <nan.h>
 #include <string>
 
 #include "TClass.h"

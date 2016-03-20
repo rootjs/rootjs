@@ -6,7 +6,7 @@
 
 #include <vector>
 
-#include <v8.h>
+#include <nan.h>
 
 #include <TClass.h>
 
@@ -80,7 +80,7 @@ namespace rootJS {
 		ObjectProxy *createObjectProxy();
 	private:
 		std::vector<void*> boundAllocatedMemory;
-		v8::Persistent<v8::Object, v8::CopyablePersistentTraits<v8::Object>> instance;
+		Nan::Persistent<v8::Object> instance;
 		MetaInfo *info = nullptr;
 		TClassRef *clazz = nullptr;
 	};

@@ -1,6 +1,6 @@
 #include "Types.h"
 
-#include <v8.h>
+#include <nan.h>
 
 #include <TROOT.h>
 #include <TString.h>

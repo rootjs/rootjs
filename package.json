@@ -28,5 +28,8 @@
   "bugs": {
     "url": "https://github.com/rootjs/rootjs/issues"
   },
-  "homepage": "https://github.com/rootjs/rootjs#readme"
+  "homepage": "https://github.com/rootjs/rootjs#readme",
+  "dependencies": {
+    "nan": "^2.2.0"
+  }
 }
