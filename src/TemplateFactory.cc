@@ -90,15 +90,14 @@ namespace rootJS
 
 	v8::Local<v8::Object> TemplateFactory::initializeNamespace(TClass *clazz) throw(std::invalid_argument)
 	{
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-		v8::EscapableHandleScope handle_scope(isolate);
+		Nan::EscapableHandleScope handle_scope;
 
 		v8::Local<v8::Object> nspace = createNamespaceTemplate(clazz)->NewInstance();
 
 		// populate namespace object
 		PointerInfo info(nullptr, clazz->GetName()); // TODO replace with something like ClassInfo / NSpaceInfo
-		nspace->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, new ObjectProxy(info, clazz));
-		nspace->SetAlignedPointerInInternalField(Toolbox::PropertyMapPtr, new std::map<std::string, ObjectProxy*>()); // there are no non-static members
+		Nan::SetInternalFieldPointer(nspace, Toolbox::ObjectProxyPtr, new ObjectProxy(info, clazz));
+		Nan::SetInternalFieldPointer(nspace, Toolbox::PropertyMapPtr, new std::map<std::string, ObjectProxy*>()); // there are no non-static members
 
 		return handle_scope.Escape(nspace);
 	}
@@ -115,8 +114,7 @@ namespace rootJS
 			throw std::invalid_argument("Specified TClass '" + std::string(clazz->GetName()) + "' is not a namespace.");
 		}
 
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-		v8::Local<v8::ObjectTemplate>  nspace = v8::ObjectTemplate::New(isolate);
+		v8::Local<v8::ObjectTemplate>  nspace = Nan::New<v8::ObjectTemplate>();
 		std::string className(clazz->GetName());
 		nspace->SetInternalFieldCount(Toolbox::INTERNAL_FIELD_COUNT); // each instance stores a map containing the property proxies
 
@@ -175,14 +173,14 @@ namespace rootJS
 					else
 					{
 						v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
-						nspace->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
+						nspace->Set(Nan::New(opNameIt->second.c_str()).ToLocalChecked(), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
 					}
 				}
 				break;
 			default:
 
 				v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
-				nspace->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
+				nspace->Set(Nan::New(methodName.c_str()).ToLocalChecked(), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
 				break;
 			}
 		}
@@ -210,7 +208,7 @@ namespace rootJS
 				if(proxy != nullptr)	// don't expose members that could not be encapsulated
 				{
 					v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
-					Nan::SetAccessor(nspace, v8::String::NewFromUtf8(isolate, member->GetName()), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
+					Nan::SetAccessor(nspace, Nan::New(member->GetName()).ToLocalChecked(), CallbackHandler::staticGetterCallback, CallbackHandler::staticSetterCallback, data);
 				}
 			}
 		}
@@ -225,15 +223,14 @@ namespace rootJS
 			throw std::invalid_argument("Specified TEnum is null or not loaded.");
 		}
 
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-		v8::EscapableHandleScope handle_scope(isolate);
+		Nan::EscapableHandleScope handle_scope;
 
 		v8::Local<v8::Object> instance = createEnumTemplate(eNum)->NewInstance();
 
 		// populate enum object
 		EnumInfo info(*eNum);
 		ObjectProxy *proxy = new ObjectProxy(info, eNum->GetClass());
-		instance->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, proxy);
+		Nan::SetInternalFieldPointer(instance, Toolbox::ObjectProxyPtr, proxy);
 		proxy->setProxy(instance);
 
 		std::map<std::string, ObjectProxy*>* propertyMap = new std::map<std::string, ObjectProxy*>();
@@ -247,7 +244,7 @@ namespace rootJS
 				(*propertyMap)[std::string(eConst->GetName())] = new EnumConstProxy(constInfo, eNum->GetClass());
 			}
 		}
-		instance->SetAlignedPointerInInternalField(Toolbox::PropertyMapPtr, propertyMap);
+		Nan::SetInternalFieldPointer(instance, Toolbox::PropertyMapPtr, propertyMap);
 
 		return handle_scope.Escape(instance);
 	}
@@ -259,9 +256,7 @@ namespace rootJS
 			throw std::invalid_argument("Specified TEnum is null or not loaded.");
 		}
 
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-
-		v8::Local<v8::ObjectTemplate> tmplt = v8::ObjectTemplate::New(isolate);
+		v8::Local<v8::ObjectTemplate> tmplt = Nan::New<v8::ObjectTemplate>();
 		std::string enumName(eNum->GetQualifiedName());
 		tmplt->SetInternalFieldCount(Toolbox::INTERNAL_FIELD_COUNT); // each instance stores a map containing the property proxies
 
@@ -271,7 +266,7 @@ namespace rootJS
 		{
 			if(eConst->IsValid() && (eConst->Property() & kIsEnum))
 			{
-				Nan::SetAccessor(tmplt, v8::String::NewFromUtf8(isolate, eConst->GetName()), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
+				Nan::SetAccessor(tmplt, Nan::New(eConst->GetName()).ToLocalChecked(), CallbackHandler::memberGetterCallback, CallbackHandler::memberSetterCallback);
 			}
 		}
 
@@ -300,19 +295,18 @@ namespace rootJS
 			throw std::invalid_argument("Specified TClass '" + std::string(clazz->GetName()) + "' is not a struct.");
 		}
 
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-		v8::EscapableHandleScope handle_scope(isolate);
+		Nan::EscapableHandleScope handle_scope;
 
 		std::string structName(clazz->GetName());
 
 		// check if template has been created already
 		if (structTemplates.count(structName) && !structTemplates[structName].IsEmpty())
 		{
-			return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, structTemplates[structName]));
+			return handle_scope.Escape(Nan::New(structTemplates[structName]));
 		}
 
 		v8::Local<v8::FunctionTemplate> tmplt = Nan::New<v8::FunctionTemplate>(CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
-		tmplt->SetClassName(v8::String::NewFromUtf8(isolate, structName.c_str()));
+		tmplt->SetClassName(Nan::New(structName.c_str()).ToLocalChecked());
 
 		// create template
 		createInstantiableTemplate(clazz, tmplt);
@@ -320,7 +314,7 @@ namespace rootJS
 		// store template in map
 		structTemplates[structName].Reset(tmplt);
 
-		return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, structTemplates[structName]));
+		return handle_scope.Escape(Nan::New(structTemplates[structName]));
 	}
 
 	v8::Local<v8::FunctionTemplate> TemplateFactory::createClassTemplate(TClass *clazz) throw(std::invalid_argument)
@@ -340,19 +334,18 @@ namespace rootJS
 			throw std::invalid_argument("Specified TClass '" + std::string(clazz->GetName()) + "'is abstract.");
 		}
 
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-		v8::EscapableHandleScope handle_scope(isolate);
+		Nan::EscapableHandleScope handle_scope;
 
 		std::string className(clazz->GetName());
 
 		// check if template has been created already
 		if (classTemplates.count(className) && !classTemplates[className].IsEmpty())
 		{
-			return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]));
+			return handle_scope.Escape(Nan::New(classTemplates[className]));
 		}
 
 		v8::Local<v8::FunctionTemplate> tmplt = Nan::New<v8::FunctionTemplate>(CallbackHandler::ctorCallback, CallbackHandler::createFunctionCallbackData(clazz));
-		tmplt->SetClassName(v8::String::NewFromUtf8(isolate, className.c_str()));
+		tmplt->SetClassName(Nan::New(className.c_str()).ToLocalChecked());
 
 		// create template
 		createInstantiableTemplate(clazz, tmplt);
@@ -360,12 +353,11 @@ namespace rootJS
 		// store template in map
 		classTemplates[className].Reset(tmplt);
 
-		return handle_scope.Escape(v8::Local<v8::FunctionTemplate>::New(isolate, classTemplates[className]));
+		return handle_scope.Escape(Nan::New(classTemplates[className]));
 	}
 
 	void TemplateFactory::createInstantiableTemplate(TClass *clazz, v8::Local<v8::FunctionTemplate> tmplt) throw(std::invalid_argument)
 	{
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		std::string className(clazz->GetName());
 
 		// add static functions and members to the prototype template
@@ -443,12 +435,12 @@ namespace rootJS
 						if (property & kIsStatic)
 						{
 							v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
-							tmplt->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
+							tmplt->Set(Nan::New(opNameIt->second.c_str()).ToLocalChecked(), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
 						}
 						else
 						{
 							v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(method->GetName(), clazz);
-							instance->Set(v8::String::NewFromUtf8(isolate, opNameIt->second.c_str()), Nan::New<v8::Function>(CallbackHandler::memberFunctionCallback, data));
+							instance->Set(Nan::New(opNameIt->second.c_str()).ToLocalChecked(), Nan::New<v8::Function>(CallbackHandler::memberFunctionCallback, data));
 						}
 					}
 				}
@@ -458,12 +450,12 @@ namespace rootJS
 				if (property & kIsStatic)
 				{
 					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
-					tmplt->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
+					tmplt->Set(Nan::New(methodName.c_str()).ToLocalChecked(), Nan::New<v8::Function>(CallbackHandler::staticFunctionCallback, data));
 				}
 				else
 				{
 					v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(methodName, clazz);
-					instance->Set(v8::String::NewFromUtf8(isolate, methodName.c_str()), Nan::New<v8::Function>(CallbackHandler::memberFunctionCallback, data));
+					instance->Set(Nan::New(methodName.c_str()).ToLocalChecked(), Nan::New<v8::Function>(CallbackHandler::memberFunctionCallback, data));
 				}
 				break;
 			}
@@ -495,12 +487,12 @@ namespace rootJS
 				{
 					v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(member->GetName(), clazz, proxy);
 					#if (NODE_MODULE_VERSION < NODE_0_12_MODULE_VERSION)
-					tmplt->Set(v8::String::NewFromUtf8(isolate, member->GetName()),
-						v8::String::NewFromUtf8("Not supported in node 0.10"),
+					tmplt->Set(Nan::New(member->GetName()).ToLocalChecked(),
+						Nan::New("Not supported in node 0.10").ToLocalChecked(),
 						v8::ReadOnly);
 					#else
 					tmplt->SetNativeDataProperty(
-							v8::String::NewFromUtf8(isolate, member->GetName()),
+							Nan::New(member->GetName()).ToLocalChecked(),
 							CallbackHandler::staticGetterCallback,
 							CallbackHandler::staticSetterCallback,
 							data);
@@ -509,7 +501,7 @@ namespace rootJS
 			}
 
 			Nan::SetAccessor(instance,
-					v8::String::NewFromUtf8(isolate, member->GetName()),
+					Nan::New(member->GetName()).ToLocalChecked(),
 					CallbackHandler::memberGetterCallback,
 					CallbackHandler::memberSetterCallback);
 
@@ -531,9 +523,9 @@ namespace rootJS
 			}
 
 			// can not use eNum->Property() & kIsPublic
-			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) encapsulateEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) Nan::GetInternalFieldPointer(encapsulateEnum(eNum), Toolbox::ObjectProxyPtr));
 			Nan::SetAccessor(tmplt,
-					v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()),
+					Nan::New(eNum->GetName()).ToLocalChecked(),
 					CallbackHandler::staticGetterCallback,
 					CallbackHandler::staticSetterCallback,
 					data);
@@ -555,14 +547,14 @@ namespace rootJS
 			}
 
 			// can not use eNum->Property() & kIsPublic
-			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) encapsulateEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			v8::Local<v8::Value> data = CallbackHandler::registerStaticObject(eNum->GetName(), clazz, (ObjectProxy*) Nan::GetInternalFieldPointer(encapsulateEnum(eNum), Toolbox::ObjectProxyPtr));
 			#if (NODE_MODULE_VERSION < NODE_0_12_MODULE_VERSION)
-			tmplt->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()),
-				v8::String::NewFromUtf8("Not supported in node < 0.12"),
+			tmplt->Set(Nan::New(eNum->GetName()).ToLocalChecked(),
+				Nan::New("Not supported in node < 0.12").ToLocalChecked(),
 				v8::ReadOnly);
 			#else
 			tmplt->SetNativeDataProperty(
-					v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName()),
+					Nan::New(eNum->GetName()).ToLocalChecked(),
 					CallbackHandler::staticGetterCallback,
 					CallbackHandler::staticSetterCallback,
 					data);

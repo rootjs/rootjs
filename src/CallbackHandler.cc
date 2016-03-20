@@ -29,7 +29,7 @@ namespace rootJS
 
 		if(globalObjectMap.find(propertyName) == globalObjectMap.end())
 		{
-			info.GetReturnValue().Set(v8::Undefined(v8::Isolate::GetCurrent()));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("Property '" + propertyName + "' not found.");
 			return;
 		}
@@ -58,8 +58,6 @@ namespace rootJS
 
 	void CallbackHandler::globalFunctionCallback(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-
 		std::string name;			// function name
 		TClass *scope = nullptr;	// function scope
 
@@ -70,7 +68,7 @@ namespace rootJS
 		}
 		catch(const std::invalid_argument& e)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException(e.what());
 			return;
 		}
@@ -81,7 +79,7 @@ namespace rootJS
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
 		if(proxy == nullptr)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("No suitable global method named '" + name + "' found for the supplied arguments.");
 			return;
 		}
@@ -130,8 +128,7 @@ namespace rootJS
 
 	v8::Local<v8::Value> CallbackHandler::registerStaticObject(const std::string &name, TClass *scope, ObjectProxy* proxy)
 	{
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-		v8::EscapableHandleScope handle_scope(isolate);
+		Nan::EscapableHandleScope handle_scope;
 
 		if(scope == nullptr || !scope->IsLoaded())
 		{
@@ -150,17 +147,19 @@ namespace rootJS
 		info.GetReturnValue().Set(staticGetterCallback(property, propertyName));
 	}
 
+	#if (NODE_MODULE_VERSION > NODE_0_10_MODULE_VERSION)
 	void CallbackHandler::staticGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info){
 		std::string propertyName(Toolbox::Stringv8toStd(info.Data()->ToString()));
 		info.GetReturnValue().Set(staticGetterCallback(property, propertyName));
 	}
+	#endif
 
 	v8::Local<v8::Value> CallbackHandler::staticGetterCallback(v8::Local<v8::String> property, const std::string& propertyName)
 	{
 		if(staticObjectMap.find(propertyName) == staticObjectMap.end())
 		{
 			Toolbox::throwException("Property '" + propertyName + "' not found.");
-			return v8::Undefined(v8::Isolate::GetCurrent());
+			return Nan::Undefined();
 		}
 
 		return staticObjectMap[propertyName]->get();
@@ -171,10 +170,12 @@ namespace rootJS
 		staticSetterCallback(property, value, propertyName);
 	}
 
+	#if (NODE_MODULE_VERSION > NODE_0_10_MODULE_VERSION)
 	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
 		std::string propertyName(Toolbox::Stringv8toStd(info.Data()->ToString()));
 		staticSetterCallback(property, value, propertyName);
 	}
+	#endif
 
 	void CallbackHandler::staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const std::string& propertyName)
 	{
@@ -194,8 +195,6 @@ namespace rootJS
 
 	void CallbackHandler::staticFunctionCallback(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-
 		std::string name;			// function name
 		TClass *scope = nullptr;	// function scope
 
@@ -206,7 +205,7 @@ namespace rootJS
 		}
 		catch(const std::invalid_argument& e)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException(e.what());
 			return;
 		}
@@ -217,7 +216,7 @@ namespace rootJS
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
 		if(proxy == nullptr)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("No suitable method named '" + name + "' found for the supplied arguments in '" + std::string(scope->GetName()) + "'.");
 			return;
 		}
@@ -271,19 +270,18 @@ namespace rootJS
 
 	void CallbackHandler::ctorCallback(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
-		v8::Isolate* isolate = info.GetIsolate();
 		v8::Local<v8::Object> instance = info.This();
 
 		if (!info.IsConstructCall())
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("Can not call this constructor as plain function. Use the new operator.");
 			return;
 		}
 
 		if(instance->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("Unexpected internal field count.");
 			return;
 		}
@@ -297,13 +295,13 @@ namespace rootJS
 		}
 		catch(const std::invalid_argument& e)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException(e.what());
 			return;
 		}
 
 		if(clazz->Property() & kIsAbstract) {
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("This class is abstract.");
 			return;
 		}
@@ -315,7 +313,7 @@ namespace rootJS
 
 		if(funcProxy == nullptr)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("No suitable constructor found for the supplied arguments. Could not create a new '" + std::string(clazz->GetName()) + "'.");
 			return;
 		}
@@ -331,7 +329,7 @@ namespace rootJS
 
 			if(!builder.isValid())
 			{
-				info.GetReturnValue().Set(v8::Undefined(isolate));
+				info.GetReturnValue().Set(Nan::Undefined());
 				Toolbox::throwException("Constructor call failed. Could not create a new '" + std::string(clazz->GetName()) + "'.");
 				return;
 			}
@@ -367,22 +365,21 @@ namespace rootJS
 
 	void CallbackHandler::memberGetterCallback(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info)
 	{
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		v8::Local<v8::Object> instance = info.This();
 
 		if(instance->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("Unexpected internal field count.");
 			return;
 		}
 
-		std::map<std::string, ObjectProxy*> *propertyMap = (std::map<std::string, ObjectProxy*>*) instance->GetAlignedPointerFromInternalField(Toolbox::PropertyMapPtr);
+		std::map<std::string, ObjectProxy*> *propertyMap = (std::map<std::string, ObjectProxy*>*) Nan::GetInternalFieldPointer(instance, Toolbox::PropertyMapPtr);
 		std::string propertyName(Toolbox::Stringv8toStd(property));
 
 		if(propertyMap->find(propertyName) == propertyMap->end())
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("Property '" + propertyName + "' not found.");
 			return;
 		}
@@ -392,17 +389,16 @@ namespace rootJS
 
 	void CallbackHandler::memberSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info)
 	{
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		v8::Local<v8::Object> instance = info.This();
 
 		if(instance->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("Unexpected internal field count.");
 			return;
 		}
 
-		std::map<std::string, ObjectProxy*> *propertyMap = (std::map<std::string, ObjectProxy*>*) instance->GetAlignedPointerFromInternalField(Toolbox::PropertyMapPtr);
+		std::map<std::string, ObjectProxy*> *propertyMap = (std::map<std::string, ObjectProxy*>*) Nan::GetInternalFieldPointer(instance, Toolbox::PropertyMapPtr);
 		std::string propertyName(Toolbox::Stringv8toStd(property));
 
 		if(propertyMap->find(propertyName) == propertyMap->end())
@@ -422,12 +418,11 @@ namespace rootJS
 
 	void CallbackHandler::memberFunctionCallback(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
 		v8::Local<v8::Object> instance = info.This();
 
 		if(instance->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("Unexpected internal field count.");
 			return;
 		}
@@ -441,15 +436,15 @@ namespace rootJS
 		}
 		catch(const std::invalid_argument& e)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException(e.what());
 			return;
 		}
 
-		ObjectProxy* holder = (ObjectProxy*) instance->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr);
+		ObjectProxy* holder = (ObjectProxy*) Nan::GetInternalFieldPointer(instance, Toolbox::ObjectProxyPtr);
 		if(holder == nullptr)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("Could not resolve enclosing '" + std::string(scope->GetName()) + "' instance to call '" + name + "' on.");
 			return;
 		}
@@ -460,7 +455,7 @@ namespace rootJS
 		FunctionProxy* proxy = FunctionProxyFactory::fromArgs(name, scope, args);
 		if(proxy == nullptr)
 		{
-			info.GetReturnValue().Set(v8::Undefined(isolate));
+			info.GetReturnValue().Set(Nan::Undefined());
 			Toolbox::throwException("No suitable method named '" + name + "' found for the supplied arguments in '" + std::string(scope->GetName()) + "'.");
 			return;
 		}
@@ -533,8 +528,7 @@ namespace rootJS
 
 	v8::Local<v8::Value> CallbackHandler::createFunctionCallbackData(std::string functionName, TClass *scope)
 	{
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-		v8::EscapableHandleScope handle_scope(isolate);
+		Nan::EscapableHandleScope handle_scope;
 
 		if(scope != nullptr && scope->IsLoaded())
 		{
@@ -548,12 +542,11 @@ namespace rootJS
 
 	v8::Local<v8::Value> CallbackHandler::createFunctionCallbackData(TClass *scope)
 	{
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-		v8::EscapableHandleScope handle_scope(isolate);
+		Nan::EscapableHandleScope handle_scope;
 
 		if(scope == nullptr || !scope->IsLoaded())
 		{
-			return handle_scope.Escape(v8::Undefined(isolate));
+			return handle_scope.Escape(Nan::Undefined());
 		}
 
 		std::string className(scope->GetName());
@@ -624,12 +617,11 @@ namespace rootJS
 
 	v8::Local<v8::Array> CallbackHandler::getInfoArgs(v8::Local<v8::Function> *callback, Nan::FunctionCallbackInfo<v8::Value> const& info)
 	{
-		v8::Isolate *isolate = v8::Isolate::GetCurrent();
-		v8::EscapableHandleScope handle_scope(isolate);
+		Nan::EscapableHandleScope handle_scope;
 
 		if(info.Length() < 1)
 		{
-			return handle_scope.Escape(v8::Array::New(isolate, 0));
+			return handle_scope.Escape(Nan::New<v8::Array>(0));
 		}
 
 		int endIndex = info.Length() - 1;
@@ -639,7 +631,7 @@ namespace rootJS
 			endIndex--;
 		}
 
-		v8::Local<v8::Array> args = v8::Array::New(isolate, endIndex + 1);
+		v8::Local<v8::Array> args = Nan::New<v8::Array>(endIndex + 1);
 
 		for(int i = 0; i <= endIndex; i++)
 		{

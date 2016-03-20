@@ -457,11 +457,8 @@ namespace rootJS
 	bool* FunctionProxy::argToBool(v8::Local<v8::Value> originalArg)
 	{
 		bool* boolValue = (bool*)malloc(sizeof(bool));
-		if(originalArg->IsBoolean()) {
-			*boolValue = v8::Local<v8::Boolean>::Cast(originalArg)->Value();
-		} else {
-			*boolValue = v8::Local<v8::BooleanObject>::Cast(originalArg)->ValueOf();
-		}
+		*boolValue = originalArg->ToBoolean()->Value();
+
 		return boolValue;
 	}
 
@@ -480,7 +477,7 @@ namespace rootJS
 			return nullptr;
 		}
 
-		ObjectProxy *proxy = (ObjectProxy*)obj->GetAlignedPointerFromInternalField(Toolbox::InternalFieldData::ObjectProxyPtr);
+		ObjectProxy *proxy = (ObjectProxy*)Nan::GetInternalFieldPointer(obj, Toolbox::InternalFieldData::ObjectProxyPtr);
 
 		void *result = proxy->getAddress();
 		return alignPointerCount(result, derefCount);
@@ -492,7 +489,11 @@ namespace rootJS
 		if(originalArg->IsNumber()) {
 			return v8::Local<v8::Number>::Cast(originalArg)->Value();
 		} else if(originalArg->IsNumberObject()) {
+			#if (NODE_MODULE_VERSION > NODE_0_10_MODULE_VERSION)
 			return v8::Local<v8::NumberObject>::Cast(originalArg)->ValueOf();
+			#else
+			return v8::Local<v8::NumberObject>::Cast(originalArg)->NumberValue();
+			#endif
 		} else {
 			return -1;
 		}

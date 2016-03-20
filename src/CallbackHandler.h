@@ -114,7 +114,11 @@ namespace rootJS
 			 *
 			 */
 			static void staticGetterCallback(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info);
+
+			#if (NODE_MODULE_VERSION > NODE_0_10_MODULE_VERSION)
 			static void staticGetterCallback(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+			#endif
+
 			static v8::Local<v8::Value> staticGetterCallback(v8::Local<v8::String> property, const std::string& info);
 
 			/**
@@ -135,7 +139,11 @@ namespace rootJS
 			 *
 			 */
 			static void staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info);
+
+			#if (NODE_MODULE_VERSION > NODE_0_10_MODULE_VERSION)
 			static void staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+			#endif
+
 			static void staticSetterCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const std::string& info);
 
 			/**

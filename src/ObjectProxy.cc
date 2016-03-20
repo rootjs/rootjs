@@ -84,7 +84,7 @@ namespace rootJS
 
 	v8::Local<v8::Object> ObjectProxy::getProxy()
 	{
-		return v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(), proxy);
+		return Nan::New( proxy);
 	}
 
 	bool ObjectProxy::isPrimitive()

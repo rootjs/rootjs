@@ -18,9 +18,9 @@ namespace rootJS
 	{
 		const char* c = c_str();
 		if(c == nullptr) {
-			return v8::Null(v8::Isolate::GetCurrent());
+			return Nan::Null();
 		} else {
-			return v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), c);
+			return Nan::New(c).ToLocalChecked();
 		}
 	}
 

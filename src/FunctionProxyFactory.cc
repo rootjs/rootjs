@@ -154,7 +154,11 @@ namespace rootJS
 			if(arg->IsNumber()) {
 				val = v8::Local<v8::Number>::Cast(arg)->Value();
 			} else if (arg->IsNumberObject()) {
+				#if (NODE_MODULE_VERSION > NODE_0_10_MODULE_VERSION)
 				val = v8::Local<v8::NumberObject>::Cast(arg)->ValueOf();
+				#else
+				val = v8::Local<v8::NumberObject>::Cast(arg)->NumberValue();
+				#endif
 			} else {
 				return false;
 			}
@@ -211,13 +215,13 @@ namespace rootJS
 				}
 			}
 		} else {
-			v8::Object *objectArg = static_cast<v8::Object*>(*arg);
+			v8::Local<v8::Object> objectArg = v8::Local<v8::Object>::Cast(arg);
 			if (objectArg->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT) {
 				Toolbox::logError("Supplied JavaScript object contains an unexpected number of internal fields.");
 				return false;
 			}
 
-			ObjectProxy *argProxy = static_cast<ObjectProxy*>(objectArg->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			ObjectProxy *argProxy = static_cast<ObjectProxy*>(Nan::GetInternalFieldPointer(objectArg, Toolbox::ObjectProxyPtr));
 			DictFuncPtr_t dictFunc = gClassTable->GetDict(argProxy->getTypeName());
 			if(dictFunc == nullptr) {
 				return false;

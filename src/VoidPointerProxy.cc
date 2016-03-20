@@ -20,9 +20,9 @@ namespace rootJS
 		if(p != nullptr) {
 			std::ostringstream stm;
 			stm << ((Long_t) p);
-			return v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), stm.str().c_str());
+			return Nan::New(stm.str().c_str()).ToLocalChecked();
 		} else {
-			return v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "nullptr");
+			return Nan::New("nullptr").ToLocalChecked();
 		}
 	}
 

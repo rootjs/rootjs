@@ -111,7 +111,7 @@ namespace rootJS
 	{
 		TCollection *enums = gROOT->GetListOfEnums(kTRUE);
 		TIter next(enums);
-		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(), exportPersistent);
+		v8::Local<v8::Object> exportsLocal = Nan::New(exportPersistent);
 
 		while (TEnum *eNum = (TEnum*) next())
 		{
@@ -127,12 +127,13 @@ namespace rootJS
 				continue;
 			}
 
-			if(exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), eNum->GetName())))
+			if(exportsLocal->Has(Nan::New(eNum->GetName()).ToLocalChecked()))
 			{
 				continue;
 			}
 
-			CallbackHandler::registerGlobalObject(eNum->GetName(), (ObjectProxy*) TemplateFactory::encapsulateEnum(eNum)->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			void* internalField = Nan::GetInternalFieldPointer(TemplateFactory::encapsulateEnum(eNum), Toolbox::ObjectProxyPtr);
+			CallbackHandler::registerGlobalObject(eNum->GetName(), (ObjectProxy*) internalField);
 			Nan::SetAccessor(exportsLocal, Nan::New(eNum->GetName()).ToLocalChecked(),
 										CallbackHandler::globalGetterCallback,
 										CallbackHandler::globalSetterCallback);
@@ -144,7 +145,7 @@ namespace rootJS
 
 		TCollection *functions = gROOT->GetListOfGlobalFunctions(kTRUE);
 
-		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
+		v8::Local<v8::Object> exportsLocal = Nan::New(exportPersistent);
 
 		TIter next(functions);
 		while (TFunction *function = (TFunction*) next())
@@ -155,7 +156,7 @@ namespace rootJS
 				continue;
 			}
 
-			if(exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),function->GetName())))
+			if(exportsLocal->Has(Nan::New(function->GetName()).ToLocalChecked()))
 			{
 				continue;
 			}
@@ -171,7 +172,7 @@ namespace rootJS
 			}
 
 			v8::Local<v8::Value> data = CallbackHandler::createFunctionCallbackData(function->GetName(), nullptr);
-			exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), exposeName.c_str()),
+			exportsLocal->Set(Nan::New(exposeName.c_str()).ToLocalChecked(),
 			                  Nan::New<v8::Function>(CallbackHandler::globalFunctionCallback, data));
 		}
 	}
@@ -179,7 +180,7 @@ namespace rootJS
 	void NodeHandler::exposeClasses() throw (std::invalid_argument)
 	{
 		//TODO implement maps for dynamic loading
-		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
+		v8::Local<v8::Object> exportsLocal = Nan::New(exportPersistent);
 		for (int i = 0; i < gClassTable->Classes(); i++)
 		{
 			DictFuncPtr_t funcPtr = gClassTable->GetDict(gClassTable->At(i));
@@ -195,18 +196,18 @@ namespace rootJS
 				throw std::invalid_argument(
 				    std::string("Specified class is not loaded."));
 			}
-			if ((((std::string) clazz->GetName()).find(":") == std::string::npos) && (!exportsLocal->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName()))))
+			if ((((std::string) clazz->GetName()).find(":") == std::string::npos) && (!exportsLocal->Has(Nan::New(clazz->GetName()).ToLocalChecked())))
 			{
 				if ((clazz->Property() & kIsClass))
 				{
 					Toolbox::logInfo(std::string("loading class ").append(clazz->GetName()), 2);
-					exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), clazz->GetName()), TemplateFactory::getConstructor(clazz));
+					exportsLocal->Set(Nan::New(clazz->GetName()).ToLocalChecked(), TemplateFactory::getConstructor(clazz));
 					continue;
 				}
 				if((clazz->Property() & kIsNamespace))
 				{
 					Toolbox::logInfo(std::string("loading namespace ").append(clazz->GetName()), 2);
-					exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),clazz->GetName()),TemplateFactory::getInstance(clazz));
+					exportsLocal->Set(Nan::New(clazz->GetName()).ToLocalChecked(),TemplateFactory::getInstance(clazz));
 					continue;
 				}
 			}
@@ -249,13 +250,13 @@ namespace rootJS
 		while(!nameque.empty())
 		{
 			v8::Local<v8::Object> obj;
-			if (!scope->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str())))
+			if (!scope->Has(Nan::New(nameque.front().c_str()).ToLocalChecked()))
 			{
 				DictFuncPtr_t funcPtr(gClassTable->GetDict(pathque.front().c_str()));
 				if (funcPtr == nullptr)
 				{
 					Toolbox::logInfo(std::string("creating stub namespace: ").append(pathque.front()), 2);
-					scope->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj->New(v8::Isolate::GetCurrent()));
+					scope->Set(Nan::New(nameque.front().c_str()).ToLocalChecked(), Nan::New<v8::Object>());
 				}
 				else
 				{
@@ -266,13 +267,13 @@ namespace rootJS
 						{
 							Toolbox::logInfo(std::string("loading namespace ").append(curclazz->GetName()),2);
 							obj = TemplateFactory::getInstance(curclazz);
-							scope->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj);
+							scope->Set(Nan::New(nameque.front().c_str()).ToLocalChecked(), obj);
 						}
 						if (curclazz->Property() & kIsClass)
 						{
 							Toolbox::logInfo(std::string("loading class ").append(curclazz->GetName()),2);
 							obj = TemplateFactory::getConstructor(curclazz);
-							scope->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), nameque.front().c_str()), obj);
+							scope->Set(Nan::New(nameque.front().c_str()).ToLocalChecked(), obj);
 						}
 					}
 					catch (const std::invalid_argument &e)
@@ -283,7 +284,7 @@ namespace rootJS
 				//TODO figure out if there are other cases as well
 			}
 
-			scope = v8::Local<v8::Object>::Cast(scope->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),nameque.front().c_str())));
+			scope = v8::Local<v8::Object>::Cast(scope->Get(Nan::New(nameque.front().c_str()).ToLocalChecked()));
 			pathque.pop();
 			nameque.pop();
 		}
@@ -325,10 +326,10 @@ namespace rootJS
 
 	void NodeHandler::exposeInterfaceFunctions()
 	{
-		v8::Local<v8::Object> exportsLocal = v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),exportPersistent);
-		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"loadlibrary"),
+		v8::Local<v8::Object> exportsLocal = Nan::New(exportPersistent);
+		exportsLocal->Set(Nan::New("loadlibrary").ToLocalChecked(),
 		                  Nan::New<v8::Function>(NodeHandler::loadlibraryCallback));
-		exportsLocal->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),"refreshExports"),Nan::New<v8::Function>(NodeHandler::refreshExportsCallback));
+		exportsLocal->Set(Nan::New("refreshExports").ToLocalChecked(),Nan::New<v8::Function>(NodeHandler::refreshExportsCallback));
 	}
 
 

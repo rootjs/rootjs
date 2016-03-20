@@ -52,7 +52,7 @@ namespace rootJS
 
 			if(!(member->Property() & kIsStatic))
 			{
-				if(!holder->getProxy()->Has(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName())))
+				if(!holder->getProxy()->Has(Nan::New(member->GetName()).ToLocalChecked()))
 				{
 					Toolbox::throwException("v8 instance of type '" + std::string(scope->GetName())
 					                        + "' has no property '" + std::string(member->GetName())
@@ -67,7 +67,7 @@ namespace rootJS
 				if(memberProxy == nullptr)
 				{
 					// Delete properties that could not be encapsulated
-					holder->getProxy()->Delete(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), member->GetName()));
+					holder->getProxy()->Delete(Nan::New(member->GetName()).ToLocalChecked());
 				}
 				else
 				{
@@ -169,8 +169,8 @@ namespace rootJS
 
 		std::map<std::string, ObjectProxy*>* propertyMap = createPropertyMap(info, type, proxy);
 
-		instance->SetAlignedPointerInInternalField(Toolbox::ObjectProxyPtr, proxy);
-		instance->SetAlignedPointerInInternalField(Toolbox::PropertyMapPtr, propertyMap);
+		Nan::SetInternalFieldPointer(instance, Toolbox::ObjectProxyPtr, proxy);
+		Nan::SetInternalFieldPointer(instance, Toolbox::PropertyMapPtr, propertyMap);
 
 		return proxy;
 	}

@@ -16,7 +16,7 @@ namespace rootJS
 	v8::Local<v8::Value> NumberProxy::get()
 	{
 		if(getAddress()) {
-			return v8::Number::New(v8::Isolate::GetCurrent(), castToDouble(getAddress()));
+			return Nan::New(castToDouble(getAddress()));
 		}
 		return getProxy();
 	}

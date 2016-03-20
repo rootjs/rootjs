@@ -79,7 +79,7 @@ namespace rootJS {
 			proxy = ObjectProxyFactory::createObjectProxy(*info, clazz);
 		} else {
 			v8::Local<v8::Object> localInstance
-				= v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
+				= Nan::New( instance);
 			proxy = ObjectProxyFactory::createObjectProxy(*info, clazz, localInstance);
 		}
 

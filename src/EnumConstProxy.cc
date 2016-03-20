@@ -18,7 +18,7 @@ namespace rootJS
 
 	v8::Local<v8::Value> EnumConstProxy::get()
 	{
-		return v8::Number::New(v8::Isolate::GetCurrent(), *((Long64_t*) (info->getAddress())));
+		return Nan::New<v8::Number>(*((Long64_t*) (info->getAddress())));
 	}
 
 	void EnumConstProxy::setValue(v8::Local<v8::Value> value)
@@ -73,7 +73,7 @@ namespace rootJS
 			}
 
 			// Obtain the encapsulated proxy from the internal field
-			ObjectProxy* proxy = (ObjectProxy*)(object->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
+			ObjectProxy* proxy = (ObjectProxy*)Nan::GetInternalFieldPointer(object, Toolbox::ObjectProxyPtr);
 			if(proxy == nullptr)
 			{
 				return nullptr;
