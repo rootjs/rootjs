@@ -2,12 +2,18 @@
 #define ENUMCONSTPROXY_H_
 
 #include "PrimitiveProxy.h"
+#include <TEnumConstant.h>
 
-namespace rootJS {
+namespace rootJS
+{
 
-	class EnumConstProxy : public PrimitiveProxy {
+	class EnumConstProxy : public PrimitiveProxy
+	{
 
 		public:
+			static TEnumConstant* fromValue(v8::Local<v8::Value> value, std::string typeName);
+			static TEnumConstant* fromNumber(v8::Local<v8::Number> number, std::string typeName);
+
 			EnumConstProxy(MetaInfo &info, TClass *scope);
 
 			virtual ~EnumConstProxy();
@@ -26,9 +32,6 @@ namespace rootJS {
 			 *              the enum constant to assign
 			 */
 			virtual void setValue(v8::Local<v8::Value> value);
-
-		private:
-			virtual void assignNumber(v8::Local<v8::Number> number);
 	};
 
 }

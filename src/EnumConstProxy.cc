@@ -5,7 +5,6 @@
 
 #include <RtypesCore.h>
 #include <TEnum.h>
-#include <TEnumConstant.h>
 #include <TCollection.h>
 
 namespace rootJS
@@ -30,10 +29,38 @@ namespace rootJS
 			return;
 		}
 
+		if(value->IsNull())
+		{
+			Toolbox::throwException("Specified value is null. Can not assign the specified value.");
+			return;
+		}
+
+		std::string typeName(getTypeName());
+		Types::resolveTypeName(*info, typeName);
+
+		TEnumConstant *eConst = fromValue(value, typeName);
+		if(eConst != nullptr && eConst->IsValid())
+		{
+			*((Long64_t*) getAddress()) = eConst->GetValue(); // value found => assign
+		}
+		else
+		{
+			Toolbox::throwException("Invalid type.");
+			return;
+		}
+	}
+
+	TEnumConstant* EnumConstProxy::fromValue(v8::Local<v8::Value> value, std::string typeName)
+	{
+		if(value->IsNull())
+		{
+			return nullptr;
+		}
+
 		if(value->IsNumber() || value->IsNumberObject())
 		{
 			// check if the number appears in the corporate enum
-			assignNumber(value->ToNumber());
+			return fromNumber(value->ToNumber(), typeName);
 		}
 		else if(value->IsObject())
 		{
@@ -42,68 +69,40 @@ namespace rootJS
 			// check if the proxy object encapsulates an ObjectProxy
 			if(object->InternalFieldCount() < Toolbox::INTERNAL_FIELD_COUNT)
 			{
-				Toolbox::throwException("Unexpected internal field count.");
-				return;
+				return nullptr;
 			}
 
 			// Obtain the encapsulated proxy from the internal field
 			ObjectProxy* proxy = (ObjectProxy*)(object->GetAlignedPointerFromInternalField(Toolbox::ObjectProxyPtr));
 			if(proxy == nullptr)
 			{
-				Toolbox::throwException("Supplied object does not hold an ObjectProxy.");
-				return;
+				return nullptr;
 			}
 
 			// check if proxy encapsulates a number primitive
 			if(proxy->get()->IsNumberObject() || proxy->get()->IsNumber())
 			{
-				assignNumber(proxy->get()->ToNumber());
-			}
-			else
-			{
-				/*
-				// check if both proxies belong to a corporate enum
-				std::string typeA(getTypeName());
-				std::string typeB(proxy->getTypeName());
-
-				Types::resolveTypeName(*info, typeA);
-				Types::resolveTypeName(*(proxy->getTypeInfo()), typeB);
-
-				if(typeA.compare(typeB) == 0)
-				{
-					Long64_t v = *((Long64_t*) (proxy->getAddress()));
-					*((Long64_t*) getAddress()) = v;	// write new value to memory
-				}
-				else
-				{
-					Toolbox::throwException("Invalid types. Can not assign value of type '" + typeB + "' to a '" + typeA + "'.");
-					return;
-				}
-				*/
-				Toolbox::throwException("Unexpected type.");
-				return;
+				return fromNumber(proxy->get()->ToNumber(), typeName);
 			}
 		}
-		else
-		{
-			Toolbox::throwException("Unexpected type.");
-			return;
-		}
+
+		return nullptr;
 	}
 
-	void EnumConstProxy::assignNumber(v8::Local<v8::Number> number)
+	TEnumConstant* EnumConstProxy::fromNumber(v8::Local<v8::Number> number, std::string typeName)
 	{
-		Long64_t value = (Long64_t) number->IntegerValue();
+		if(number->IsNull())
+		{
+			return nullptr;
+		}
 
-		std::string typeName(getTypeName());
-		Types::resolveTypeName(*info, typeName);
+		Long64_t value = (Long64_t) number->IntegerValue();
 
 		// Find enum
 		TEnum *e = TEnum::GetEnum(typeName.c_str());
 		if(e == nullptr)	// should never happen
 		{
-			Toolbox::throwException("Unexpected type.");
-			return;
+			return nullptr;
 		}
 
 		// check if value of an enum constant equals value of supplied number
@@ -113,14 +112,10 @@ namespace rootJS
 		{
 			if(eConst->IsValid() && (eConst->GetValue() == value))
 			{
-				*((Long64_t*) getAddress()) = value; // value found => assign
-				return;
+				return eConst;
 			}
 		}
 
-		// value not found
-		// Toolbox::throwException("Supplied number value '" + Toolbox::Stringv8toStd(number) + "' is not a constant of enum '" + std::string(e->GetQualifiedName()) + "'.");
-		Toolbox::throwException("Supplied number value is not a constant of enum '" + std::string(e->GetQualifiedName()) + "'.");
+		return nullptr;
 	}
-
 }
