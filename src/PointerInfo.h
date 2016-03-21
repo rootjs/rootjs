@@ -3,6 +3,8 @@
 
 #include "MetaInfo.h"
 
+#include <string>
+
 namespace rootJS
 {
 
@@ -51,6 +53,8 @@ namespace rootJS
 			 * Type of the pointer
 			 */
 			char *typeName;
+
+			std::string normalTypeName;
 	};
 }
 
