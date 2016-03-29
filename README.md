@@ -16,9 +16,9 @@ We currently use a mocha testsuite but might add something to (unit-)test C++ co
 * You need libuv, on Ubuntu you can use `sudo apt-get install libuv1-dev` to install it
 
 #Usage
-You can use rootJS in a node shell by using require on the provided index.js file, e.g.:
+You can use rootJS in a node shell by using require on the module directory, e.g.:
 ```javascript
-var root = require('./index.js');
+var root = require('rootjs');
 ```
 
 Afterwards you have access to root's functionality through the required `root` object which copies its structure from ROOT.
