@@ -1,5 +1,10 @@
 #!/bin/bash
-cd $WORKSPACE/rootinstall
+
+if [ -d "$WORKSPACE/rootinstall" ]; then
+	cd $WORKSPACE/rootinstall
+else
+	cd /afs/cern.ch/sw/lcg/app/releases/ROOT/6.06.06/x86_64-centos7-gcc48-opt/root
+fi
 source ./bin/thisroot.sh
 cd $WORKSPACE
 rm artifacts/* -R
