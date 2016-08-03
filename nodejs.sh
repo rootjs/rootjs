@@ -1,12 +1,13 @@
 #!/bin/bash
 
-if [ -d "$WORKSPACE/rootinstall" ]; then
-	cd $WORKSPACE/rootinstall
-else
-	cd /afs/cern.ch/sw/lcg/app/releases/ROOT/6.06.06/x86_64-centos7-gcc48-opt/root
+readonly rootInstallDir="$1"
+
+if [ ! -d "${rootInstallDir}" ] || [ ! -f "${rootInstallDir}/bin/thisroot.sh" ]; then
+	echo "Couldn't find a ROOT installation"
+	exit 1
 fi
-source ./bin/thisroot.sh
-cd $WORKSPACE
+source "${rootInstallDir}/bin/thisroot.sh"
+
 rm artifacts/* -R
 ROOTJS_ADD_CFLAGS="-fprofile-arcs -ftest-coverage" ROOTJS_ADD_LDLAGS="-lgcov --coverage" npm install
 npm test
