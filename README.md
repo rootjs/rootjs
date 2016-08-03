@@ -1,4 +1,4 @@
-**Jenkins**: *[![Build Status](https://jenkins-rootjs.cern.ch/job/RootJS/badge/icon)](https://jenkins-rootjs.cern.ch/job/RootJS/), Sir!*
+**Jenkins**: *[![Build Status](https://jenkins-rootjs.web.cern.ch/job/RootJS/badge/icon)](https://jenkins-rootjs.web.cern.ch/job/RootJS/), Sir!*
 # rootJS
 Node.js Bindings for ROOT6 implementation (http://wiki.scc.kit.edu/lsdf/index.php/Node.js_Bindings_for_ROOT6)
 # Docs
