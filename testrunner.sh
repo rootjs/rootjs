@@ -8,7 +8,7 @@ if [ ! -d "${rootInstallDir}" ] || [ ! -f "${rootInstallDir}/bin/thisroot.sh" ];
 fi
 source "${rootInstallDir}/bin/thisroot.sh"
 
-rm artifacts/* -R
+rm -rf artifacts/*
 ROOTJS_ADD_CFLAGS="-fprofile-arcs -ftest-coverage" ROOTJS_ADD_LDLAGS="-lgcov --coverage" npm install
 npm test
 
