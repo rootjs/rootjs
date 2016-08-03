@@ -12,7 +12,8 @@ Simply run `npm test` after installing rootJS in development mode.
 We currently use a mocha testsuite but might add something to (unit-)test C++ code directly.
 
 #Dependencies
-* You need to have ROOT installed (root-config needs to be available in your PATH)
+* This module only supports Node.js v4.4 or newer
+* You need to have ROOT-6.06.00 or newer installed (root-config needs to be available in your PATH)
 * You need libuv, on Ubuntu you can use `sudo apt-get install libuv1-dev` to install it
 
 #Usage

@@ -7,6 +7,9 @@
     "test": "jenkins-mocha test/*",
     "build": "node-gyp configure build"
   },
+  "engines": {
+    "node": ">=4.4.0"
+  },
   "devDependencies": {
     "jenkins-mocha": "latest",
     "jslint": "^0.9.6",
